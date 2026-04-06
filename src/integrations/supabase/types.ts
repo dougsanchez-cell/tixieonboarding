@@ -14,7 +14,129 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      app_config: {
+        Row: {
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
+      content_modules: {
+        Row: {
+          abbr: string
+          accent: string | null
+          duration: string | null
+          id: number
+          light: string | null
+          module_number: number
+          sections: Json
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          abbr: string
+          accent?: string | null
+          duration?: string | null
+          id?: number
+          light?: string | null
+          module_number: number
+          sections?: Json
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          abbr?: string
+          accent?: string | null
+          duration?: string | null
+          id?: number
+          light?: string | null
+          module_number?: number
+          sections?: Json
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      contractors: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          email: string
+          id: string
+          name: string
+          phone: string
+          quiz_attempts: number
+          quiz_score: number | null
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          phone: string
+          quiz_attempts?: number
+          quiz_score?: number | null
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          phone?: string
+          quiz_attempts?: number
+          quiz_score?: number | null
+          status?: string
+        }
+        Relationships: []
+      }
+      quiz_questions: {
+        Row: {
+          correct_index: number
+          explanation: string | null
+          id: number
+          options: Json
+          question_number: number
+          question_text: string
+          updated_at: string
+        }
+        Insert: {
+          correct_index: number
+          explanation?: string | null
+          id?: number
+          options?: Json
+          question_number: number
+          question_text: string
+          updated_at?: string
+        }
+        Update: {
+          correct_index?: number
+          explanation?: string | null
+          id?: number
+          options?: Json
+          question_number?: number
+          question_text?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
