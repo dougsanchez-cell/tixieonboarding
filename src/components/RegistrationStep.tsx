@@ -31,11 +31,11 @@ const RegistrationStep = ({ onComplete }: RegistrationStepProps) => {
     if (!validate()) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const id = crypto.randomUUID();
+      const { error } = await supabase
         .from("contractors")
-        .insert({ name: name.trim(), email: email.trim(), phone: phone.trim() })
-        .select("id")
-        .single();
+        .insert({ id, name: name.trim(), email: email.trim(), phone: phone.trim() });
+      const data = { id };
       if (error) throw error;
       onComplete({ id: data.id, name: name.trim(), email: email.trim(), phone: phone.trim() });
     } catch {
