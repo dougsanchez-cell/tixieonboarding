@@ -69,15 +69,15 @@ const QuizStep = ({ contractorId, onPass }: QuizStepProps) => {
 
     const passed = pct >= passThreshold;
 
-    await supabase
-      .from("contractors")
-      .update({
+    await supabase.functions.invoke("update-contractor", {
+      body: {
+        contractorId,
         quiz_score: pct,
         quiz_attempts: attempts + 1,
         status: passed ? "cleared" : "failed",
         ...(passed ? { completed_at: new Date().toISOString() } : {}),
-      })
-      .eq("id", contractorId);
+      },
+    });
 
     if (passed) {
       setTimeout(() => onPass(pct), 1500);
