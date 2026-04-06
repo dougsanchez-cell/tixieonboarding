@@ -1,16 +1,61 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import TixieHeader from "@/components/TixieHeader";
+import ProgressBar from "@/components/ProgressBar";
+import RegistrationStep from "@/components/RegistrationStep";
+import TrainingModules from "@/components/TrainingModules";
+import AIChatStep from "@/components/AIChatStep";
+import QuizStep from "@/components/QuizStep";
+import CompletionStep from "@/components/CompletionStep";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+interface Contractor {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+}
+
+const Index = () => {
+  const [step, setStep] = useState(1);
+  const [contractor, setContractor] = useState<Contractor | null>(null);
+  const [finalScore, setFinalScore] = useState(0);
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="min-h-screen bg-background">
+      <div className="max-w-5xl mx-auto">
+        <TixieHeader />
+        <ProgressBar currentStep={step} />
+        <div className="pb-8">
+          {step === 1 && (
+            <RegistrationStep
+              onComplete={(c) => {
+                setContractor(c);
+                setStep(2);
+              }}
+            />
+          )}
+          {step === 2 && <TrainingModules onComplete={() => setStep(3)} />}
+          {step === 3 && <AIChatStep onComplete={() => setStep(4)} />}
+          {step === 4 && contractor && (
+            <QuizStep
+              contractorId={contractor.id}
+              onPass={(score) => {
+                setFinalScore(score);
+                setStep(5);
+              }}
+            />
+          )}
+          {step === 5 && contractor && (
+            <CompletionStep
+              name={contractor.name}
+              email={contractor.email}
+              score={finalScore}
+              contractorId={contractor.id}
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
