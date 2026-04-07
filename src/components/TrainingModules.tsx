@@ -94,6 +94,7 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
         (data || []).map((m) => ({
           ...m,
           sections: (m.sections as unknown as Section[]) || [],
+          comprehension_questions: (m.comprehension_questions as unknown as CompQuestion[]) || [],
         }))
       );
       setLoading(false);
