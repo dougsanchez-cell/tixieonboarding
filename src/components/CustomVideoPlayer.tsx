@@ -58,13 +58,14 @@ const CustomVideoPlayer = ({
 
   // Auto-pause helper
   const autoPause = useCallback(() => {
+    if (demoMode) return;
     const v = videoRef.current;
     if (v && !v.paused) {
       v.pause();
       setPlaying(false);
       setAutoPaused(true);
     }
-  }, []);
+  }, [demoMode]);
 
   // 1. Page Visibility API
   useEffect(() => {
@@ -118,14 +119,15 @@ const CustomVideoPlayer = ({
     };
   }, []);
 
-  // Block seeking forward past maxReached
+  // Block seeking forward past maxReached (disabled in demo mode)
   const handleSeeking = useCallback(() => {
+    if (demoMode) return;
     const v = videoRef.current;
     if (!v) return;
     if (v.currentTime > maxRef.current + 0.1) {
       v.currentTime = maxRef.current;
     }
-  }, []);
+  }, [demoMode]);
 
   const handleTimeUpdate = useCallback(() => {
     const v = videoRef.current;
