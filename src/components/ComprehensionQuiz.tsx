@@ -11,11 +11,9 @@ const ComprehensionQuiz = ({ questions, moduleNumber, onPass, passed, demoMode =
   const [checked, setChecked] = useState(false);
   const [results, setResults] = useState<Record<number, boolean>>({});
 
-  if (!questions || questions.length === 0) return null;
-
   // Demo mode: auto-select correct answers and pass
   useEffect(() => {
-    if (demoMode && !passed && questions.length > 0) {
+    if (demoMode && !passed && questions && questions.length > 0) {
       const correctAnswers: Record<number, number> = {};
       const correctResults: Record<number, boolean> = {};
       questions.forEach((q, i) => { correctAnswers[i] = q.correct; correctResults[i] = true; });
@@ -25,6 +23,8 @@ const ComprehensionQuiz = ({ questions, moduleNumber, onPass, passed, demoMode =
       onPass();
     }
   }, [demoMode]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!questions || questions.length === 0) return null;
 
   const allAnswered = Object.keys(answers).length === questions.length;
 
