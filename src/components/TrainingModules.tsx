@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import tixieCat from "@/assets/tixie-cat.png";
+
 import { Check, PlayCircle, BookOpen, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
