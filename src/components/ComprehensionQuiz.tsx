@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Check, X, RotateCcw } from "lucide-react";
 
 interface CompQuestion { q: string; options: string[]; correct: number; }
@@ -11,18 +11,15 @@ const ComprehensionQuiz = ({ questions, moduleNumber, onPass, passed, demoMode =
   const [checked, setChecked] = useState(false);
   const [results, setResults] = useState<Record<number, boolean>>({});
 
-  // Demo mode: auto-select correct answers and pass
-  useEffect(() => {
-    if (demoMode && !passed && questions && questions.length > 0) {
-      const correctAnswers: Record<number, number> = {};
-      const correctResults: Record<number, boolean> = {};
-      questions.forEach((q, i) => { correctAnswers[i] = q.correct; correctResults[i] = true; });
-      setAnswers(correctAnswers);
-      setResults(correctResults);
-      setChecked(true);
-      onPass();
-    }
-  }, [demoMode]); // eslint-disable-line react-hooks/exhaustive-deps
+  const handleDemoSkip = () => {
+    const correctAnswers: Record<number, number> = {};
+    const correctResults: Record<number, boolean> = {};
+    questions.forEach((q, i) => { correctAnswers[i] = q.correct; correctResults[i] = true; });
+    setAnswers(correctAnswers);
+    setResults(correctResults);
+    setChecked(true);
+    onPass();
+  };
 
   if (!questions || questions.length === 0) return null;
 
@@ -76,6 +73,16 @@ const ComprehensionQuiz = ({ questions, moduleNumber, onPass, passed, demoMode =
         <Check className="w-4 h-4" style={{ color: "#8B50CC" }} />
         Check your understanding
       </h3>
+
+      {demoMode && !passed && (
+        <button
+          onClick={handleDemoSkip}
+          className="w-full px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:brightness-125"
+          style={{ background: "#F59E0B", color: "#1C1D2E" }}
+        >
+          ⚡ Skip (demo only)
+        </button>
+      )}
 
       {questions.map((q, qi) => (
         <div key={qi} className="space-y-2">
