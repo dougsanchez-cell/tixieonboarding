@@ -83,11 +83,6 @@ const RegistrationStep = ({ onComplete }: RegistrationStepProps) => {
         />
 
         <div className="relative z-10 text-center">
-          <img
-            src={tixieCat}
-            alt="Tixie"
-            className="w-20 h-20 mx-auto mb-6"
-          />
           <h1
             className="text-4xl font-black leading-tight"
             style={{ color: "#0D0D0D" }}
