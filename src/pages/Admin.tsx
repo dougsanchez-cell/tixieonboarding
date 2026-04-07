@@ -92,7 +92,7 @@ const Admin = () => {
       supabase.from("app_config").select("*"),
     ]);
     if (cRes.data) setContractors(cRes.data as Contractor[]);
-    if (mRes.data) setModules(mRes.data.map(m => ({ ...m, sections: m.sections as unknown as { heading: string; body: string }[] })));
+    if (mRes.data) setModules(mRes.data.map(m => ({ ...m, sections: m.sections as unknown as { heading: string; body: string }[], comprehension_questions: (m.comprehension_questions as unknown as CompQuestion[]) || [] })));
     if (qRes.data) setQuestions(qRes.data.map(q => ({ ...q, options: q.options as unknown as string[] })));
     if (cfgRes.data) {
       cfgRes.data.forEach(c => {
