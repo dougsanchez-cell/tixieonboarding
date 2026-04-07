@@ -62,7 +62,7 @@ const ComprehensionQuiz = ({ questions, moduleNumber, onPass, passed, demoMode =
     }
     const isCorrect = questions[qIndex].correct === optIndex;
     const wasSelected = isSelected;
-    if (isCorrect && (wasSelected || !results[qIndex])) return { bg: "#1A3A2A", border: "#4CAF82", color: "#E8E8F0" };
+    if (isCorrect && wasSelected && results[qIndex]) return { bg: "#1A3A2A", border: "#4CAF82", color: "#E8E8F0" };
     if (wasSelected && !results[qIndex]) return { bg: "#3A1A1A", border: "#E05555", color: "#E8E8F0" };
     return { bg: "#22233A", border: "#3A3B50", color: "#9898B0" };
   };
