@@ -7,9 +7,10 @@ import { toast } from "sonner";
 
 interface RegistrationStepProps {
   onComplete: (contractor: { id: string; name: string; email: string; phone: string }) => void;
+  demoMode?: boolean;
 }
 
-const RegistrationStep = ({ onComplete }: RegistrationStepProps) => {
+const RegistrationStep = ({ onComplete, demoMode = false }: RegistrationStepProps) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
