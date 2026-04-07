@@ -139,7 +139,27 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      quiz_questions_public: {
+        Row: {
+          id: number | null
+          options: Json | null
+          question_number: number | null
+          question_text: string | null
+        }
+        Insert: {
+          id?: number | null
+          options?: Json | null
+          question_number?: number | null
+          question_text?: string | null
+        }
+        Update: {
+          id?: number | null
+          options?: Json | null
+          question_number?: number | null
+          question_text?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
