@@ -261,7 +261,9 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
   const currentVideoProgress = videoProgress[current.module_number] || 0;
   const videoGateMet = hasVideo ? currentVideoProgress >= VIDEO_THRESHOLD : true;
   const textGateMet = hasVideo ? true : countdown === 0 && hasScrolledBottom;
-  const canComplete = videoGateMet && textGateMet && hasScrolledBottom && !isCompleted;
+  const hasQuiz = current.comprehension_questions && current.comprehension_questions.length > 0;
+  const quizGateMet = hasQuiz ? quizPassed.has(current.module_number) : true;
+  const canComplete = videoGateMet && textGateMet && hasScrolledBottom && quizGateMet && !isCompleted;
 
   // For video modules, also require scroll to bottom
   const getButtonLabel = () => {
