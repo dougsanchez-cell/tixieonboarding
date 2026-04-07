@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Check, X, RotateCcw } from "lucide-react";
 
 interface CompQuestion { q: string; options: string[]; correct: number; }
