@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,21 +17,14 @@ const RegistrationStep = ({ onComplete, demoMode = false }: RegistrationStepProp
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Demo mode: auto-register with fake data
-  useEffect(() => {
-    if (!demoMode) return;
-    const autoRegister = async () => {
-      const id = crypto.randomUUID();
-      const demoData = { id, name: "Demo User", email: "demo@tixie.com", phone: "5555555555" };
-      try {
-        await supabase.from("contractors").insert(demoData);
-        onComplete(demoData);
-      } catch {
-        onComplete(demoData);
-      }
-    };
-    autoRegister();
-  }, [demoMode]); // eslint-disable-line react-hooks/exhaustive-deps
+  const handleDemoSkip = async () => {
+    const id = crypto.randomUUID();
+    const demoData = { id, name: "Demo User", email: "demo@jomero.co", phone: "5550000000" };
+    try {
+      await supabase.from("contractors").insert(demoData);
+    } catch {}
+    onComplete(demoData);
+  };
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -160,6 +153,17 @@ const RegistrationStep = ({ onComplete, demoMode = false }: RegistrationStepProp
             >
               {loading ? "Registering..." : "Start Orientation →"}
             </button>
+
+            {demoMode && (
+              <button
+                type="button"
+                onClick={handleDemoSkip}
+                className="w-full py-2.5 rounded-[10px] font-semibold text-sm transition-all duration-200 hover:brightness-125 mt-2"
+                style={{ background: "#F59E0B", color: "#1C1D2E" }}
+              >
+                ⚡ Demo: Skip registration →
+              </button>
+            )}
           </form>
 
           {/* Progress preview */}
