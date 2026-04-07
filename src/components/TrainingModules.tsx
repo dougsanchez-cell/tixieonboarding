@@ -111,13 +111,25 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Video placeholder */}
-          <div className="rounded-lg bg-muted flex items-center justify-center py-12 border border-dashed border-border">
-            <div className="text-center text-muted-foreground">
-              <PlayCircle className="w-10 h-10 mx-auto mb-2 opacity-40" />
-              <p className="text-sm">Video walkthrough coming soon</p>
+          {/* Video */}
+          {current.video_url ? (
+            <div className="rounded-lg overflow-hidden aspect-video">
+              <iframe
+                src={current.video_url}
+                title={current.title}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
             </div>
-          </div>
+          ) : (
+            <div className="rounded-lg bg-muted flex items-center justify-center py-12 border border-dashed border-border">
+              <div className="text-center text-muted-foreground">
+                <PlayCircle className="w-10 h-10 mx-auto mb-2 opacity-40" />
+                <p className="text-sm">Video walkthrough coming soon</p>
+              </div>
+            </div>
+          )}
 
           {/* Sections */}
           {current.sections.map((section, i) => (
