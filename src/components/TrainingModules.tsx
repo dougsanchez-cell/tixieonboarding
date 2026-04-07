@@ -321,8 +321,9 @@ const TrainingModules = ({ onComplete, demoMode = false }: TrainingModulesProps)
                     <ComprehensionQuiz
                       questions={current.comprehension_questions}
                       moduleNumber={current.module_number}
-                      passed={quizPassed.has(current.module_number)}
+                      passed={demoMode || quizPassed.has(current.module_number)}
                       onPass={() => setQuizPassed((prev) => new Set(prev).add(current.module_number))}
+                      demoMode={demoMode}
                     />
                   )}
 

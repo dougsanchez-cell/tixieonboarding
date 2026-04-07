@@ -2,11 +2,11 @@ import { useState } from "react";
 import { Check, X, RotateCcw } from "lucide-react";
 
 interface CompQuestion { q: string; options: string[]; correct: number; }
-interface ComprehensionQuizProps { questions: CompQuestion[]; moduleNumber: number; onPass: () => void; passed: boolean; }
+interface ComprehensionQuizProps { questions: CompQuestion[]; moduleNumber: number; onPass: () => void; passed: boolean; demoMode?: boolean; }
 
 const LABELS = ["A", "B", "C", "D"];
 
-const ComprehensionQuiz = ({ questions, moduleNumber, onPass, passed }: ComprehensionQuizProps) => {
+const ComprehensionQuiz = ({ questions, moduleNumber, onPass, passed, demoMode = false }: ComprehensionQuizProps) => {
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [checked, setChecked] = useState(false);
   const [results, setResults] = useState<Record<number, boolean>>({});
