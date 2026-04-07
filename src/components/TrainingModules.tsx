@@ -392,6 +392,16 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
               </div>
             ))}
 
+            {/* Comprehension quiz */}
+            {hasQuiz && !isCompleted && (
+              <ComprehensionQuiz
+                questions={current.comprehension_questions}
+                moduleNumber={current.module_number}
+                passed={quizPassed.has(current.module_number)}
+                onPass={() => setQuizPassed(prev => new Set(prev).add(current.module_number))}
+              />
+            )}
+
             {/* Mark complete button */}
             <div className="pt-4 border-t space-y-2">
               {isCompleted ? (
