@@ -133,6 +133,7 @@ const TrainingModules = ({ onComplete, demoMode = false }: TrainingModulesProps)
   }, [activeModule, handleScroll, loading]);
 
   const isModuleAccessible = (index: number): boolean => {
+    if (demoMode) return true;
     if (index === activeModule) return true;
     const mod = modules[index];
     if (!mod) return false;
@@ -171,14 +172,14 @@ const TrainingModules = ({ onComplete, demoMode = false }: TrainingModulesProps)
   const isYT = hasVideo && isYouTubeVideo(current.video_url!);
   const hasQuiz = current.comprehension_questions && current.comprehension_questions.length > 0;
 
-  const supabaseVideoGateMet = isSupabase ? videoComplete.has(current.module_number) : true;
+  const supabaseVideoGateMet = demoMode || (isSupabase ? videoComplete.has(current.module_number) : true);
   const ytProgress = ytVideoProgress[current.module_number] || 0;
-  const ytVideoGateMet = isYT ? ytProgress >= 100 : true;
+  const ytVideoGateMet = demoMode || (isYT ? ytProgress >= 100 : true);
   const videoGateMet = supabaseVideoGateMet && ytVideoGateMet;
-  const textGateMet = hasVideo ? true : countdown === 0 && hasScrolledBottom;
-  const quizGateMet = hasQuiz ? quizPassed.has(current.module_number) : true;
-  const canComplete = videoGateMet && textGateMet && hasScrolledBottom && quizGateMet && !isCompleted;
-  const showQuizAndComplete = isSupabase ? supabaseVideoGateMet : true;
+  const textGateMet = demoMode || (hasVideo ? true : countdown === 0 && hasScrolledBottom);
+  const quizGateMet = demoMode || (hasQuiz ? quizPassed.has(current.module_number) : true);
+  const canComplete = demoMode ? !isCompleted : (videoGateMet && textGateMet && hasScrolledBottom && quizGateMet && !isCompleted);
+  const showQuizAndComplete = demoMode || (isSupabase ? supabaseVideoGateMet : true);
 
   const getButtonLabel = () => {
     if (isYT && ytProgress < 100) return `Watch video (${ytProgress}% watched)`;
@@ -264,6 +265,7 @@ const TrainingModules = ({ onComplete, demoMode = false }: TrainingModulesProps)
                     onMaxReachedChange={handleMaxReachedChange}
                     onComplete={() => handleVideoComplete(current.module_number)}
                     isComplete={videoComplete.has(current.module_number)}
+                    demoMode={demoMode}
                   />
                 </div>
               ) : isYT ? (
