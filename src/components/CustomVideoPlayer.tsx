@@ -217,10 +217,28 @@ const CustomVideoPlayer = ({
             {formatTime(currentTime)} / {formatTime(duration)}
           </span>
 
-          <div className="flex-1 h-1.5 rounded-full overflow-hidden pointer-events-none" style={{ backgroundColor: "rgba(255,255,255,0.2)" }}>
+          <div
+            className="flex-1 h-1.5 rounded-full overflow-hidden cursor-pointer relative"
+            style={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+            onClick={(e) => {
+              const v = videoRef.current;
+              if (!v || !duration) return;
+              const rect = e.currentTarget.getBoundingClientRect();
+              const clickPct = (e.clientX - rect.left) / rect.width;
+              const clickTime = clickPct * duration;
+              if (clickTime <= maxRef.current) {
+                v.currentTime = clickTime;
+              }
+            }}
+          >
             <div
               className="h-full rounded-full transition-all duration-300"
               style={{ width: `${pct}%`, backgroundColor: "hsl(var(--primary))" }}
+            />
+            {/* Max reached indicator dot */}
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-white shadow"
+              style={{ left: `${pct}%`, transform: `translate(-50%, -50%)` }}
             />
           </div>
 
@@ -234,7 +252,7 @@ const CustomVideoPlayer = ({
         <p className={`text-xs ${watchedPct >= 99 ? "text-success" : "text-muted-foreground"}`}>
           {watchedPct >= 99
             ? "Video complete ✓ — answer the questions below to continue"
-            : `Watched: ${watchedPct}% — you must watch the full video to continue`}
+            : `Watched: ${watchedPct}% — you must watch the full video to continue — you can rewind to review any section`}
         </p>
       )}
     </div>
