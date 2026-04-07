@@ -267,12 +267,11 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
 
   // For video modules, also require scroll to bottom
   const getButtonLabel = () => {
-    if (hasVideo) {
-      if (currentVideoProgress < VIDEO_THRESHOLD) return `Watch video (${currentVideoProgress}% / ${VIDEO_THRESHOLD}%)`;
-      if (!hasScrolledBottom) return "Scroll to the end";
-      return "Mark as Complete";
-    }
-    if (countdown > 0) return `Available in ${countdown}s`;
+    if (hasVideo && currentVideoProgress < VIDEO_THRESHOLD) return `Watch video (${currentVideoProgress}% / ${VIDEO_THRESHOLD}%)`;
+    if (hasVideo && !hasScrolledBottom) return "Scroll to the end";
+    if (!hasVideo && countdown > 0) return `Available in ${countdown}s`;
+    if (!hasVideo && !hasScrolledBottom) return "Scroll to the end";
+    if (hasQuiz && !quizGateMet) return "Answer all questions correctly";
     return "Mark as Complete";
   };
 
@@ -281,12 +280,10 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
     if (hasVideo && currentVideoProgress < VIDEO_THRESHOLD) {
       return `Video progress: ${currentVideoProgress}% watched — watch at least ${VIDEO_THRESHOLD}% to continue`;
     }
-    if (hasVideo && !hasScrolledBottom) {
-      return "Scroll to the end to continue";
-    }
-    if (!hasVideo && countdown === 0 && !hasScrolledBottom) {
-      return "Scroll to the end to continue";
-    }
+    if (hasVideo && !hasScrolledBottom) return "Scroll to the end to continue";
+    if (!hasVideo && countdown > 0) return null;
+    if (!hasVideo && !hasScrolledBottom) return "Scroll to the end to continue";
+    if (hasQuiz && !quizGateMet) return "Answer all comprehension questions correctly to continue";
     return null;
   };
 
