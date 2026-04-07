@@ -139,30 +139,18 @@ export type Database = {
       }
     }
     Views: {
-      quiz_questions_public: {
-        Row: {
-          id: number | null
-          options: Json | null
-          question_number: number | null
-          question_text: string | null
-        }
-        Insert: {
-          id?: number | null
-          options?: Json | null
-          question_number?: number | null
-          question_text?: string | null
-        }
-        Update: {
-          id?: number | null
-          options?: Json | null
-          question_number?: number | null
-          question_text?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_quiz_questions: {
+        Args: never
+        Returns: {
+          id: number
+          options: Json
+          question_number: number
+          question_text: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
