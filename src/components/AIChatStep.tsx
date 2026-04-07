@@ -148,7 +148,7 @@ const AIChatStep = ({ onComplete }: AIChatStepProps) => {
               placeholder="Ask a question about Tixie..."
               disabled={loading}
               className="flex-1 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 transition-all"
-              style={{ background: "#22233A", border: "1px solid #3A3B50", focusRingColor: "#8B50CC" }}
+              style={{ background: "#22233A", border: "1px solid #3A3B50" }}
             />
             <button
               type="submit"
