@@ -1,4 +1,4 @@
-import tixieCat from "@/assets/tixie-cat.png";
+import tixieLogo from "@/assets/tixie-logo.jpg";
 
 const TixieHeader = () => (
   <header className="flex items-center gap-3 py-4 px-4">
