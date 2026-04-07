@@ -142,7 +142,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_quiz_questions: {
+        Args: never
+        Returns: {
+          id: number
+          options: Json
+          question_number: number
+          question_text: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

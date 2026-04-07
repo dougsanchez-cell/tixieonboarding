@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Check, X, RotateCcw, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -10,6 +10,10 @@ interface Question {
   question_number: number;
   question_text: string;
   options: string[];
+}
+
+interface GradeResult {
+  correct: boolean;
   correct_index: number;
   explanation: string | null;
 }
@@ -26,23 +30,29 @@ const QuizStep = ({ contractorId, onPass }: QuizStepProps) => {
   const [score, setScore] = useState(0);
   const [passThreshold, setPassThreshold] = useState(80);
   const [loading, setLoading] = useState(true);
-  const [attempts, setAttempts] = useState(0);
+  const [grading, setGrading] = useState(false);
+  const [results, setResults] = useState<Record<number, GradeResult>>({});
 
   useEffect(() => {
     const load = async () => {
-      const [qRes, configRes] = await Promise.all([
-        supabase.from("quiz_questions").select("*").order("question_number"),
-        supabase.from("app_config").select("value").eq("key", "pass_threshold").single(),
-      ]);
-      if (qRes.data) {
+      // Use the security definer function that hides correct_index
+      const { data, error } = await supabase.rpc("get_quiz_questions");
+      if (data && !error) {
         setQuestions(
-          qRes.data.map((q) => ({
+          (data as unknown as Question[]).map((q) => ({
             ...q,
             options: (q.options as unknown as string[]) || [],
           }))
         );
       }
-      if (configRes.data) setPassThreshold(parseInt(configRes.data.value) || 80);
+
+      const { data: configData } = await supabase
+        .from("app_config")
+        .select("value")
+        .eq("key", "pass_threshold")
+        .single();
+      if (configData) setPassThreshold(parseInt(configData.value) || 80);
+
       setLoading(false);
     };
     load();
@@ -57,30 +67,28 @@ const QuizStep = ({ contractorId, onPass }: QuizStepProps) => {
       return;
     }
 
-    let correct = 0;
-    questions.forEach((q) => {
-      if (answers[q.question_number] === q.correct_index) correct++;
-    });
+    setGrading(true);
 
-    const pct = Math.round((correct / questions.length) * 100);
-    setScore(pct);
-    setSubmitted(true);
-    setAttempts((a) => a + 1);
+    try {
+      const { data, error } = await supabase.functions.invoke("grade-quiz", {
+        body: { contractorId, answers },
+      });
 
-    const passed = pct >= passThreshold;
+      if (error) throw error;
 
-    await supabase.functions.invoke("update-contractor", {
-      body: {
-        contractorId,
-        quiz_score: pct,
-        quiz_attempts: attempts + 1,
-        status: passed ? "cleared" : "failed",
-        ...(passed ? { completed_at: new Date().toISOString() } : {}),
-      },
-    });
+      setScore(data.score);
+      setResults(data.results);
+      setPassThreshold(data.passThreshold);
+      setSubmitted(true);
 
-    if (passed) {
-      setTimeout(() => onPass(pct), 1500);
+      if (data.passed) {
+        setTimeout(() => onPass(data.score), 1500);
+      }
+    } catch (err) {
+      toast.error("Failed to grade quiz. Please try again.");
+      console.error(err);
+    } finally {
+      setGrading(false);
     }
   };
 
@@ -88,6 +96,7 @@ const QuizStep = ({ contractorId, onPass }: QuizStepProps) => {
     setAnswers({});
     setSubmitted(false);
     setScore(0);
+    setResults({});
   };
 
   if (loading) return <div className="text-center py-12 text-muted-foreground">Loading quiz...</div>;
@@ -124,10 +133,11 @@ const QuizStep = ({ contractorId, onPass }: QuizStepProps) => {
       )}
 
       <div className="space-y-4">
-        {questions.map((q, qi) => {
+        {questions.map((q) => {
           const userAnswer = answers[q.question_number];
-          const isCorrect = submitted && userAnswer === q.correct_index;
-          const isWrong = submitted && userAnswer !== undefined && userAnswer !== q.correct_index;
+          const result = results[q.question_number];
+          const isCorrect = submitted && result?.correct;
+          const isWrong = submitted && userAnswer !== undefined && !result?.correct;
 
           return (
             <Card key={q.id} className={submitted ? (isCorrect ? "border-success/50" : isWrong ? "border-destructive/50" : "") : ""}>
@@ -139,7 +149,7 @@ const QuizStep = ({ contractorId, onPass }: QuizStepProps) => {
                 <div className="space-y-2">
                   {q.options.map((opt, oi) => {
                     const isSelected = userAnswer === oi;
-                    const isCorrectOption = q.correct_index === oi;
+                    const isCorrectOption = submitted && result?.correct_index === oi;
 
                     let cls = "border border-border bg-card hover:bg-accent cursor-pointer";
                     if (submitted) {
@@ -168,8 +178,8 @@ const QuizStep = ({ contractorId, onPass }: QuizStepProps) => {
                     );
                   })}
                 </div>
-                {submitted && isWrong && q.explanation && (
-                  <p className="mt-3 text-xs text-muted-foreground bg-muted p-2 rounded">{q.explanation}</p>
+                {submitted && isWrong && result?.explanation && (
+                  <p className="mt-3 text-xs text-muted-foreground bg-muted p-2 rounded">{result.explanation}</p>
                 )}
               </CardContent>
             </Card>
@@ -179,8 +189,8 @@ const QuizStep = ({ contractorId, onPass }: QuizStepProps) => {
 
       <div className="mt-6 text-center pb-8">
         {!submitted ? (
-          <Button onClick={handleSubmit} disabled={!allAnswered} size="lg" className="min-w-[200px]">
-            Submit Quiz
+          <Button onClick={handleSubmit} disabled={!allAnswered || grading} size="lg" className="min-w-[200px]">
+            {grading ? "Grading..." : "Submit Quiz"}
           </Button>
         ) : !passed ? (
           <Button onClick={retry} variant="outline" size="lg">
