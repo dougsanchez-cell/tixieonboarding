@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 interface Question { id: number; question_number: number; question_text: string; options: string[]; }
 interface GradeResult { correct: boolean; correct_index: number; explanation: string | null; }
-interface QuizStepProps { contractorId: string; onPass: (score: number) => void; }
+interface QuizStepProps { contractorId: string; onPass: (score: number) => void; demoMode?: boolean; }
 
 const QuizStep = ({ contractorId, onPass }: QuizStepProps) => {
   const [questions, setQuestions] = useState<Question[]>([]);

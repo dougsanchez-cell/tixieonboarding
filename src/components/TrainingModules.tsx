@@ -13,7 +13,7 @@ interface Module {
   accent: string | null; light: string | null; duration: string | null;
   video_url: string | null; sections: Section[]; comprehension_questions: CompQuestion[];
 }
-interface TrainingModulesProps { onComplete: () => void; }
+interface TrainingModulesProps { onComplete: () => void; demoMode?: boolean; }
 
 declare global { interface Window { YT: any; onYouTubeIframeAPIReady: (() => void) | undefined; } }
 

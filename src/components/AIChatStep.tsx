@@ -10,7 +10,7 @@ const SUGGESTED = [
   "Walk me through what the Select Option dropdown is for",
 ];
 
-interface AIChatStepProps { onComplete: () => void; }
+interface AIChatStepProps { onComplete: () => void; demoMode?: boolean; }
 
 const AIChatStep = ({ onComplete }: AIChatStepProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
