@@ -54,7 +54,7 @@ const AIChatStep = ({ onComplete, demoMode = false }: AIChatStepProps) => {
     }
   };
 
-  const canAdvance = userQuestionCount >= minQuestions;
+  const canAdvance = demoMode || userQuestionCount >= minQuestions;
 
   return (
     <div className="min-h-screen py-6 px-4 flex flex-col items-center" style={{ background: "#1C1D2E" }}>

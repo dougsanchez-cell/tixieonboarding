@@ -269,7 +269,7 @@ const CustomVideoPlayer = ({
                 const rect = e.currentTarget.getBoundingClientRect();
                 const clickPct = (e.clientX - rect.left) / rect.width;
                 const clickTime = clickPct * duration;
-                if (clickTime <= maxRef.current) {
+                if (demoMode || clickTime <= maxRef.current) {
                   v.currentTime = clickTime;
                 }
                 if (isMobile) showControlsTemporarily();
