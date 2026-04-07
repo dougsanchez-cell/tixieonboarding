@@ -30,14 +30,9 @@ const AIChatStep = ({ onComplete }: AIChatStepProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    supabase
-      .from("app_config")
-      .select("value")
-      .eq("key", "min_chat_questions")
-      .single()
-      .then(({ data }) => {
-        if (data) setMinQuestions(parseInt(data.value) || 2);
-      });
+    supabase.functions.invoke("get-public-config").then(({ data }) => {
+      if (data?.min_chat_questions) setMinQuestions(parseInt(data.min_chat_questions) || 2);
+    });
   }, []);
 
   useEffect(() => {
