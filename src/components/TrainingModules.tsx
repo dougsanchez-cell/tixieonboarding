@@ -401,7 +401,7 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
                   <BookOpen className="w-4 h-4 mt-1 text-primary shrink-0" />
                   <div>
                     <h3 className="font-semibold text-foreground">{section.heading}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed mt-1">{section.body}</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed mt-1 [&_a]:text-primary [&_a]:underline [&_a]:hover:text-primary/80" dangerouslySetInnerHTML={{ __html: section.body }} />
                   </div>
                 </div>
               </div>
