@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import tixieCat from "@/assets/tixie-cat.png";
 import { toast } from "sonner";
 
 interface RegistrationStepProps {
