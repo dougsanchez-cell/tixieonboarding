@@ -1,6 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, PlayCircle, BookOpen, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -42,7 +40,6 @@ declare global {
   }
 }
 
-// Load YT IFrame API once (for YouTube URLs)
 let ytApiLoaded = false;
 let ytApiReady = false;
 const ytReadyCallbacks: (() => void)[] = [];
@@ -77,7 +74,6 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
   const [videoMaxReached, setVideoMaxReached] = useState<Record<number, number>>({});
   const [videoComplete, setVideoComplete] = useState<Set<number>>(new Set());
   const [quizPassed, setQuizPassed] = useState<Set<number>>(new Set());
-  // YT player state for YouTube videos
   const [ytVideoProgress, setYtVideoProgress] = useState<Record<number, number>>({});
   const cardContentRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -107,7 +103,6 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
     load();
   }, []);
 
-  // --- YouTube IFrame Player logic (only for YT URLs) ---
   const getVideoId = (url: string): string | null => {
     const match = url.match(/\/embed\/([^?/]+)/);
     return match ? match[1] : null;
@@ -121,15 +116,11 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
       if (playerRef.current) { playerRef.current.destroy(); playerRef.current = null; }
       return;
     }
-
     const videoId = getVideoId(current.video_url);
     if (!videoId) return;
-
     if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
     if (playerRef.current) { playerRef.current.destroy(); playerRef.current = null; }
-
     const moduleNum = current.module_number;
-
     loadYTApi(() => {
       setTimeout(() => {
         const el = document.getElementById(playerDivId);
@@ -152,14 +143,12 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
         });
       }, 100);
     });
-
     return () => {
       if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
       if (playerRef.current) { try { playerRef.current.destroy(); } catch {} playerRef.current = null; }
     };
   }, [activeModule, modules, completed]);
 
-  // Timer & scroll gate for text-only modules (no video)
   useEffect(() => {
     if (modules.length === 0) return;
     const current = modules[activeModule];
@@ -168,17 +157,14 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
       setHasScrolledBottom(true);
       return;
     }
-
     if (current.video_url) {
       setCountdown(0);
       setHasScrolledBottom(false);
       return;
     }
-
     const duration = 90;
     setCountdown(duration);
     setHasScrolledBottom(false);
-
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
       setCountdown((prev) => {
@@ -189,13 +175,11 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
         return prev - 1;
       });
     }, 1000);
-
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [activeModule, modules, completed]);
 
-  // Scroll detection
   const handleScroll = useCallback(() => {
     const el = cardContentRef.current;
     if (!el) return;
@@ -244,7 +228,15 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
     setVideoComplete((prev) => new Set(prev).add(moduleNumber));
   }, []);
 
-  if (loading) return <div className="text-center py-12 text-muted-foreground">Loading modules...</div>;
+  if (loading)
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: "linear-gradient(135deg, #2D1B69 0%, #7B51D3 50%, #9B6FE8 100%)" }}
+      >
+        <p className="text-white/80 animate-pulse">Loading modules...</p>
+      </div>
+    );
 
   const current = modules[activeModule];
   if (!current) return null;
@@ -255,7 +247,6 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
   const isYT = hasVideo && isYouTubeVideo(current.video_url!);
   const hasQuiz = current.comprehension_questions && current.comprehension_questions.length > 0;
 
-  // Video gate
   const supabaseVideoGateMet = isSupabase ? videoComplete.has(current.module_number) : true;
   const ytProgress = ytVideoProgress[current.module_number] || 0;
   const ytVideoGateMet = isYT ? ytProgress >= 100 : true;
@@ -265,7 +256,6 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
   const quizGateMet = hasQuiz ? quizPassed.has(current.module_number) : true;
   const canComplete = videoGateMet && textGateMet && hasScrolledBottom && quizGateMet && !isCompleted;
 
-  // For supabase video modules, hide quiz & complete until video is done
   const showQuizAndComplete = isSupabase ? supabaseVideoGateMet : true;
 
   const getButtonLabel = () => {
@@ -274,7 +264,7 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
     if (!hasVideo && countdown > 0) return `Available in ${countdown}s`;
     if (!hasVideo && !hasScrolledBottom) return "Scroll to the end";
     if (hasQuiz && !quizGateMet) return "Answer all questions correctly";
-    return "Mark as Complete";
+    return "Mark as Complete ✓";
   };
 
   const getHintText = () => {
@@ -288,167 +278,217 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
   };
 
   return (
-    <div className="px-4 max-w-4xl mx-auto animate-fade-in">
-      {/* Module tabs */}
-      <div className="grid grid-cols-3 gap-2 mb-6">
-        {modules.map((m, i) => {
-          const done = completed.has(m.module_number);
-          const active = i === activeModule;
-          const accessible = isModuleAccessible(i);
-          return (
-            <button
-              key={m.id}
-              onClick={() => accessible && setActiveModule(i)}
-              disabled={!accessible}
-              className={`relative flex items-center gap-2 p-3 rounded-lg border text-left transition-all text-sm ${
-                active
-                  ? "border-primary bg-secondary shadow-sm"
-                  : done
-                  ? "border-success/30 bg-success-light cursor-pointer"
-                  : accessible
-                  ? "border-border bg-card hover:bg-accent cursor-pointer"
-                  : "border-border/50 bg-muted/50 opacity-50 cursor-not-allowed"
-              }`}
-            >
-              <span
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                  done
-                    ? "bg-success text-success-foreground"
-                    : accessible
-                    ? "bg-primary/10 text-primary"
-                    : "bg-muted text-muted-foreground"
-                }`}
-              >
-                {done ? (
-                  <Check className="w-3.5 h-3.5" />
-                ) : !accessible ? (
-                  <Lock className="w-3 h-3" />
-                ) : (
-                  `0${m.module_number}`
-                )}
-              </span>
-              <span className={`font-medium truncate ${!accessible && !done ? "text-muted-foreground" : ""}`}>
-                {m.abbr}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Module content */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-xl">{current.title}</CardTitle>
-            <span className="text-sm text-muted-foreground">{current.duration}</span>
+    <div
+      className="min-h-screen py-6 px-4 relative overflow-hidden"
+      style={{ background: "linear-gradient(135deg, #2D1B69 0%, #7B51D3 50%, #9B6FE8 100%)" }}
+    >
+      <div className="max-w-4xl mx-auto animate-fade-in">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-6 justify-center">
+          <img
+            src="/lovable-uploads/7f1e5a1b-2b57-4107-b737-9e6a43210ccc.png"
+            alt="Tixie"
+            className="w-10 h-10"
+          />
+          <div>
+            <h1 className="text-xl font-bold text-white">Module Training 📚</h1>
+            <p className="text-white/70 text-xs">Complete all modules to unlock the AI assistant</p>
           </div>
-        </CardHeader>
-        <div ref={cardContentRef} className="max-h-[60vh] overflow-y-auto">
-          <CardContent className="space-y-6">
-            {/* Video */}
-            {isSupabase ? (
-              <CustomVideoPlayer
-                src={current.video_url!}
-                moduleNumber={current.module_number}
-                maxReached={videoMaxReached[current.module_number] || 0}
-                onMaxReachedChange={handleMaxReachedChange}
-                onComplete={() => handleVideoComplete(current.module_number)}
-                isComplete={videoComplete.has(current.module_number)}
-              />
-            ) : isYT ? (
-              <div className="space-y-3">
-                <div className="rounded-lg overflow-hidden" style={{ position: "relative", paddingBottom: "56.25%", width: "100%" }}>
-                  <div
-                    id={playerDivId}
-                    style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
-                  />
-                </div>
-                {!isCompleted && (
-                  <div className="space-y-1.5">
-                    <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
-                      <div
-                        className="h-full bg-primary rounded-full transition-all"
-                        style={{ width: `${Math.min(ytProgress, 100)}%` }}
-                      />
-                    </div>
-                    <p className={`text-xs ${ytProgress >= 100 ? "text-success" : "text-muted-foreground"}`}>
-                      Video progress: {ytProgress}% watched
-                      {ytProgress < 100 && ` — you must watch the full video to continue`}
-                    </p>
-                  </div>
-                )}
-              </div>
-            ) : hasVideo ? (
-              <div className="rounded-lg bg-muted flex items-center justify-center py-12 border border-dashed border-border">
-                <div className="text-center text-muted-foreground">
-                  <PlayCircle className="w-10 h-10 mx-auto mb-2 opacity-40" />
-                  <p className="text-sm">Video walkthrough coming soon</p>
-                </div>
-              </div>
-            ) : (
-              <div className="rounded-lg bg-muted flex items-center justify-center py-12 border border-dashed border-border">
-                <div className="text-center text-muted-foreground">
-                  <PlayCircle className="w-10 h-10 mx-auto mb-2 opacity-40" />
-                  <p className="text-sm">Video walkthrough coming soon</p>
-                </div>
-              </div>
-            )}
+        </div>
 
-            {/* Sections */}
-            {current.sections.map((section, i) => (
-              <div key={i} className="space-y-2">
-                <div className="flex items-start gap-2">
-                  <BookOpen className="w-4 h-4 mt-1 text-primary shrink-0" />
-                  <div>
-                    <h3 className="font-semibold text-foreground">{section.heading}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed mt-1 [&_a]:text-primary [&_a]:underline [&_a]:hover:text-primary/80" dangerouslySetInnerHTML={{ __html: section.body }} />
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {/* Comprehension quiz & Mark complete — hidden until video done for supabase videos */}
-            {showQuizAndComplete && (
-              <>
-                {hasQuiz && !isCompleted && (
-                  <ComprehensionQuiz
-                    questions={current.comprehension_questions}
-                    moduleNumber={current.module_number}
-                    passed={quizPassed.has(current.module_number)}
-                    onPass={() => setQuizPassed((prev) => new Set(prev).add(current.module_number))}
-                  />
-                )}
-
-                <div className="pt-4 border-t space-y-2">
-                  {isCompleted ? (
-                    <div className="flex items-center gap-2 text-success font-medium">
-                      <Check className="w-5 h-5" />
-                      Module completed
-                    </div>
+        {/* Module tabs */}
+        <div className="grid grid-cols-3 gap-2 mb-6">
+          {modules.map((m, i) => {
+            const done = completed.has(m.module_number);
+            const active = i === activeModule;
+            const accessible = isModuleAccessible(i);
+            return (
+              <button
+                key={m.id}
+                onClick={() => accessible && setActiveModule(i)}
+                disabled={!accessible}
+                className={`relative flex items-center gap-2 p-3 rounded-xl text-left transition-all text-sm ${
+                  active
+                    ? "bg-white text-[#7B51D3] font-semibold shadow-lg"
+                    : done
+                    ? "bg-green-500/90 text-white font-medium cursor-pointer"
+                    : accessible
+                    ? "bg-white/10 text-white/80 hover:bg-white/20 cursor-pointer backdrop-blur-sm"
+                    : "bg-white/5 text-white/40 cursor-not-allowed"
+                }`}
+                style={active ? { boxShadow: "0 0 20px rgba(123,81,211,0.6)" } : {}}
+              >
+                <span
+                  className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                    done
+                      ? "bg-white/20"
+                      : active
+                      ? "bg-[#7B51D3]/10"
+                      : "bg-white/10"
+                  }`}
+                >
+                  {done ? (
+                    <Check className="w-3.5 h-3.5" />
+                  ) : !accessible ? (
+                    <Lock className="w-3 h-3" />
                   ) : (
-                    <>
-                      <Button
-                        onClick={() => markComplete(current.module_number)}
-                        disabled={!canComplete}
-                        className="w-full sm:w-auto"
-                      >
-                        {getButtonLabel()}
-                      </Button>
-                      {getHintText() && (
-                        <p className="text-sm text-muted-foreground">{getHintText()}</p>
-                      )}
-                    </>
+                    `0${m.module_number}`
+                  )}
+                </span>
+                <span className="truncate">{m.abbr}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Module content card */}
+        <div className="bg-white rounded-[20px] shadow-2xl overflow-hidden">
+          {/* Purple top gradient border */}
+          <div className="h-1" style={{ background: "linear-gradient(135deg, #7B51D3, #9B6FE8)" }} />
+
+          <div className="px-6 pt-5 pb-2 flex items-center justify-between">
+            <h2 className="text-xl font-bold" style={{ color: "#2D1B69" }}>{current.title}</h2>
+            <span className="text-sm text-gray-400">{current.duration}</span>
+          </div>
+
+          <div ref={cardContentRef} className="max-h-[60vh] overflow-y-auto px-6 pb-6">
+            <div className="space-y-6 pt-2">
+              {/* Video */}
+              {isSupabase ? (
+                <CustomVideoPlayer
+                  src={current.video_url!}
+                  moduleNumber={current.module_number}
+                  maxReached={videoMaxReached[current.module_number] || 0}
+                  onMaxReachedChange={handleMaxReachedChange}
+                  onComplete={() => handleVideoComplete(current.module_number)}
+                  isComplete={videoComplete.has(current.module_number)}
+                />
+              ) : isYT ? (
+                <div className="space-y-3">
+                  <div className="rounded-lg overflow-hidden" style={{ position: "relative", paddingBottom: "56.25%", width: "100%" }}>
+                    <div
+                      id={playerDivId}
+                      style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
+                    />
+                  </div>
+                  {!isCompleted && (
+                    <div className="space-y-1.5">
+                      <div className="relative h-2 w-full overflow-hidden rounded-full bg-gray-200">
+                        <div
+                          className="h-full rounded-full transition-all"
+                          style={{
+                            width: `${Math.min(ytProgress, 100)}%`,
+                            background: "linear-gradient(135deg, #7B51D3, #9B6FE8)",
+                          }}
+                        />
+                      </div>
+                      <p className={`text-xs font-semibold ${ytProgress >= 100 ? "text-green-600" : "text-gray-500"}`}>
+                        Video progress: {ytProgress}% watched
+                        {ytProgress < 100 && " — you must watch the full video to continue"}
+                      </p>
+                    </div>
                   )}
                 </div>
-              </>
-            )}
-          </CardContent>
-        </div>
-      </Card>
+              ) : hasVideo ? (
+                <div className="rounded-lg bg-gray-50 flex items-center justify-center py-12 border border-dashed border-gray-200">
+                  <div className="text-center text-gray-400">
+                    <PlayCircle className="w-10 h-10 mx-auto mb-2 opacity-40" />
+                    <p className="text-sm">Video walkthrough coming soon</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-lg bg-gray-50 flex items-center justify-center py-12 border border-dashed border-gray-200">
+                  <div className="text-center text-gray-400">
+                    <PlayCircle className="w-10 h-10 mx-auto mb-2 opacity-40" />
+                    <p className="text-sm">Video walkthrough coming soon</p>
+                  </div>
+                </div>
+              )}
 
-      <p className="text-center text-sm text-muted-foreground mt-4">
-        {completed.size} of {modules.length} modules completed
-      </p>
+              {/* Sections */}
+              {current.sections.map((section, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <BookOpen className="w-4 h-4 mt-1 shrink-0" style={{ color: "#7B51D3" }} />
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{section.heading}</h3>
+                      <p className="text-sm text-gray-600 leading-relaxed mt-1 [&_a]:text-[#7B51D3] [&_a]:underline [&_a]:hover:text-[#9B6FE8]" dangerouslySetInnerHTML={{ __html: section.body }} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* Comprehension quiz & Mark complete */}
+              {showQuizAndComplete && (
+                <>
+                  {hasQuiz && !isCompleted && (
+                    <ComprehensionQuiz
+                      questions={current.comprehension_questions}
+                      moduleNumber={current.module_number}
+                      passed={quizPassed.has(current.module_number)}
+                      onPass={() => setQuizPassed((prev) => new Set(prev).add(current.module_number))}
+                    />
+                  )}
+
+                  <div className="pt-4 border-t border-gray-100 space-y-2">
+                    {isCompleted ? (
+                      <div className="flex items-center gap-2 text-green-600 font-semibold">
+                        <Check className="w-5 h-5" />
+                        Module completed
+                      </div>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => markComplete(current.module_number)}
+                          disabled={!canComplete}
+                          className="w-full sm:w-auto px-8 py-3 rounded-xl text-white font-semibold transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none relative overflow-hidden group"
+                          style={{
+                            background: canComplete
+                              ? "linear-gradient(135deg, #7B51D3, #9B6FE8)"
+                              : "#94a3b8",
+                          }}
+                        >
+                          <span className="relative z-10">{getButtonLabel()}</span>
+                          {canComplete && (
+                            <span
+                              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                              style={{
+                                background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,.25) 50%, transparent 60%)",
+                                backgroundSize: "200% 100%",
+                                animation: "shimmer 1.5s infinite",
+                              }}
+                            />
+                          )}
+                        </button>
+                        {getHintText() && (
+                          <p className="text-sm text-gray-400">{getHintText()}</p>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Progress counter pill */}
+        <div className="mt-5 flex justify-center">
+          <div
+            className="px-5 py-2 rounded-full text-sm font-medium text-white"
+            style={{ background: "rgba(45,27,105,.7)", backdropFilter: "blur(8px)" }}
+          >
+            {completed.size} of {modules.length} modules completed 🎯
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+      `}</style>
     </div>
   );
 };
