@@ -62,7 +62,7 @@ const CustomVideoPlayer = ({
   const handleSeeking = useCallback(() => {
     const v = videoRef.current;
     if (!v) return;
-    if (v.currentTime > maxRef.current + 1) {
+    if (v.currentTime > maxRef.current + 0.1) {
       v.currentTime = maxRef.current;
     }
   }, []);

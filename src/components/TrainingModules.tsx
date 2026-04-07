@@ -258,7 +258,7 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
   // Video gate
   const supabaseVideoGateMet = isSupabase ? videoComplete.has(current.module_number) : true;
   const ytProgress = ytVideoProgress[current.module_number] || 0;
-  const ytVideoGateMet = isYT ? ytProgress >= 80 : true;
+  const ytVideoGateMet = isYT ? ytProgress >= 100 : true;
   const videoGateMet = supabaseVideoGateMet && ytVideoGateMet;
 
   const textGateMet = hasVideo ? true : countdown === 0 && hasScrolledBottom;
@@ -269,7 +269,7 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
   const showQuizAndComplete = isSupabase ? supabaseVideoGateMet : true;
 
   const getButtonLabel = () => {
-    if (isYT && ytProgress < 80) return `Watch video (${ytProgress}% / 80%)`;
+    if (isYT && ytProgress < 100) return `Watch video (${ytProgress}% watched)`;
     if (hasVideo && !hasScrolledBottom) return "Scroll to the end";
     if (!hasVideo && countdown > 0) return `Available in ${countdown}s`;
     if (!hasVideo && !hasScrolledBottom) return "Scroll to the end";
@@ -279,7 +279,7 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
 
   const getHintText = () => {
     if (isCompleted) return null;
-    if (isYT && ytProgress < 80) return `Video progress: ${ytProgress}% watched — watch at least 80% to continue`;
+    if (isYT && ytProgress < 100) return `Video progress: ${ytProgress}% watched — you must watch the full video to continue`;
     if (hasVideo && !hasScrolledBottom) return "Scroll to the end to continue";
     if (!hasVideo && countdown > 0) return null;
     if (!hasVideo && !hasScrolledBottom) return "Scroll to the end to continue";
@@ -371,9 +371,9 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
                         style={{ width: `${Math.min(ytProgress, 100)}%` }}
                       />
                     </div>
-                    <p className={`text-xs ${ytProgress >= 80 ? "text-success" : "text-muted-foreground"}`}>
+                    <p className={`text-xs ${ytProgress >= 100 ? "text-success" : "text-muted-foreground"}`}>
                       Video progress: {ytProgress}% watched
-                      {ytProgress < 80 && ` — watch at least 80% to continue`}
+                      {ytProgress < 100 && ` — you must watch the full video to continue`}
                     </p>
                   </div>
                 )}
