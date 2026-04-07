@@ -46,12 +46,8 @@ const QuizStep = ({ contractorId, onPass }: QuizStepProps) => {
         );
       }
 
-      const { data: configData } = await supabase
-        .from("app_config")
-        .select("value")
-        .eq("key", "pass_threshold")
-        .single();
-      if (configData) setPassThreshold(parseInt(configData.value) || 80);
+      const { data: configData } = await supabase.functions.invoke("get-public-config");
+      if (configData?.pass_threshold) setPassThreshold(parseInt(configData.pass_threshold) || 80);
 
       setLoading(false);
     };
