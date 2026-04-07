@@ -3,23 +3,9 @@ import { Check, X, RotateCcw, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-interface Question {
-  id: number;
-  question_number: number;
-  question_text: string;
-  options: string[];
-}
-
-interface GradeResult {
-  correct: boolean;
-  correct_index: number;
-  explanation: string | null;
-}
-
-interface QuizStepProps {
-  contractorId: string;
-  onPass: (score: number) => void;
-}
+interface Question { id: number; question_number: number; question_text: string; options: string[]; }
+interface GradeResult { correct: boolean; correct_index: number; explanation: string | null; }
+interface QuizStepProps { contractorId: string; onPass: (score: number) => void; }
 
 const QuizStep = ({ contractorId, onPass }: QuizStepProps) => {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -35,12 +21,7 @@ const QuizStep = ({ contractorId, onPass }: QuizStepProps) => {
     const load = async () => {
       const { data, error } = await supabase.rpc("get_quiz_questions");
       if (data && !error) {
-        setQuestions(
-          (data as unknown as Question[]).map((q) => ({
-            ...q,
-            options: (q.options as unknown as string[]) || [],
-          }))
-        );
+        setQuestions((data as unknown as Question[]).map((q) => ({ ...q, options: (q.options as unknown as string[]) || [] })));
       }
       const { data: configData } = await supabase.functions.invoke("get-public-config");
       if (configData?.pass_threshold) setPassThreshold(parseInt(configData.pass_threshold) || 80);
@@ -53,82 +34,53 @@ const QuizStep = ({ contractorId, onPass }: QuizStepProps) => {
   const allAnswered = answeredCount === questions.length;
 
   const handleSubmit = async () => {
-    if (!allAnswered) {
-      toast.error("Please answer all questions before submitting.");
-      return;
-    }
+    if (!allAnswered) { toast.error("Please answer all questions before submitting."); return; }
     setGrading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("grade-quiz", {
-        body: { contractorId, answers },
-      });
+      const { data, error } = await supabase.functions.invoke("grade-quiz", { body: { contractorId, answers } });
       if (error) throw error;
-      setScore(data.score);
-      setResults(data.results);
-      setPassThreshold(data.passThreshold);
-      setSubmitted(true);
-      if (data.passed) {
-        setTimeout(() => onPass(data.score), 1500);
-      }
+      setScore(data.score); setResults(data.results); setPassThreshold(data.passThreshold); setSubmitted(true);
+      if (data.passed) { setTimeout(() => onPass(data.score), 1500); }
     } catch (err) {
-      toast.error("Failed to grade quiz. Please try again.");
-      console.error(err);
-    } finally {
-      setGrading(false);
-    }
+      toast.error("Failed to grade quiz. Please try again."); console.error(err);
+    } finally { setGrading(false); }
   };
 
-  const retry = () => {
-    setAnswers({});
-    setSubmitted(false);
-    setScore(0);
-    setResults({});
-  };
+  const retry = () => { setAnswers({}); setSubmitted(false); setScore(0); setResults({}); };
 
-  if (loading)
-    return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ background: "linear-gradient(135deg, #2D1B69 0%, #7B51D3 50%, #9B6FE8 100%)" }}
-      >
-        <p className="text-white/80 animate-pulse">Loading quiz...</p>
-      </div>
-    );
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "#1C1D2E" }}>
+      <p className="animate-pulse" style={{ color: "#9898B0" }}>Loading quiz...</p>
+    </div>
+  );
 
   const passed = submitted && score >= passThreshold;
 
   return (
-    <div
-      className="min-h-screen py-8 px-4"
-      style={{ background: "linear-gradient(135deg, #2D1B69 0%, #7B51D3 50%, #9B6FE8 100%)" }}
-    >
+    <div className="min-h-screen py-8 px-4" style={{ background: "#1C1D2E" }}>
       <div className="max-w-3xl mx-auto animate-fade-in">
         {/* Header */}
         <div className="text-center mb-6">
           <p className="text-4xl mb-2">📝</p>
-          <h1 className="text-2xl font-bold text-white">Knowledge Quiz</h1>
-          <p className="text-white/70 text-sm mt-1">Score {passThreshold}% or higher to get cleared</p>
+          <h1 className="text-2xl font-black text-white">Knowledge Quiz</h1>
+          <p className="text-sm mt-1" style={{ color: "#9898B0" }}>Score {passThreshold}% or higher to get cleared</p>
         </div>
 
         {/* Pass / fail banner */}
         {submitted && (
           <div
-            className="mb-6 p-5 rounded-2xl text-center font-semibold text-white animate-fade-in relative overflow-hidden"
-            style={{
-              background: passed
-                ? "linear-gradient(135deg, #059669, #34d399)"
-                : "linear-gradient(135deg, #d97706, #fbbf24)",
-            }}
+            className="mb-6 p-5 rounded-2xl text-center font-semibold text-white animate-fade-in"
+            style={{ background: passed ? "#1A3A2A" : "#3A2A1A", border: `1px solid ${passed ? "#4CAF82" : "#d97706"}` }}
           >
             {passed ? (
               <div className="flex items-center justify-center gap-2 text-lg">
-                <Trophy className="w-6 h-6" />
+                <Trophy className="w-6 h-6" style={{ color: "#4CAF82" }} />
                 You passed with {score}%! Moving to completion...
               </div>
             ) : (
               <div>
                 <p className="text-lg">You scored {score}% — {passThreshold}% required</p>
-                <p className="text-sm font-normal mt-1 opacity-90">Review the correct answers below and try again</p>
+                <p className="text-sm font-normal mt-1" style={{ color: "#9898B0" }}>Review the correct answers below and try again</p>
               </div>
             )}
           </div>
@@ -137,10 +89,7 @@ const QuizStep = ({ contractorId, onPass }: QuizStepProps) => {
         {/* Progress pill */}
         {!submitted && (
           <div className="flex justify-center mb-6">
-            <div
-              className="px-4 py-1.5 rounded-full text-sm font-medium text-white"
-              style={{ background: "rgba(45,27,105,.7)", backdropFilter: "blur(8px)" }}
-            >
+            <div className="px-4 py-1.5 rounded-full text-sm font-medium" style={{ background: "#22233A", color: "#E8E8F0" }}>
               {answeredCount}/{questions.length} answered
             </div>
           </div>
@@ -157,14 +106,13 @@ const QuizStep = ({ contractorId, onPass }: QuizStepProps) => {
             return (
               <div
                 key={q.id}
-                className={`bg-white rounded-2xl p-5 shadow-lg transition-all ${
-                  isWrong ? "animate-[shake_0.4s_ease-in-out]" : ""
-                }`}
+                className={`rounded-2xl p-5 transition-all ${isWrong ? "animate-[shake_0.4s_ease-in-out]" : ""}`}
+                style={{ background: "#2A2B3D", border: "1px solid #3A3B50" }}
               >
-                <p className="font-medium mb-3 text-sm text-gray-900 flex items-start gap-2">
+                <p className="font-medium mb-3 text-sm text-white flex items-start gap-2">
                   <span
                     className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-                    style={{ background: "linear-gradient(135deg, #7B51D3, #9B6FE8)" }}
+                    style={{ background: "#8B50CC" }}
                   >
                     Q{q.question_number}
                   </span>
@@ -175,13 +123,17 @@ const QuizStep = ({ contractorId, onPass }: QuizStepProps) => {
                     const isSelected = userAnswer === oi;
                     const isCorrectOption = submitted && result?.correct_index === oi;
 
-                    let bg = "bg-white border-gray-200 hover:border-[#7B51D3]/50 hover:shadow-md cursor-pointer";
+                    let bg = "#22233A";
+                    let border = "#3A3B50";
+                    let textColor = "#E8E8F0";
+                    let opacity = 1;
+
                     if (submitted) {
-                      if (isCorrectOption) bg = "bg-green-50 border-green-400 cursor-default";
-                      else if (isSelected && !isCorrectOption) bg = "bg-red-50 border-red-400 cursor-default";
-                      else bg = "bg-gray-50 border-gray-200 opacity-60 cursor-default";
+                      if (isCorrectOption) { bg = "#1A3A2A"; border = "#4CAF82"; }
+                      else if (isSelected && !isCorrectOption) { bg = "#3A1A1A"; border = "#E05555"; }
+                      else { opacity = 0.6; }
                     } else if (isSelected) {
-                      bg = "border-[#7B51D3] bg-[#7B51D3]/5 cursor-pointer shadow-md";
+                      bg = "#3D2B6B"; border = "#8B50CC";
                     }
 
                     return (
@@ -189,20 +141,21 @@ const QuizStep = ({ contractorId, onPass }: QuizStepProps) => {
                         key={oi}
                         onClick={() => !submitted && setAnswers({ ...answers, [q.question_number]: oi })}
                         disabled={submitted}
-                        className={`w-full text-left p-3 rounded-xl flex items-center gap-3 text-sm transition-all border-2 ${bg}`}
+                        className="w-full text-left p-3 rounded-xl flex items-center gap-3 text-sm transition-all cursor-pointer disabled:cursor-default"
+                        style={{ background: bg, border: `1px solid ${border}`, color: textColor, opacity }}
                       >
-                        <span className="w-6 h-6 rounded-full border flex items-center justify-center text-xs font-medium shrink-0">
+                        <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium shrink-0" style={{ border: `1px solid ${border}` }}>
                           {String.fromCharCode(65 + oi)}
                         </span>
-                        <span className="flex-1 text-gray-800">{opt}</span>
-                        {submitted && isCorrectOption && <Check className="w-4 h-4 text-green-600 shrink-0" />}
-                        {submitted && isSelected && !isCorrectOption && <X className="w-4 h-4 text-red-500 shrink-0" />}
+                        <span className="flex-1">{opt}</span>
+                        {submitted && isCorrectOption && <Check className="w-4 h-4 shrink-0" style={{ color: "#4CAF82" }} />}
+                        {submitted && isSelected && !isCorrectOption && <X className="w-4 h-4 shrink-0" style={{ color: "#E05555" }} />}
                       </button>
                     );
                   })}
                 </div>
                 {submitted && isWrong && result?.explanation && (
-                  <p className="mt-3 text-xs text-gray-500 bg-gray-50 p-2 rounded-lg ml-10">{result.explanation}</p>
+                  <p className="mt-3 text-xs p-2 rounded-lg ml-10" style={{ background: "#22233A", color: "#9898B0" }}>{result.explanation}</p>
                 )}
               </div>
             );
@@ -215,43 +168,24 @@ const QuizStep = ({ contractorId, onPass }: QuizStepProps) => {
             <button
               onClick={handleSubmit}
               disabled={!allAnswered || grading}
-              className="w-full sm:w-auto min-w-[220px] px-8 py-3.5 rounded-xl text-white font-semibold text-base transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none relative overflow-hidden group"
-              style={{
-                background: allAnswered
-                  ? "linear-gradient(135deg, #7B51D3, #9B6FE8)"
-                  : "#64748b",
-              }}
+              className="w-full sm:w-auto min-w-[220px] px-8 py-3.5 rounded-xl text-white font-semibold text-base transition-all hover:brightness-125 disabled:opacity-40 disabled:pointer-events-none"
+              style={{ background: allAnswered ? "#6B5498" : "#3A3B50" }}
             >
-              <span className="relative z-10">{grading ? "Grading..." : "Submit Quiz"}</span>
-              {allAnswered && !grading && (
-                <span
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{
-                    background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,.25) 50%, transparent 60%)",
-                    backgroundSize: "200% 100%",
-                    animation: "shimmer 1.5s infinite",
-                  }}
-                />
-              )}
+              {grading ? "Grading..." : "Submit Quiz"}
             </button>
           ) : !passed ? (
             <button
               onClick={retry}
-              className="px-8 py-3 rounded-xl text-white font-semibold transition-transform hover:scale-[1.02] active:scale-[0.98] border border-white/20"
-              style={{ background: "rgba(255,255,255,.1)", backdropFilter: "blur(8px)" }}
+              className="px-8 py-3 rounded-xl text-white font-semibold transition-all hover:brightness-125"
+              style={{ background: "#22233A", border: "1px solid #3A3B50" }}
             >
-              <RotateCcw className="w-4 h-4 mr-2 inline" />
-              Retry Quiz
+              <RotateCcw className="w-4 h-4 mr-2 inline" /> Retry Quiz
             </button>
           ) : null}
         </div>
       </div>
 
       <style>{`
-        @keyframes shimmer {
-          0% { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
-        }
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
           20% { transform: translateX(-6px); }

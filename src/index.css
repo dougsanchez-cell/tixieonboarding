@@ -1,87 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 270 50% 98%;
-    --foreground: 270 80% 10%;
+    --background: 230 28% 14%;
+    --foreground: 240 20% 93%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 270 80% 10%;
+    --card: 232 22% 20%;
+    --card-foreground: 240 20% 93%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 270 80% 10%;
+    --popover: 232 22% 20%;
+    --popover-foreground: 240 20% 93%;
 
-    --primary: 262 56% 52%;
+    --primary: 268 52% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 263 100% 96%;
-    --secondary-foreground: 270 80% 20%;
+    --secondary: 232 22% 20%;
+    --secondary-foreground: 240 20% 93%;
 
-    --muted: 263 30% 94%;
-    --muted-foreground: 262 20% 46%;
+    --muted: 233 30% 17%;
+    --muted-foreground: 240 12% 65%;
 
-    --accent: 263 100% 96%;
-    --accent-foreground: 270 80% 20%;
+    --accent: 262 30% 46%;
+    --accent-foreground: 240 20% 93%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 70% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 84 60% 37%;
+    --success: 152 42% 49%;
     --success-foreground: 0 0% 100%;
-    --success-light: 90 50% 92%;
+    --success-light: 152 30% 15%;
 
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 262 30% 90%;
-    --input: 262 30% 90%;
-    --ring: 262 56% 52%;
+    --border: 233 17% 27%;
+    --input: 232 22% 20%;
+    --ring: 268 52% 55%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 262 56% 52%;
+    --sidebar-background: 232 22% 20%;
+    --sidebar-foreground: 240 20% 93%;
+    --sidebar-primary: 268 52% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 263 100% 96%;
-    --sidebar-accent-foreground: 270 80% 20%;
-    --sidebar-border: 262 30% 90%;
-    --sidebar-ring: 262 56% 52%;
-  }
-
-  .dark {
-    --background: 270 30% 6%;
-    --foreground: 0 0% 95%;
-    --card: 270 30% 8%;
-    --card-foreground: 0 0% 95%;
-    --popover: 270 30% 8%;
-    --popover-foreground: 0 0% 95%;
-    --primary: 262 56% 60%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 270 20% 15%;
-    --secondary-foreground: 0 0% 95%;
-    --muted: 270 20% 15%;
-    --muted-foreground: 262 15% 60%;
-    --accent: 270 20% 15%;
-    --accent-foreground: 0 0% 95%;
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 0 0% 95%;
-    --success: 84 60% 37%;
-    --success-foreground: 0 0% 100%;
-    --success-light: 90 30% 15%;
-    --border: 270 20% 18%;
-    --input: 270 20% 18%;
-    --ring: 262 56% 60%;
-    --sidebar-background: 270 30% 8%;
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 262 56% 60%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 270 20% 15%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 270 20% 18%;
-    --sidebar-ring: 262 56% 60%;
+    --sidebar-accent: 233 30% 17%;
+    --sidebar-accent-foreground: 240 20% 93%;
+    --sidebar-border: 233 17% 27%;
+    --sidebar-ring: 268 52% 55%;
   }
 }
 
@@ -93,6 +62,22 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1 {
+    font-weight: 900;
+  }
+
+  h2 {
+    font-weight: 700;
+  }
+
+  h3 {
+    font-weight: 600;
   }
 }
 
