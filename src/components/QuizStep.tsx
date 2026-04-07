@@ -7,7 +7,7 @@ interface Question { id: number; question_number: number; question_text: string;
 interface GradeResult { correct: boolean; correct_index: number; explanation: string | null; }
 interface QuizStepProps { contractorId: string; onPass: (score: number) => void; demoMode?: boolean; }
 
-const QuizStep = ({ contractorId, onPass }: QuizStepProps) => {
+const QuizStep = ({ contractorId, onPass, demoMode = false }: QuizStepProps) => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [submitted, setSubmitted] = useState(false);

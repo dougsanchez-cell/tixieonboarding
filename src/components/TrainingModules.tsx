@@ -34,7 +34,7 @@ function loadYTApi(cb: () => void) {
 const isSupabaseVideo = (url: string) => url.includes("supabase.co");
 const isYouTubeVideo = (url: string) => url.includes("youtube.com") || url.includes("youtu.be");
 
-const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
+const TrainingModules = ({ onComplete, demoMode = false }: TrainingModulesProps) => {
   const [modules, setModules] = useState<Module[]>([]);
   const [activeModule, setActiveModule] = useState(0);
   const [completed, setCompleted] = useState<Set<number>>(new Set());

@@ -12,7 +12,7 @@ const SUGGESTED = [
 
 interface AIChatStepProps { onComplete: () => void; demoMode?: boolean; }
 
-const AIChatStep = ({ onComplete }: AIChatStepProps) => {
+const AIChatStep = ({ onComplete, demoMode = false }: AIChatStepProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
