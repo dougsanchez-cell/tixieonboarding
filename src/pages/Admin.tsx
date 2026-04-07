@@ -133,7 +133,13 @@ const Admin = () => {
   const saveModule = async (mod: Module) => {
     const { error } = await supabase
       .from("content_modules")
-      .update({ title: mod.title, duration: mod.duration, video_url: mod.video_url, sections: mod.sections as unknown as any })
+      .update({
+        title: mod.title,
+        duration: mod.duration,
+        video_url: mod.video_url,
+        sections: mod.sections as unknown as any,
+        comprehension_questions: mod.comprehension_questions as unknown as any,
+      })
       .eq("id", mod.id);
     if (error) toast.error("Failed to save");
     else toast.success("Module saved");
