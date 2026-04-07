@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, PlayCircle, BookOpen, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress";
 
 interface Section {
   heading: string;
@@ -26,6 +27,37 @@ interface TrainingModulesProps {
   onComplete: () => void;
 }
 
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady: (() => void) | undefined;
+  }
+}
+
+// Load YT IFrame API once
+let ytApiLoaded = false;
+let ytApiReady = false;
+const ytReadyCallbacks: (() => void)[] = [];
+
+function loadYTApi(cb: () => void) {
+  if (ytApiReady) { cb(); return; }
+  ytReadyCallbacks.push(cb);
+  if (ytApiLoaded) return;
+  ytApiLoaded = true;
+  const prev = window.onYouTubeIframeAPIReady;
+  window.onYouTubeIframeAPIReady = () => {
+    ytApiReady = true;
+    prev?.();
+    ytReadyCallbacks.forEach((fn) => fn());
+    ytReadyCallbacks.length = 0;
+  };
+  const tag = document.createElement("script");
+  tag.src = "https://www.youtube.com/iframe_api";
+  document.head.appendChild(tag);
+}
+
+const VIDEO_THRESHOLD = 80; // percent
+
 const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
   const [modules, setModules] = useState<Module[]>([]);
   const [activeModule, setActiveModule] = useState(0);
@@ -33,8 +65,12 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
   const [loading, setLoading] = useState(true);
   const [countdown, setCountdown] = useState(0);
   const [hasScrolledBottom, setHasScrolledBottom] = useState(false);
+  const [videoProgress, setVideoProgress] = useState<Record<number, number>>({});
   const cardContentRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const playerRef = useRef<any>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const playerDivId = "yt-player-container";
 
   useEffect(() => {
     const load = async () => {
@@ -57,7 +93,75 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
     load();
   }, []);
 
-  // Reset timer & scroll gate when active module changes
+  // Extract YouTube video ID from embed URL
+  const getVideoId = (url: string): string | null => {
+    const match = url.match(/\/embed\/([^?/]+)/);
+    return match ? match[1] : null;
+  };
+
+  // Initialize / re-initialize YT player when active module changes
+  useEffect(() => {
+    if (modules.length === 0) return;
+    const current = modules[activeModule];
+    if (!current?.video_url || completed.has(current.module_number)) {
+      // Destroy player & stop polling for non-video modules
+      if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+      if (playerRef.current) { playerRef.current.destroy(); playerRef.current = null; }
+      return;
+    }
+
+    const videoId = getVideoId(current.video_url);
+    if (!videoId) return;
+
+    // Clean up previous
+    if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+    if (playerRef.current) { playerRef.current.destroy(); playerRef.current = null; }
+
+    const moduleNum = current.module_number;
+
+    loadYTApi(() => {
+      // Small delay to ensure the DOM div exists
+      setTimeout(() => {
+        const el = document.getElementById(playerDivId);
+        if (!el) return;
+
+        playerRef.current = new window.YT.Player(playerDivId, {
+          videoId,
+          playerVars: {
+            enablejsapi: 1,
+            origin: "https://tixieonboarding.lovable.app",
+            rel: 0,
+          },
+          events: {
+            onReady: () => {
+              // Start polling
+              pollRef.current = setInterval(() => {
+                const p = playerRef.current;
+                if (!p?.getCurrentTime || !p?.getDuration) return;
+                const dur = p.getDuration();
+                if (dur <= 0) return;
+                const pct = Math.round((p.getCurrentTime() / dur) * 100);
+                setVideoProgress((prev) => ({
+                  ...prev,
+                  [moduleNum]: Math.max(prev[moduleNum] || 0, pct),
+                }));
+              }, 2000);
+            },
+          },
+        });
+      }, 100);
+    });
+
+    return () => {
+      if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+      if (playerRef.current) {
+        try { playerRef.current.destroy(); } catch {}
+        playerRef.current = null;
+      }
+    };
+  }, [activeModule, modules, completed]);
+
+  // Timer & scroll gate for NON-video modules only
   useEffect(() => {
     if (modules.length === 0) return;
     const current = modules[activeModule];
@@ -67,7 +171,14 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
       return;
     }
 
-    const duration = current.video_url ? 120 : 90;
+    // Video modules don't use timer gate
+    if (current.video_url) {
+      setCountdown(0);
+      setHasScrolledBottom(false);
+      return;
+    }
+
+    const duration = 90;
     setCountdown(duration);
     setHasScrolledBottom(false);
 
@@ -98,7 +209,6 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
   useEffect(() => {
     const el = cardContentRef.current;
     if (!el) return;
-    // Check immediately in case content fits without scrolling
     if (el.scrollHeight - el.clientHeight < 100) {
       setHasScrolledBottom(true);
     }
@@ -137,7 +247,36 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
   if (!current) return null;
 
   const isCompleted = completed.has(current.module_number);
-  const canComplete = countdown === 0 && hasScrolledBottom && !isCompleted;
+  const hasVideo = !!current.video_url;
+  const currentVideoProgress = videoProgress[current.module_number] || 0;
+  const videoGateMet = hasVideo ? currentVideoProgress >= VIDEO_THRESHOLD : true;
+  const textGateMet = hasVideo ? true : countdown === 0 && hasScrolledBottom;
+  const canComplete = videoGateMet && textGateMet && hasScrolledBottom && !isCompleted;
+
+  // For video modules, also require scroll to bottom
+  const getButtonLabel = () => {
+    if (hasVideo) {
+      if (currentVideoProgress < VIDEO_THRESHOLD) return `Watch video (${currentVideoProgress}% / ${VIDEO_THRESHOLD}%)`;
+      if (!hasScrolledBottom) return "Scroll to the end";
+      return "Mark as Complete";
+    }
+    if (countdown > 0) return `Available in ${countdown}s`;
+    return "Mark as Complete";
+  };
+
+  const getHintText = () => {
+    if (isCompleted) return null;
+    if (hasVideo && currentVideoProgress < VIDEO_THRESHOLD) {
+      return `Video progress: ${currentVideoProgress}% watched — watch at least ${VIDEO_THRESHOLD}% to continue`;
+    }
+    if (hasVideo && !hasScrolledBottom) {
+      return "Scroll to the end to continue";
+    }
+    if (!hasVideo && countdown === 0 && !hasScrolledBottom) {
+      return "Scroll to the end to continue";
+    }
+    return null;
+  };
 
   return (
     <div className="px-4 max-w-4xl mx-auto animate-fade-in">
@@ -201,18 +340,23 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
         >
           <CardContent className="space-y-6">
             {/* Video */}
-            {current.video_url ? (
-              <div className="rounded-lg overflow-hidden" style={{ position: "relative", paddingBottom: "56.25%", width: "100%" }}>
-                <iframe
-                  src={current.video_url}
-                  title={current.title}
-                  style={{ position: "absolute", top: 0, left: 0 }}
-                  width="100%"
-                  height="100%"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
+            {hasVideo ? (
+              <div className="space-y-3">
+                <div className="rounded-lg overflow-hidden" style={{ position: "relative", paddingBottom: "56.25%", width: "100%" }}>
+                  <div
+                    id={playerDivId}
+                    style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
+                  />
+                </div>
+                {!isCompleted && (
+                  <div className="space-y-1.5">
+                    <Progress value={Math.min(currentVideoProgress, 100)} className="h-2" />
+                    <p className={`text-xs ${currentVideoProgress >= VIDEO_THRESHOLD ? "text-success" : "text-muted-foreground"}`}>
+                      Video progress: {currentVideoProgress}% watched
+                      {currentVideoProgress < VIDEO_THRESHOLD && ` — watch at least ${VIDEO_THRESHOLD}% to continue`}
+                    </p>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="rounded-lg bg-muted flex items-center justify-center py-12 border border-dashed border-border">
@@ -250,10 +394,10 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
                     disabled={!canComplete}
                     className="w-full sm:w-auto"
                   >
-                    {countdown > 0 ? `Available in ${countdown}s` : "Mark as Complete"}
+                    {getButtonLabel()}
                   </Button>
-                  {countdown === 0 && !hasScrolledBottom && (
-                    <p className="text-sm text-muted-foreground">Scroll to the end to continue</p>
+                  {getHintText() && (
+                    <p className="text-sm text-muted-foreground">{getHintText()}</p>
                   )}
                 </>
               )}
