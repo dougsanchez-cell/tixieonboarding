@@ -185,9 +185,14 @@ const CustomVideoPlayer = ({
     }
   };
 
-  const pct = duration > 0 ? Math.min((maxReached / duration) * 100, 100) : 0;
+  const pct = demoMode ? 100 : (duration > 0 ? Math.min((maxReached / duration) * 100, 100) : 0);
   const playPct = duration > 0 ? Math.min((currentTime / duration) * 100, 100) : 0;
   const watchedPct = Math.floor(pct);
+
+  // In demo mode, immediately signal completion
+  useEffect(() => {
+    if (demoMode && !isComplete) onComplete();
+  }, [demoMode, isComplete, onComplete]);
   const showControls = isMobile ? controlsVisible : true;
 
   return (
