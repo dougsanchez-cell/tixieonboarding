@@ -10,9 +10,9 @@ const SUGGESTED = [
   "Walk me through what the Select Option dropdown is for",
 ];
 
-interface AIChatStepProps { onComplete: () => void; }
+interface AIChatStepProps { onComplete: () => void; demoMode?: boolean; }
 
-const AIChatStep = ({ onComplete }: AIChatStepProps) => {
+const AIChatStep = ({ onComplete, demoMode = false }: AIChatStepProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -54,7 +54,7 @@ const AIChatStep = ({ onComplete }: AIChatStepProps) => {
     }
   };
 
-  const canAdvance = userQuestionCount >= minQuestions;
+  const canAdvance = demoMode || userQuestionCount >= minQuestions;
 
   return (
     <div className="min-h-screen py-6 px-4 flex flex-col items-center" style={{ background: "#1C1D2E" }}>
@@ -161,15 +161,17 @@ const AIChatStep = ({ onComplete }: AIChatStepProps) => {
           </form>
 
           <div className="flex items-center justify-between">
-            <span
-              className="text-xs font-medium px-3 py-1 rounded-full"
-              style={{
-                background: canAdvance ? "#4CAF82" : "#22233A",
-                color: canAdvance ? "#FFFFFF" : "#9898B0",
-              }}
-            >
-              {userQuestionCount}/{minQuestions} questions asked {canAdvance ? "✅" : ""}
-            </span>
+            <div className="flex items-center gap-2">
+              <span
+                className="text-xs font-medium px-3 py-1 rounded-full"
+                style={{
+                  background: canAdvance ? "#4CAF82" : "#22233A",
+                  color: canAdvance ? "#FFFFFF" : "#9898B0",
+                }}
+              >
+                {demoMode ? "Demo: question gate bypassed" : `${userQuestionCount}/${minQuestions} questions asked ${canAdvance ? "✅" : ""}`}
+              </span>
+            </div>
             <button
               onClick={onComplete}
               disabled={!canAdvance}

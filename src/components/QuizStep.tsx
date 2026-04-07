@@ -5,9 +5,9 @@ import { toast } from "sonner";
 
 interface Question { id: number; question_number: number; question_text: string; options: string[]; }
 interface GradeResult { correct: boolean; correct_index: number; explanation: string | null; }
-interface QuizStepProps { contractorId: string; onPass: (score: number) => void; }
+interface QuizStepProps { contractorId: string; onPass: (score: number) => void; demoMode?: boolean; }
 
-const QuizStep = ({ contractorId, onPass }: QuizStepProps) => {
+const QuizStep = ({ contractorId, onPass, demoMode = false }: QuizStepProps) => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [submitted, setSubmitted] = useState(false);
@@ -65,6 +65,19 @@ const QuizStep = ({ contractorId, onPass }: QuizStepProps) => {
           <h1 className="text-2xl font-black text-white">Knowledge Quiz</h1>
           <p className="text-sm mt-1" style={{ color: "#9898B0" }}>Score {passThreshold}% or higher to get cleared</p>
         </div>
+
+        {/* Demo auto-pass button */}
+        {demoMode && !submitted && (
+          <div className="mb-6 text-center">
+            <button
+              onClick={() => onPass(100)}
+              className="px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:brightness-125"
+              style={{ background: "#F59E0B", color: "#1C1D2E" }}
+            >
+              🎬 Demo: Auto-pass quiz
+            </button>
+          </div>
+        )}
 
         {/* Pass / fail banner */}
         {submitted && (

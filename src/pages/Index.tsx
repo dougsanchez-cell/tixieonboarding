@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TixieHeader from "@/components/TixieHeader";
 import ProgressBar from "@/components/ProgressBar";
 import RegistrationStep from "@/components/RegistrationStep";
@@ -6,6 +6,7 @@ import TrainingModules from "@/components/TrainingModules";
 import AIChatStep from "@/components/AIChatStep";
 import QuizStep from "@/components/QuizStep";
 import CompletionStep from "@/components/CompletionStep";
+import DemoModeBanner from "@/components/DemoModeBanner";
 
 interface Contractor {
   id: string;
@@ -18,10 +19,16 @@ const Index = () => {
   const [step, setStep] = useState(1);
   const [contractor, setContractor] = useState<Contractor | null>(null);
   const [finalScore, setFinalScore] = useState(0);
+  const [demoMode, setDemoMode] = useState(() => {
+    return new URLSearchParams(window.location.search).get("demo") === "true";
+  });
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-5xl mx-auto">
+      {demoMode && (
+        <DemoModeBanner onExit={() => setDemoMode(false)} />
+      )}
+      <div className={`max-w-5xl mx-auto ${demoMode ? "pt-8" : ""}`}>
         <TixieHeader />
         <ProgressBar currentStep={step} />
         <div className="pb-8">
@@ -33,8 +40,8 @@ const Index = () => {
               }}
             />
           )}
-          {step === 2 && <TrainingModules onComplete={() => setStep(3)} />}
-          {step === 3 && <AIChatStep onComplete={() => setStep(4)} />}
+          {step === 2 && <TrainingModules onComplete={() => setStep(3)} demoMode={demoMode} />}
+          {step === 3 && <AIChatStep onComplete={() => setStep(4)} demoMode={demoMode} />}
           {step === 4 && contractor && (
             <QuizStep
               contractorId={contractor.id}
@@ -42,6 +49,7 @@ const Index = () => {
                 setFinalScore(score);
                 setStep(5);
               }}
+              demoMode={demoMode}
             />
           )}
           {step === 5 && contractor && (

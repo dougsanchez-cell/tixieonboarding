@@ -9,6 +9,7 @@ interface CustomVideoPlayerProps {
   onMaxReachedChange: (moduleNumber: number, time: number) => void;
   onComplete: () => void;
   isComplete: boolean;
+  demoMode?: boolean;
 }
 
 const formatTime = (s: number) => {
@@ -24,6 +25,7 @@ const CustomVideoPlayer = ({
   onMaxReachedChange,
   onComplete,
   isComplete,
+  demoMode = false,
 }: CustomVideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -56,13 +58,14 @@ const CustomVideoPlayer = ({
 
   // Auto-pause helper
   const autoPause = useCallback(() => {
+    if (demoMode) return;
     const v = videoRef.current;
     if (v && !v.paused) {
       v.pause();
       setPlaying(false);
       setAutoPaused(true);
     }
-  }, []);
+  }, [demoMode]);
 
   // 1. Page Visibility API
   useEffect(() => {
@@ -116,14 +119,15 @@ const CustomVideoPlayer = ({
     };
   }, []);
 
-  // Block seeking forward past maxReached
+  // Block seeking forward past maxReached (disabled in demo mode)
   const handleSeeking = useCallback(() => {
+    if (demoMode) return;
     const v = videoRef.current;
     if (!v) return;
     if (v.currentTime > maxRef.current + 0.1) {
       v.currentTime = maxRef.current;
     }
-  }, []);
+  }, [demoMode]);
 
   const handleTimeUpdate = useCallback(() => {
     const v = videoRef.current;
@@ -181,9 +185,14 @@ const CustomVideoPlayer = ({
     }
   };
 
-  const pct = duration > 0 ? Math.min((maxReached / duration) * 100, 100) : 0;
+  const pct = demoMode ? 100 : (duration > 0 ? Math.min((maxReached / duration) * 100, 100) : 0);
   const playPct = duration > 0 ? Math.min((currentTime / duration) * 100, 100) : 0;
   const watchedPct = Math.floor(pct);
+
+  // In demo mode, immediately signal completion
+  useEffect(() => {
+    if (demoMode && !isComplete) onComplete();
+  }, [demoMode, isComplete, onComplete]);
   const showControls = isMobile ? controlsVisible : true;
 
   return (
@@ -260,7 +269,7 @@ const CustomVideoPlayer = ({
                 const rect = e.currentTarget.getBoundingClientRect();
                 const clickPct = (e.clientX - rect.left) / rect.width;
                 const clickTime = clickPct * duration;
-                if (clickTime <= maxRef.current) {
+                if (demoMode || clickTime <= maxRef.current) {
                   v.currentTime = clickTime;
                 }
                 if (isMobile) showControlsTemporarily();
