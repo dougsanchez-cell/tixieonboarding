@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { LogOut, Download, Save, Users, BookOpen, HelpCircle, Settings, Bot } from "lucide-react";
+import { LogOut, Download, Save, Users, BookOpen, HelpCircle, Settings, Bot, ChevronRight } from "lucide-react";
 import TixieHeader from "@/components/TixieHeader";
 import type { Session } from "@supabase/supabase-js";
 
@@ -50,6 +50,19 @@ interface QuizQ {
   explanation: string | null;
 }
 
+interface ContractorGroup {
+  email: string;
+  latest: Contractor;
+  attempts: Contractor[];
+  bestScore: number | null;
+  rolledStatus: string;
+  totalAttempts: number;
+  firstRegisteredAt: string;
+}
+
+const formatStatusLabel = (status: string) =>
+  status === "in_progress" ? "In Progress" : status.charAt(0).toUpperCase() + status.slice(1);
+
 const Admin = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loginEmail, setLoginEmail] = useState("");
@@ -66,6 +79,7 @@ const Admin = () => {
   const [opsEmail, setOpsEmail] = useState("ops@jomero.com");
   const [minQuestions, setMinQuestions] = useState("2");
   const [filter, setFilter] = useState("all");
+  const [expandedEmail, setExpandedEmail] = useState<string | null>(null);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => {
@@ -83,6 +97,56 @@ const Admin = () => {
     if (!session) return;
     loadAll();
   }, [session]);
+
+  const groupedContractors = useMemo(
+    () => contractors.reduce<Record<string, Contractor[]>>((acc, contractor) => {
+      (acc[contractor.email] = acc[contractor.email] || []).push(contractor);
+      return acc;
+    }, {}),
+    [contractors],
+  );
+
+  const contractorGroups = useMemo<ContractorGroup[]>(() => (
+    Object.entries(groupedContractors)
+      .map(([email, attempts]) => {
+        const sortedAttempts = [...attempts].sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        );
+        const latest = sortedAttempts[0];
+        const earliest = sortedAttempts[sortedAttempts.length - 1];
+        const bestScore = attempts.reduce<number | null>((best, attempt) => {
+          if (attempt.quiz_score == null) return best;
+          return best == null ? attempt.quiz_score : Math.max(best, attempt.quiz_score);
+        }, null);
+        const rolledStatus = attempts.some(attempt => attempt.status === "cleared")
+          ? "cleared"
+          : attempts.some(attempt => attempt.status === "failed")
+            ? "failed"
+            : "in_progress";
+
+        return {
+          email,
+          latest,
+          attempts: sortedAttempts,
+          bestScore,
+          rolledStatus,
+          totalAttempts: attempts.length,
+          firstRegisteredAt: earliest.created_at,
+        };
+      })
+      .sort((a, b) => new Date(b.latest.created_at).getTime() - new Date(a.latest.created_at).getTime())
+  ), [groupedContractors]);
+
+  const filteredContractorGroups = useMemo(
+    () => (filter === "all" ? contractorGroups : contractorGroups.filter(group => group.rolledStatus === filter)),
+    [contractorGroups, filter],
+  );
+
+  const exportableContractors = useMemo(() => {
+    if (filter === "all") return contractors;
+    const visibleEmails = new Set(filteredContractorGroups.map(group => group.email));
+    return contractors.filter(contractor => visibleEmails.has(contractor.email));
+  }, [contractors, filter, filteredContractorGroups]);
 
   const loadAll = async () => {
     const [cRes, mRes, qRes, cfgRes] = await Promise.all([
@@ -114,11 +178,31 @@ const Admin = () => {
 
   const logout = () => supabase.auth.signOut();
 
+  const toggleExpandedEmail = (email: string) => {
+    setExpandedEmail(current => (current === email ? null : email));
+  };
+
+  const renderStatusBadge = (status: string) => (
+    <Badge
+      variant={status === "cleared" ? "default" : status === "failed" ? "destructive" : "secondary"}
+      className={status === "cleared" ? "bg-success text-success-foreground" : ""}
+    >
+      {formatStatusLabel(status)}
+    </Badge>
+  );
+
   const exportCSV = () => {
     const rows = [["Name", "Email", "Phone", "Score", "Status", "Attempts", "Date"]];
-    const filtered = filter === "all" ? contractors : contractors.filter(c => c.status === filter);
-    filtered.forEach(c => {
-      rows.push([c.name, c.email, c.phone, String(c.quiz_score ?? ""), c.status, String(c.quiz_attempts), new Date(c.created_at).toLocaleDateString()]);
+    exportableContractors.forEach(c => {
+      rows.push([
+        c.name,
+        c.email,
+        c.phone,
+        String(c.quiz_score ?? ""),
+        c.status,
+        String(c.quiz_attempts),
+        new Date(c.created_at).toLocaleDateString(),
+      ]);
     });
     const csv = rows.map(r => r.map(v => `"${v}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -189,8 +273,6 @@ const Admin = () => {
     );
   }
 
-  const filteredContractors = filter === "all" ? contractors : contractors.filter(c => c.status === filter);
-
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto">
@@ -211,7 +293,7 @@ const Admin = () => {
           </TabsList>
 
           <TabsContent value="contractors">
-            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <div className="mb-4 flex items-center justify-between gap-2 flex-wrap">
               <div className="flex gap-2">
                 {["all", "cleared", "failed", "in_progress"].map(f => (
                   <Button key={f} variant={filter === f ? "default" : "outline"} size="sm" onClick={() => setFilter(f)}>
@@ -230,31 +312,73 @@ const Admin = () => {
                     <th className="p-2">Name</th>
                     <th className="p-2">Email</th>
                     <th className="p-2 hidden sm:table-cell">Phone</th>
-                    <th className="p-2">Score</th>
+                    <th className="p-2">Best Score</th>
                     <th className="p-2">Status</th>
                     <th className="p-2 hidden sm:table-cell">Attempts</th>
-                    <th className="p-2">Date</th>
+                    <th className="p-2">First Registered</th>
+                    <th className="w-8 p-2" aria-label="Expand row"></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredContractors.map(c => (
-                    <tr key={c.id} className="border-b hover:bg-accent/50">
-                      <td className="p-2 font-medium">{c.name}</td>
-                      <td className="p-2 text-muted-foreground">{c.email}</td>
-                      <td className="p-2 hidden sm:table-cell text-muted-foreground">{c.phone}</td>
-                      <td className="p-2">{c.quiz_score != null ? `${c.quiz_score}%` : "—"}</td>
-                      <td className="p-2">
-                        <Badge variant={c.status === "cleared" ? "default" : c.status === "failed" ? "destructive" : "secondary"}
-                          className={c.status === "cleared" ? "bg-success text-success-foreground" : ""}>
-                          {c.status === "in_progress" ? "In Progress" : c.status.charAt(0).toUpperCase() + c.status.slice(1)}
-                        </Badge>
-                      </td>
-                      <td className="p-2 hidden sm:table-cell">{c.quiz_attempts}</td>
-                      <td className="p-2 text-muted-foreground">{new Date(c.created_at).toLocaleDateString()}</td>
-                    </tr>
-                  ))}
-                  {filteredContractors.length === 0 && (
-                    <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">No contractors found</td></tr>
+                  {filteredContractorGroups.map(group => {
+                    const isExpanded = expandedEmail === group.email;
+
+                    return (
+                      <Fragment key={group.email}>
+                        <tr
+                          className="cursor-pointer border-b transition-colors hover:bg-accent/50"
+                          onClick={() => toggleExpandedEmail(group.email)}
+                        >
+                          <td className={`p-2 font-medium ${isExpanded ? "border-l-4 border-primary pl-1" : ""}`}>
+                            {group.latest.name}
+                          </td>
+                          <td className="p-2 text-muted-foreground">{group.email}</td>
+                          <td className="p-2 hidden sm:table-cell text-muted-foreground">{group.latest.phone}</td>
+                          <td className="p-2">{group.bestScore != null ? `${group.bestScore}%` : "—"}</td>
+                          <td className="p-2">{renderStatusBadge(group.rolledStatus)}</td>
+                          <td className="p-2 hidden sm:table-cell">{group.totalAttempts}</td>
+                          <td className="p-2 text-muted-foreground">{new Date(group.firstRegisteredAt).toLocaleDateString()}</td>
+                          <td className="p-2">
+                            <div className="flex justify-end">
+                              <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`} />
+                            </div>
+                          </td>
+                        </tr>
+                        {isExpanded && (
+                          <tr className="border-b">
+                            <td colSpan={8} className="p-0">
+                              <div className="my-2 ml-4 overflow-hidden rounded-lg border border-primary/15 bg-primary/5">
+                                <table className="w-full text-xs">
+                                  <thead>
+                                    <tr className="border-b text-left text-muted-foreground">
+                                      <th className="p-2 pl-4">#</th>
+                                      <th className="p-2">Score</th>
+                                      <th className="p-2">Status</th>
+                                      <th className="p-2">Date</th>
+                                      <th className="p-2 hidden sm:table-cell">Quiz Attempts</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {group.attempts.map((attempt, index) => (
+                                      <tr key={attempt.id} className="border-b last:border-b-0">
+                                        <td className="p-2 pl-4 font-medium">{index + 1}</td>
+                                        <td className="p-2">{attempt.quiz_score != null ? `${attempt.quiz_score}%` : "—"}</td>
+                                        <td className="p-2">{renderStatusBadge(attempt.status)}</td>
+                                        <td className="p-2 text-muted-foreground">{new Date(attempt.created_at).toLocaleString()}</td>
+                                        <td className="p-2 hidden sm:table-cell">{attempt.quiz_attempts}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    );
+                  })}
+                  {filteredContractorGroups.length === 0 && (
+                    <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">No contractors found</td></tr>
                   )}
                 </tbody>
               </table>
@@ -310,7 +434,6 @@ const Admin = () => {
                         }} />
                       </div>
                     ))}
-                    {/* Comprehension Questions */}
                     <div className="border-t pt-3 mt-3">
                       <div className="flex items-center justify-between mb-2">
                         <Label className="text-sm font-semibold">Comprehension Questions</Label>
