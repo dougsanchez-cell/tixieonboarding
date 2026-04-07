@@ -113,11 +113,14 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
         <CardContent className="space-y-6">
           {/* Video */}
           {current.video_url ? (
-            <div className="rounded-lg overflow-hidden aspect-video">
+            <div className="rounded-lg overflow-hidden" style={{ position: "relative", paddingBottom: "56.25%", width: "100%" }}>
               <iframe
                 src={current.video_url}
                 title={current.title}
-                className="w-full h-full"
+                style={{ position: "absolute", top: 0, left: 0 }}
+                width="100%"
+                height="100%"
+                frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
