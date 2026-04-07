@@ -5,6 +5,7 @@ import { Check, PlayCircle, BookOpen, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
+import ComprehensionQuiz from "@/components/ComprehensionQuiz";
 
 interface Section {
   heading: string;
@@ -27,6 +28,7 @@ interface Module {
   duration: string | null;
   video_url: string | null;
   sections: Section[];
+  comprehension_questions: CompQuestion[];
 }
 
 interface TrainingModulesProps {
