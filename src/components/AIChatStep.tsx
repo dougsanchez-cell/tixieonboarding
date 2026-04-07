@@ -161,15 +161,17 @@ const AIChatStep = ({ onComplete, demoMode = false }: AIChatStepProps) => {
           </form>
 
           <div className="flex items-center justify-between">
-            <span
-              className="text-xs font-medium px-3 py-1 rounded-full"
-              style={{
-                background: canAdvance ? "#4CAF82" : "#22233A",
-                color: canAdvance ? "#FFFFFF" : "#9898B0",
-              }}
-            >
-              {userQuestionCount}/{minQuestions} questions asked {canAdvance ? "✅" : ""}
-            </span>
+            <div className="flex items-center gap-2">
+              <span
+                className="text-xs font-medium px-3 py-1 rounded-full"
+                style={{
+                  background: canAdvance ? "#4CAF82" : "#22233A",
+                  color: canAdvance ? "#FFFFFF" : "#9898B0",
+                }}
+              >
+                {demoMode ? "Demo: question gate bypassed" : `${userQuestionCount}/${minQuestions} questions asked ${canAdvance ? "✅" : ""}`}
+              </span>
+            </div>
             <button
               onClick={onComplete}
               disabled={!canAdvance}
