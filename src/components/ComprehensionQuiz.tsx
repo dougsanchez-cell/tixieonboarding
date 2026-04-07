@@ -13,6 +13,19 @@ const ComprehensionQuiz = ({ questions, moduleNumber, onPass, passed, demoMode =
 
   if (!questions || questions.length === 0) return null;
 
+  // Demo mode: auto-select correct answers and pass
+  useEffect(() => {
+    if (demoMode && !passed && questions.length > 0) {
+      const correctAnswers: Record<number, number> = {};
+      const correctResults: Record<number, boolean> = {};
+      questions.forEach((q, i) => { correctAnswers[i] = q.correct; correctResults[i] = true; });
+      setAnswers(correctAnswers);
+      setResults(correctResults);
+      setChecked(true);
+      onPass();
+    }
+  }, [demoMode]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const allAnswered = Object.keys(answers).length === questions.length;
 
   const handleSelect = (qIndex: number, optIndex: number) => {
