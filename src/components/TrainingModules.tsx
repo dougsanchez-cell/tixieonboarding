@@ -74,6 +74,7 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
   const [countdown, setCountdown] = useState(0);
   const [hasScrolledBottom, setHasScrolledBottom] = useState(false);
   const [videoProgress, setVideoProgress] = useState<Record<number, number>>({});
+  const [quizPassed, setQuizPassed] = useState<Set<number>>(new Set());
   const cardContentRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const playerRef = useRef<any>(null);
