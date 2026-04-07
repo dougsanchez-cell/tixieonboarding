@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, PlayCircle, BookOpen, ChevronDown, ChevronUp } from "lucide-react";
+import { Check, PlayCircle, BookOpen, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -53,6 +53,20 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
     load();
   }, []);
 
+  const isModuleAccessible = (index: number): boolean => {
+    if (index === activeModule) return true;
+    const mod = modules[index];
+    if (!mod) return false;
+    if (completed.has(mod.module_number)) return true;
+    // Accessible if it's the next sequential incomplete module
+    for (let i = 0; i < modules.length; i++) {
+      if (!completed.has(modules[i].module_number)) {
+        return i === index;
+      }
+    }
+    return false;
+  };
+
   const markComplete = (moduleNum: number) => {
     const next = new Set(completed);
     next.add(moduleNum);
@@ -73,30 +87,46 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
   return (
     <div className="px-4 max-w-4xl mx-auto animate-fade-in">
       {/* Module tabs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
+      <div className="grid grid-cols-3 gap-2 mb-6">
         {modules.map((m, i) => {
           const done = completed.has(m.module_number);
           const active = i === activeModule;
+          const accessible = isModuleAccessible(i);
           return (
             <button
               key={m.id}
-              onClick={() => setActiveModule(i)}
+              onClick={() => accessible && setActiveModule(i)}
+              disabled={!accessible}
               className={`relative flex items-center gap-2 p-3 rounded-lg border text-left transition-all text-sm ${
                 active
                   ? "border-primary bg-secondary shadow-sm"
                   : done
-                  ? "border-success/30 bg-success-light"
-                  : "border-border bg-card hover:bg-accent"
+                  ? "border-success/30 bg-success-light cursor-pointer"
+                  : accessible
+                  ? "border-border bg-card hover:bg-accent cursor-pointer"
+                  : "border-border/50 bg-muted/50 opacity-50 cursor-not-allowed"
               }`}
             >
               <span
                 className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                  done ? "bg-success text-success-foreground" : "bg-primary/10 text-primary"
+                  done
+                    ? "bg-success text-success-foreground"
+                    : accessible
+                    ? "bg-primary/10 text-primary"
+                    : "bg-muted text-muted-foreground"
                 }`}
               >
-                {done ? <Check className="w-3.5 h-3.5" /> : `0${m.module_number}`}
+                {done ? (
+                  <Check className="w-3.5 h-3.5" />
+                ) : !accessible ? (
+                  <Lock className="w-3 h-3" />
+                ) : (
+                  `0${m.module_number}`
+                )}
               </span>
-              <span className="font-medium truncate">{m.abbr}</span>
+              <span className={`font-medium truncate ${!accessible && !done ? "text-muted-foreground" : ""}`}>
+                {m.abbr}
+              </span>
             </button>
           );
         })}
