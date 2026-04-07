@@ -84,7 +84,7 @@ const RegistrationStep = ({ onComplete }: RegistrationStepProps) => {
 
         <div className="relative z-10 text-center">
           <img
-            src="/lovable-uploads/7f1e5a1b-2b57-4107-b737-9e6a43210ccc.png"
+            src={tixieCat}
             alt="Tixie"
             className="w-20 h-20 mx-auto mb-6"
           />
