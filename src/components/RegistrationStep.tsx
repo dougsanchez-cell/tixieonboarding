@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import tixieCat from "@/assets/tixie-cat.png";
 import { toast } from "sonner";
 
 interface RegistrationStepProps {
@@ -83,7 +84,7 @@ const RegistrationStep = ({ onComplete }: RegistrationStepProps) => {
 
         <div className="relative z-10 text-center">
           <img
-            src="/lovable-uploads/7f1e5a1b-2b57-4107-b737-9e6a43210ccc.png"
+            src={tixieCat}
             alt="Tixie"
             className="w-20 h-20 mx-auto mb-6"
           />
