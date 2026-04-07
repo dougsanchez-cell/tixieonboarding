@@ -24,6 +24,12 @@ interface Contractor {
   completed_at: string | null;
 }
 
+interface CompQuestion {
+  q: string;
+  options: string[];
+  correct: number;
+}
+
 interface Module {
   id: number;
   module_number: number;
@@ -32,6 +38,7 @@ interface Module {
   duration: string | null;
   video_url: string | null;
   sections: { heading: string; body: string }[];
+  comprehension_questions: CompQuestion[];
 }
 
 interface QuizQ {
