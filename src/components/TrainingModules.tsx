@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import tixieCat from "@/assets/tixie-cat.png";
+
 import { Check, PlayCircle, BookOpen, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -204,7 +204,7 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
       <div className="max-w-4xl mx-auto animate-fade-in">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6 justify-center">
-          <img src={tixieCat} alt="Tixie" className="w-10 h-10" />
+          
           <div>
             <h1 className="text-xl font-black text-white">Module Training 📚</h1>
             <p className="text-xs" style={{ color: "#9898B0" }}>Complete all modules to unlock the AI assistant</p>
