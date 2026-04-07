@@ -319,6 +319,7 @@ const TrainingModules = ({ onComplete, demoMode = false }: TrainingModulesProps)
                 <>
                   {hasQuiz && !isCompleted && (
                     <ComprehensionQuiz
+                      key={current.module_number}
                       questions={current.comprehension_questions}
                       moduleNumber={current.module_number}
                       passed={quizPassed.has(current.module_number)}
