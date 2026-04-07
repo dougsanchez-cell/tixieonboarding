@@ -17,6 +17,22 @@ const RegistrationStep = ({ onComplete, demoMode = false }: RegistrationStepProp
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Demo mode: auto-register with fake data
+  useEffect(() => {
+    if (!demoMode) return;
+    const autoRegister = async () => {
+      const id = crypto.randomUUID();
+      const demoData = { id, name: "Demo User", email: "demo@tixie.com", phone: "5555555555" };
+      try {
+        await supabase.from("contractors").insert(demoData);
+        onComplete(demoData);
+      } catch {
+        onComplete(demoData);
+      }
+    };
+    autoRegister();
+  }, [demoMode]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const validate = () => {
     const e: Record<string, string> = {};
     if (!name.trim()) e.name = "Full name is required";
