@@ -8,10 +8,6 @@ interface RegistrationStepProps {
   onComplete: (contractor: { id: string; name: string; email: string; phone: string }) => void;
 }
 
-const FloatingShape = ({ children, className }: { children: React.ReactNode; className: string }) => (
-  <div className={`absolute pointer-events-none hidden sm:block ${className}`}>{children}</div>
-);
-
 const RegistrationStep = ({ onComplete }: RegistrationStepProps) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -37,9 +33,8 @@ const RegistrationStep = ({ onComplete }: RegistrationStepProps) => {
       const { error } = await supabase
         .from("contractors")
         .insert({ id, name: name.trim(), email: email.trim(), phone: phone.trim() });
-      const data = { id };
       if (error) throw error;
-      onComplete({ id: data.id, name: name.trim(), email: email.trim(), phone: phone.trim() });
+      onComplete({ id, name: name.trim(), email: email.trim(), phone: phone.trim() });
     } catch {
       toast.error("Registration failed. Please try again.");
     } finally {
@@ -48,166 +43,132 @@ const RegistrationStep = ({ onComplete }: RegistrationStepProps) => {
   };
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative overflow-hidden"
-      style={{ background: "linear-gradient(135deg, #2D1B69 0%, #7B51D3 50%, #9B6FE8 100%)" }}
-    >
-      {/* Floating decorations — hidden on mobile */}
-      <FloatingShape className="top-[8%] left-[10%] animate-[float_4s_ease-in-out_infinite]">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><polygon points="16,2 20,12 30,12 22,19 25,30 16,23 7,30 10,19 2,12 12,12" fill="white" opacity=".12"/></svg>
-      </FloatingShape>
-      <FloatingShape className="top-[15%] right-[12%] animate-[float_5s_ease-in-out_infinite_0.5s]">
-        <svg width="36" height="24" viewBox="0 0 36 24" fill="none"><rect x="1" y="1" width="34" height="22" rx="4" stroke="white" strokeWidth="1.5" opacity=".1"/><line x1="12" y1="0" x2="12" y2="24" stroke="white" strokeWidth="1" strokeDasharray="3 3" opacity=".1"/></svg>
-      </FloatingShape>
-      <FloatingShape className="bottom-[20%] left-[7%] animate-[float_6s_ease-in-out_infinite_1s]">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" stroke="white" strokeWidth="1.5" opacity=".1"/><polyline points="9,14 13,18 20,10" stroke="white" strokeWidth="1.5" opacity=".12" fill="none"/></svg>
-      </FloatingShape>
-      <FloatingShape className="bottom-[30%] right-[8%] animate-[float_4.5s_ease-in-out_infinite_0.8s]">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><polygon points="12,1 15,9 23,9 17,14 19,23 12,18 5,23 7,14 1,9 9,9" fill="white" opacity=".1"/></svg>
-      </FloatingShape>
-      <FloatingShape className="top-[40%] left-[25%] animate-[float_5.5s_ease-in-out_infinite_1.5s]">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="16" height="16" rx="3" stroke="white" strokeWidth="1" opacity=".08" transform="rotate(15 10 10)"/></svg>
-      </FloatingShape>
+    <div className="min-h-screen flex flex-col lg:flex-row">
+      {/* Left hero panel */}
+      <div
+        className="relative lg:w-[40%] w-full px-8 py-16 lg:py-0 flex flex-col items-center justify-center overflow-hidden"
+        style={{ background: "#D4B8F8" }}
+      >
+        {/* Organic blob shapes */}
+        <div
+          className="absolute w-[300px] h-[300px] opacity-60"
+          style={{
+            background: "#8B50CC",
+            borderRadius: "50% 40% 60% 50% / 60% 50% 40% 50%",
+            top: "-10%",
+            right: "-15%",
+            animation: "morphBlob 8s ease-in-out infinite",
+          }}
+        />
+        <div
+          className="absolute w-[250px] h-[250px] opacity-50"
+          style={{
+            background: "#7B3FC4",
+            borderRadius: "40% 60% 50% 50% / 50% 40% 60% 50%",
+            bottom: "-5%",
+            left: "-10%",
+            animation: "morphBlob 8s ease-in-out infinite 2s",
+          }}
+        />
+        <div
+          className="absolute w-[180px] h-[180px] opacity-40"
+          style={{
+            background: "#8B50CC",
+            borderRadius: "60% 50% 40% 50% / 50% 60% 50% 40%",
+            top: "40%",
+            left: "20%",
+            animation: "morphBlob 8s ease-in-out infinite 4s",
+          }}
+        />
 
-      {/* Hero section */}
-      <div className="flex flex-col items-center mb-8 z-10 animate-fade-in">
-        {/* Floating Tixie logo */}
-        <div className="animate-[float_3s_ease-in-out_infinite] mb-4">
+        <div className="relative z-10 text-center">
           <img
             src="/lovable-uploads/7f1e5a1b-2b57-4107-b737-9e6a43210ccc.png"
             alt="Tixie"
-            className="w-20 h-20 drop-shadow-lg"
+            className="w-20 h-20 mx-auto mb-6"
           />
-        </div>
-        <h1 className="text-[28px] font-bold text-white mb-2 text-center">
-          Welcome to Tixie! 🎟️
-        </h1>
-        <p className="text-white/80 text-center max-w-md mb-5 text-sm sm:text-base">
-          Complete this orientation to get cleared for live purchasing
-        </p>
-
-        {/* Stat pills */}
-        <div className="flex flex-wrap justify-center gap-3">
-          {[
-            { icon: "⚡", label: "~15 min" },
-            { icon: "🎯", label: "3 modules" },
-            { icon: "🤖", label: "AI powered" },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium text-white"
-              style={{ background: "rgba(255,255,255,.15)", backdropFilter: "blur(8px)" }}
-            >
-              <span>{stat.icon}</span>
-              <span>{stat.label}</span>
-            </div>
-          ))}
+          <h1
+            className="text-4xl font-black leading-tight"
+            style={{ color: "#0D0D0D" }}
+          >
+            Welcome to<br />Tixie Orientation!
+          </h1>
         </div>
       </div>
 
-      {/* Form card */}
+      {/* Right form panel */}
       <div
-        className="w-full max-w-lg z-10 animate-fade-in"
-        style={{ animationDelay: "0.15s" }}
+        className="lg:w-[60%] w-full flex flex-col items-center justify-center px-6 py-12 lg:py-0"
+        style={{ background: "#1C1D2E" }}
       >
-        <div
-          className="bg-white rounded-[20px] p-6 sm:p-8 shadow-2xl"
-        >
-          <h2 className="text-xl font-bold mb-6" style={{ color: "#2D1B69" }}>
-            Let's get you set up
-          </h2>
+        <div className="w-full max-w-md">
+          <h2 className="text-xl font-bold text-white mb-2">Let's get you set up</h2>
+          <p className="text-sm mb-8" style={{ color: "#9898B0" }}>
+            Complete this orientation to get cleared for live purchasing
+          </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <Label htmlFor="name" className="font-semibold" style={{ color: "#7B51D3" }}>
-                Full Name
-              </Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Jane Doe"
-                className="mt-1.5 border-2 border-gray-200 focus:border-[#7B51D3] focus:ring-[#7B51D3]/20 transition-colors rounded-xl"
-              />
-              {errors.name && <p className="text-sm text-destructive mt-1">{errors.name}</p>}
-            </div>
-            <div>
-              <Label htmlFor="email" className="font-semibold" style={{ color: "#7B51D3" }}>
-                Email Address
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="jane@example.com"
-                className="mt-1.5 border-2 border-gray-200 focus:border-[#7B51D3] focus:ring-[#7B51D3]/20 transition-colors rounded-xl"
-              />
-              {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
-            </div>
-            <div>
-              <Label htmlFor="phone" className="font-semibold" style={{ color: "#7B51D3" }}>
-                Phone Number
-              </Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="(555) 123-4567"
-                className="mt-1.5 border-2 border-gray-200 focus:border-[#7B51D3] focus:ring-[#7B51D3]/20 transition-colors rounded-xl"
-              />
-              {errors.phone && <p className="text-sm text-destructive mt-1">{errors.phone}</p>}
-            </div>
+            {[
+              { id: "name", label: "FULL NAME", value: name, onChange: setName, placeholder: "Jane Doe", type: "text" },
+              { id: "email", label: "EMAIL ADDRESS", value: email, onChange: setEmail, placeholder: "jane@example.com", type: "email" },
+              { id: "phone", label: "PHONE NUMBER", value: phone, onChange: setPhone, placeholder: "(555) 123-4567", type: "tel" },
+            ].map((field) => (
+              <div key={field.id}>
+                <Label
+                  htmlFor={field.id}
+                  className="text-xs font-semibold tracking-wider"
+                  style={{ color: "#9898B0", letterSpacing: "0.08em" }}
+                >
+                  {field.label}
+                </Label>
+                <Input
+                  id={field.id}
+                  type={field.type}
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  placeholder={field.placeholder}
+                  className="mt-1.5 text-white placeholder:text-white/30 rounded-xl border focus:ring-2 transition-colors"
+                  style={{
+                    background: "#2A2B3D",
+                    borderColor: "#3A3B50",
+                  }}
+                />
+                {errors[field.id] && (
+                  <p className="text-sm mt-1" style={{ color: "#E05555" }}>{errors[field.id]}</p>
+                )}
+              </div>
+            ))}
 
-            {/* Submit button with gradient + shimmer */}
             <button
               type="submit"
               disabled={loading}
-              className="relative w-full py-3.5 rounded-xl text-white font-semibold text-base transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:pointer-events-none overflow-hidden group"
-              style={{ background: "linear-gradient(135deg, #7B51D3, #9B6FE8)" }}
+              className="w-full py-3.5 rounded-[10px] text-white font-semibold text-base transition-all duration-200 hover:brightness-125 disabled:opacity-60 disabled:pointer-events-none"
+              style={{ background: "#6B5498" }}
             >
-              <span className="relative z-10">
-                {loading ? "Registering..." : "Start my orientation →"}
-              </span>
-              {/* Shimmer sweep on hover */}
-              <span
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                style={{
-                  background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,.25) 50%, transparent 60%)",
-                  backgroundSize: "200% 100%",
-                  animation: "shimmer 1.5s infinite",
-                }}
-              />
+              {loading ? "Registering..." : "Start Orientation →"}
             </button>
           </form>
+
+          {/* Progress preview */}
+          <div className="mt-10 flex flex-wrap justify-center gap-x-2 gap-y-1 text-xs font-medium" style={{ color: "#9898B0" }}>
+            <span className="text-white">📋 Register</span>
+            <span style={{ color: "#3A3B50" }}>→</span>
+            <span>📚 Train</span>
+            <span style={{ color: "#3A3B50" }}>→</span>
+            <span>🤖 Ask AI</span>
+            <span style={{ color: "#3A3B50" }}>→</span>
+            <span>📝 Quiz</span>
+            <span style={{ color: "#3A3B50" }}>→</span>
+            <span>✅ Cleared</span>
+          </div>
         </div>
       </div>
 
-      {/* Progress preview strip */}
-      <div className="mt-8 z-10 animate-fade-in" style={{ animationDelay: "0.3s" }}>
-        <div className="flex flex-wrap justify-center gap-x-2 gap-y-1 text-white/70 text-xs sm:text-sm font-medium">
-          <span>📋 Register</span>
-          <span className="text-white/40">→</span>
-          <span>📚 Train</span>
-          <span className="text-white/40">→</span>
-          <span>🤖 Ask AI</span>
-          <span className="text-white/40">→</span>
-          <span>📝 Quiz</span>
-          <span className="text-white/40">→</span>
-          <span>✅ Cleared</span>
-        </div>
-      </div>
-
-      {/* Inline keyframes */}
       <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-        }
-        @keyframes shimmer {
-          0% { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
+        @keyframes morphBlob {
+          0%, 100% { border-radius: 50% 40% 60% 50% / 60% 50% 40% 50%; }
+          33% { border-radius: 40% 60% 50% 50% / 50% 40% 60% 50%; }
+          66% { border-radius: 60% 50% 40% 50% / 50% 60% 50% 40%; }
         }
       `}</style>
     </div>
