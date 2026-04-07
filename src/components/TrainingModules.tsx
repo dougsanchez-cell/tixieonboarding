@@ -11,6 +11,12 @@ interface Section {
   body: string;
 }
 
+interface CompQuestion {
+  q: string;
+  options: string[];
+  correct: number;
+}
+
 interface Module {
   id: number;
   module_number: number;
