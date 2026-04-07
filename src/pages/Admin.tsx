@@ -24,6 +24,12 @@ interface Contractor {
   completed_at: string | null;
 }
 
+interface CompQuestion {
+  q: string;
+  options: string[];
+  correct: number;
+}
+
 interface Module {
   id: number;
   module_number: number;
@@ -32,6 +38,7 @@ interface Module {
   duration: string | null;
   video_url: string | null;
   sections: { heading: string; body: string }[];
+  comprehension_questions: CompQuestion[];
 }
 
 interface QuizQ {
@@ -85,7 +92,7 @@ const Admin = () => {
       supabase.from("app_config").select("*"),
     ]);
     if (cRes.data) setContractors(cRes.data as Contractor[]);
-    if (mRes.data) setModules(mRes.data.map(m => ({ ...m, sections: m.sections as unknown as { heading: string; body: string }[] })));
+    if (mRes.data) setModules(mRes.data.map(m => ({ ...m, sections: m.sections as unknown as { heading: string; body: string }[], comprehension_questions: (m.comprehension_questions as unknown as CompQuestion[]) || [] })));
     if (qRes.data) setQuestions(qRes.data.map(q => ({ ...q, options: q.options as unknown as string[] })));
     if (cfgRes.data) {
       cfgRes.data.forEach(c => {
@@ -126,7 +133,13 @@ const Admin = () => {
   const saveModule = async (mod: Module) => {
     const { error } = await supabase
       .from("content_modules")
-      .update({ title: mod.title, duration: mod.duration, video_url: mod.video_url, sections: mod.sections as unknown as any })
+      .update({
+        title: mod.title,
+        duration: mod.duration,
+        video_url: mod.video_url,
+        sections: mod.sections as unknown as any,
+        comprehension_questions: mod.comprehension_questions as unknown as any,
+      })
       .eq("id", mod.id);
     if (error) toast.error("Failed to save");
     else toast.success("Module saved");
@@ -297,6 +310,60 @@ const Admin = () => {
                         }} />
                       </div>
                     ))}
+                    {/* Comprehension Questions */}
+                    <div className="border-t pt-3 mt-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <Label className="text-sm font-semibold">Comprehension Questions</Label>
+                        <Button size="sm" variant="outline" onClick={() => {
+                          const next = [...modules];
+                          next[mi] = { ...mod, comprehension_questions: [...mod.comprehension_questions, { q: "", options: ["", "", "", ""], correct: 0 }] };
+                          setModules(next);
+                        }}>+ Add Question</Button>
+                      </div>
+                      {mod.comprehension_questions.map((cq, ci) => (
+                        <div key={ci} className="border rounded-lg p-3 space-y-2 mb-2">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-xs font-medium">Question {ci + 1}</Label>
+                            <Button size="sm" variant="ghost" className="text-destructive h-6 px-2 text-xs" onClick={() => {
+                              const next = [...modules];
+                              const cqs = mod.comprehension_questions.filter((_, i) => i !== ci);
+                              next[mi] = { ...mod, comprehension_questions: cqs };
+                              setModules(next);
+                            }}>Remove</Button>
+                          </div>
+                          <Textarea value={cq.q} rows={2} placeholder="Question text" onChange={e => {
+                            const next = [...modules];
+                            const cqs = [...mod.comprehension_questions];
+                            cqs[ci] = { ...cq, q: e.target.value };
+                            next[mi] = { ...mod, comprehension_questions: cqs };
+                            setModules(next);
+                          }} />
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {cq.options.map((opt, oi) => (
+                              <div key={oi} className="flex items-center gap-2">
+                                <input type="radio" name={`comp-correct-${mod.id}-${ci}`} checked={cq.correct === oi}
+                                  onChange={() => {
+                                    const next = [...modules];
+                                    const cqs = [...mod.comprehension_questions];
+                                    cqs[ci] = { ...cq, correct: oi };
+                                    next[mi] = { ...mod, comprehension_questions: cqs };
+                                    setModules(next);
+                                  }} className="accent-primary" />
+                                <Input value={opt} placeholder={`Option ${String.fromCharCode(65 + oi)}`} onChange={e => {
+                                  const next = [...modules];
+                                  const cqs = [...mod.comprehension_questions];
+                                  const opts = [...cq.options];
+                                  opts[oi] = e.target.value;
+                                  cqs[ci] = { ...cq, options: opts };
+                                  next[mi] = { ...mod, comprehension_questions: cqs };
+                                  setModules(next);
+                                }} />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </CardContent>
                 </Card>
               ))}

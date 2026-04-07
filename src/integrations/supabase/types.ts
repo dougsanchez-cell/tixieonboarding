@@ -36,6 +36,7 @@ export type Database = {
         Row: {
           abbr: string
           accent: string | null
+          comprehension_questions: Json | null
           duration: string | null
           id: number
           light: string | null
@@ -48,6 +49,7 @@ export type Database = {
         Insert: {
           abbr: string
           accent?: string | null
+          comprehension_questions?: Json | null
           duration?: string | null
           id?: number
           light?: string | null
@@ -60,6 +62,7 @@ export type Database = {
         Update: {
           abbr?: string
           accent?: string | null
+          comprehension_questions?: Json | null
           duration?: string | null
           id?: number
           light?: string | null

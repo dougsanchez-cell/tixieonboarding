@@ -5,10 +5,17 @@ import { Check, PlayCircle, BookOpen, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
+import ComprehensionQuiz from "@/components/ComprehensionQuiz";
 
 interface Section {
   heading: string;
   body: string;
+}
+
+interface CompQuestion {
+  q: string;
+  options: string[];
+  correct: number;
 }
 
 interface Module {
@@ -21,6 +28,7 @@ interface Module {
   duration: string | null;
   video_url: string | null;
   sections: Section[];
+  comprehension_questions: CompQuestion[];
 }
 
 interface TrainingModulesProps {
@@ -66,6 +74,7 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
   const [countdown, setCountdown] = useState(0);
   const [hasScrolledBottom, setHasScrolledBottom] = useState(false);
   const [videoProgress, setVideoProgress] = useState<Record<number, number>>({});
+  const [quizPassed, setQuizPassed] = useState<Set<number>>(new Set());
   const cardContentRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const playerRef = useRef<any>(null);
@@ -86,6 +95,7 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
         (data || []).map((m) => ({
           ...m,
           sections: (m.sections as unknown as Section[]) || [],
+          comprehension_questions: (m.comprehension_questions as unknown as CompQuestion[]) || [],
         }))
       );
       setLoading(false);
@@ -251,16 +261,17 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
   const currentVideoProgress = videoProgress[current.module_number] || 0;
   const videoGateMet = hasVideo ? currentVideoProgress >= VIDEO_THRESHOLD : true;
   const textGateMet = hasVideo ? true : countdown === 0 && hasScrolledBottom;
-  const canComplete = videoGateMet && textGateMet && hasScrolledBottom && !isCompleted;
+  const hasQuiz = current.comprehension_questions && current.comprehension_questions.length > 0;
+  const quizGateMet = hasQuiz ? quizPassed.has(current.module_number) : true;
+  const canComplete = videoGateMet && textGateMet && hasScrolledBottom && quizGateMet && !isCompleted;
 
   // For video modules, also require scroll to bottom
   const getButtonLabel = () => {
-    if (hasVideo) {
-      if (currentVideoProgress < VIDEO_THRESHOLD) return `Watch video (${currentVideoProgress}% / ${VIDEO_THRESHOLD}%)`;
-      if (!hasScrolledBottom) return "Scroll to the end";
-      return "Mark as Complete";
-    }
-    if (countdown > 0) return `Available in ${countdown}s`;
+    if (hasVideo && currentVideoProgress < VIDEO_THRESHOLD) return `Watch video (${currentVideoProgress}% / ${VIDEO_THRESHOLD}%)`;
+    if (hasVideo && !hasScrolledBottom) return "Scroll to the end";
+    if (!hasVideo && countdown > 0) return `Available in ${countdown}s`;
+    if (!hasVideo && !hasScrolledBottom) return "Scroll to the end";
+    if (hasQuiz && !quizGateMet) return "Answer all questions correctly";
     return "Mark as Complete";
   };
 
@@ -269,12 +280,10 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
     if (hasVideo && currentVideoProgress < VIDEO_THRESHOLD) {
       return `Video progress: ${currentVideoProgress}% watched — watch at least ${VIDEO_THRESHOLD}% to continue`;
     }
-    if (hasVideo && !hasScrolledBottom) {
-      return "Scroll to the end to continue";
-    }
-    if (!hasVideo && countdown === 0 && !hasScrolledBottom) {
-      return "Scroll to the end to continue";
-    }
+    if (hasVideo && !hasScrolledBottom) return "Scroll to the end to continue";
+    if (!hasVideo && countdown > 0) return null;
+    if (!hasVideo && !hasScrolledBottom) return "Scroll to the end to continue";
+    if (hasQuiz && !quizGateMet) return "Answer all comprehension questions correctly to continue";
     return null;
   };
 
@@ -379,6 +388,16 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
                 </div>
               </div>
             ))}
+
+            {/* Comprehension quiz */}
+            {hasQuiz && !isCompleted && (
+              <ComprehensionQuiz
+                questions={current.comprehension_questions}
+                moduleNumber={current.module_number}
+                passed={quizPassed.has(current.module_number)}
+                onPass={() => setQuizPassed(prev => new Set(prev).add(current.module_number))}
+              />
+            )}
 
             {/* Mark complete button */}
             <div className="pt-4 border-t space-y-2">
