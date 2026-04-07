@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Check, X, RotateCcw } from "lucide-react";
 
 interface CompQuestion {
@@ -27,7 +26,7 @@ const ComprehensionQuiz = ({ questions, moduleNumber, onPass, passed }: Comprehe
   const allAnswered = Object.keys(answers).length === questions.length;
 
   const handleSelect = (qIndex: number, optIndex: number) => {
-    if (checked && results[qIndex]) return; // don't change correct answers
+    if (checked && results[qIndex]) return;
     setAnswers(prev => ({ ...prev, [qIndex]: optIndex }));
   };
 
@@ -45,7 +44,6 @@ const ComprehensionQuiz = ({ questions, moduleNumber, onPass, passed }: Comprehe
   };
 
   const handleRetry = () => {
-    // Reset only wrong answers
     const newAnswers: Record<number, number> = {};
     Object.entries(answers).forEach(([k, v]) => {
       const idx = Number(k);
@@ -58,35 +56,34 @@ const ComprehensionQuiz = ({ questions, moduleNumber, onPass, passed }: Comprehe
 
   const getOptionClass = (qIndex: number, optIndex: number) => {
     const isSelected = answers[qIndex] === optIndex;
-    
+
     if (!checked) {
-      if (isSelected) return "border-primary bg-primary/10 text-foreground";
-      return "border-border bg-card hover:bg-accent text-foreground";
+      if (isSelected) return "border-[#9B6FE8] bg-[#9B6FE8]/20 text-white";
+      return "border-white/20 bg-white/5 hover:bg-white/10 text-white/80";
     }
 
-    // After checking
     const isCorrect = questions[qIndex].correct === optIndex;
     const wasSelected = isSelected;
 
     if (isCorrect && (wasSelected || !results[qIndex])) {
-      return "border-success bg-success-light text-foreground";
+      return "border-green-400 bg-green-500/20 text-white";
     }
     if (wasSelected && !results[qIndex]) {
-      return "border-destructive bg-destructive/5 text-foreground";
+      return "border-red-400 bg-red-500/20 text-white";
     }
-    return "border-border bg-card text-muted-foreground";
+    return "border-white/10 bg-white/5 text-white/40";
   };
 
   return (
-    <div className="border border-primary/20 rounded-lg bg-primary/5 p-4 space-y-4">
-      <h3 className="font-semibold text-foreground flex items-center gap-2">
-        <Check className="w-4 h-4 text-primary" />
+    <div className="rounded-2xl p-5 space-y-4" style={{ background: "#2D1B69" }}>
+      <h3 className="font-semibold text-white flex items-center gap-2">
+        <Check className="w-4 h-4 text-[#9B6FE8]" />
         Check your understanding
       </h3>
 
       {questions.map((q, qi) => (
         <div key={qi} className="space-y-2">
-          <p className="text-sm font-medium text-foreground">
+          <p className="text-sm font-medium text-white">
             {qi + 1}. {q.q}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -95,19 +92,19 @@ const ComprehensionQuiz = ({ questions, moduleNumber, onPass, passed }: Comprehe
                 key={oi}
                 onClick={() => !passed && handleSelect(qi, oi)}
                 disabled={passed || (checked && results[qi])}
-                className={`flex items-center gap-2 p-2.5 rounded-lg border text-left text-sm transition-all ${getOptionClass(qi, oi)} ${
+                className={`flex items-center gap-2 p-2.5 rounded-xl border text-left text-sm transition-all ${getOptionClass(qi, oi)} ${
                   passed || (checked && results[qi]) ? "cursor-default" : "cursor-pointer"
                 }`}
               >
-                <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-background border">
+                <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 border border-white/20 bg-white/10">
                   {LABELS[oi]}
                 </span>
                 <span className="flex-1">{opt}</span>
                 {checked && answers[qi] === oi && results[qi] && (
-                  <Check className="w-4 h-4 text-success shrink-0" />
+                  <Check className="w-4 h-4 text-green-400 shrink-0" />
                 )}
                 {checked && answers[qi] === oi && !results[qi] && (
-                  <X className="w-4 h-4 text-destructive shrink-0" />
+                  <X className="w-4 h-4 text-red-400 shrink-0" />
                 )}
               </button>
             ))}
@@ -116,26 +113,28 @@ const ComprehensionQuiz = ({ questions, moduleNumber, onPass, passed }: Comprehe
       ))}
 
       {passed ? (
-        <div className="flex items-center gap-2 text-success font-medium text-sm bg-success-light border border-success/30 rounded-lg p-3">
+        <div className="flex items-center gap-2 text-green-400 font-medium text-sm bg-green-500/20 border border-green-500/30 rounded-xl p-3">
           <Check className="w-4 h-4" />
           All correct! You can mark this module complete.
         </div>
       ) : checked && Object.values(results).some(r => !r) ? (
         <div className="flex items-center gap-2">
-          <p className="text-sm text-destructive font-medium">Some answers are incorrect. Review and try again.</p>
-          <Button variant="outline" size="sm" onClick={handleRetry}>
-            <RotateCcw className="w-3 h-3 mr-1" /> Try again
-          </Button>
+          <p className="text-sm text-red-400 font-medium">Some answers are incorrect. Review and try again.</p>
+          <button
+            onClick={handleRetry}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-white border border-white/20 hover:bg-white/10 transition-colors"
+          >
+            <RotateCcw className="w-3 h-3" /> Try again
+          </button>
         </div>
       ) : !checked ? (
-        <Button
+        <button
           onClick={handleCheck}
           disabled={!allAnswered}
-          variant="outline"
-          className="border-primary text-primary hover:bg-primary/10"
+          className="px-5 py-2 rounded-xl text-sm font-semibold text-white border border-[#9B6FE8] hover:bg-[#9B6FE8]/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           Check answers
-        </Button>
+        </button>
       ) : null}
     </div>
   );
