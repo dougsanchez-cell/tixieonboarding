@@ -9,6 +9,7 @@ interface CustomVideoPlayerProps {
   onMaxReachedChange: (moduleNumber: number, time: number) => void;
   onComplete: () => void;
   isComplete: boolean;
+  demoMode?: boolean;
 }
 
 const formatTime = (s: number) => {
@@ -24,6 +25,7 @@ const CustomVideoPlayer = ({
   onMaxReachedChange,
   onComplete,
   isComplete,
+  demoMode = false,
 }: CustomVideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
