@@ -87,7 +87,7 @@ const RegistrationStep = ({ onComplete }: RegistrationStepProps) => {
             className="text-4xl font-black leading-tight"
             style={{ color: "#0D0D0D" }}
           >
-            Welcome to<br />Tixie Orientation!
+            Welcome to<br />Tixie!
           </h1>
         </div>
       </div>
