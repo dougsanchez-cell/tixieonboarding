@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, PlayCircle, BookOpen, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Progress } from "@/components/ui/progress";
 import ComprehensionQuiz from "@/components/ComprehensionQuiz";
+import CustomVideoPlayer from "@/components/CustomVideoPlayer";
 
 interface Section {
   heading: string;
@@ -42,7 +42,7 @@ declare global {
   }
 }
 
-// Load YT IFrame API once
+// Load YT IFrame API once (for YouTube URLs)
 let ytApiLoaded = false;
 let ytApiReady = false;
 const ytReadyCallbacks: (() => void)[] = [];
@@ -64,7 +64,8 @@ function loadYTApi(cb: () => void) {
   document.head.appendChild(tag);
 }
 
-const VIDEO_THRESHOLD = 80; // percent
+const isSupabaseVideo = (url: string) => url.includes("supabase.co");
+const isYouTubeVideo = (url: string) => url.includes("youtube.com") || url.includes("youtu.be");
 
 const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
   const [modules, setModules] = useState<Module[]>([]);
@@ -73,8 +74,11 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
   const [loading, setLoading] = useState(true);
   const [countdown, setCountdown] = useState(0);
   const [hasScrolledBottom, setHasScrolledBottom] = useState(false);
-  const [videoProgress, setVideoProgress] = useState<Record<number, number>>({});
+  const [videoMaxReached, setVideoMaxReached] = useState<Record<number, number>>({});
+  const [videoComplete, setVideoComplete] = useState<Set<number>>(new Set());
   const [quizPassed, setQuizPassed] = useState<Set<number>>(new Set());
+  // YT player state for YouTube videos
+  const [ytVideoProgress, setYtVideoProgress] = useState<Record<number, number>>({});
   const cardContentRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const playerRef = useRef<any>(null);
@@ -103,18 +107,16 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
     load();
   }, []);
 
-  // Extract YouTube video ID from embed URL
+  // --- YouTube IFrame Player logic (only for YT URLs) ---
   const getVideoId = (url: string): string | null => {
     const match = url.match(/\/embed\/([^?/]+)/);
     return match ? match[1] : null;
   };
 
-  // Initialize / re-initialize YT player when active module changes
   useEffect(() => {
     if (modules.length === 0) return;
     const current = modules[activeModule];
-    if (!current?.video_url || completed.has(current.module_number)) {
-      // Destroy player & stop polling for non-video modules
+    if (!current?.video_url || !isYouTubeVideo(current.video_url) || completed.has(current.module_number)) {
       if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
       if (playerRef.current) { playerRef.current.destroy(); playerRef.current = null; }
       return;
@@ -123,38 +125,27 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
     const videoId = getVideoId(current.video_url);
     if (!videoId) return;
 
-    // Clean up previous
     if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
     if (playerRef.current) { playerRef.current.destroy(); playerRef.current = null; }
 
     const moduleNum = current.module_number;
 
     loadYTApi(() => {
-      // Small delay to ensure the DOM div exists
       setTimeout(() => {
         const el = document.getElementById(playerDivId);
         if (!el) return;
-
         playerRef.current = new window.YT.Player(playerDivId, {
           videoId,
-          playerVars: {
-            enablejsapi: 1,
-            origin: "https://tixieonboarding.lovable.app",
-            rel: 0,
-          },
+          playerVars: { enablejsapi: 1, origin: "https://tixieonboarding.lovable.app", rel: 0 },
           events: {
             onReady: () => {
-              // Start polling
               pollRef.current = setInterval(() => {
                 const p = playerRef.current;
                 if (!p?.getCurrentTime || !p?.getDuration) return;
                 const dur = p.getDuration();
                 if (dur <= 0) return;
                 const pct = Math.round((p.getCurrentTime() / dur) * 100);
-                setVideoProgress((prev) => ({
-                  ...prev,
-                  [moduleNum]: Math.max(prev[moduleNum] || 0, pct),
-                }));
+                setYtVideoProgress((prev) => ({ ...prev, [moduleNum]: Math.max(prev[moduleNum] || 0, pct) }));
               }, 2000);
             },
           },
@@ -164,14 +155,11 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
 
     return () => {
       if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
-      if (playerRef.current) {
-        try { playerRef.current.destroy(); } catch {}
-        playerRef.current = null;
-      }
+      if (playerRef.current) { try { playerRef.current.destroy(); } catch {} playerRef.current = null; }
     };
   }, [activeModule, modules, completed]);
 
-  // Timer & scroll gate for NON-video modules only
+  // Timer & scroll gate for text-only modules (no video)
   useEffect(() => {
     if (modules.length === 0) return;
     const current = modules[activeModule];
@@ -181,7 +169,6 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
       return;
     }
 
-    // Video modules don't use timer gate
     if (current.video_url) {
       setCountdown(0);
       setHasScrolledBottom(false);
@@ -212,16 +199,13 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
   const handleScroll = useCallback(() => {
     const el = cardContentRef.current;
     if (!el) return;
-    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100;
-    if (nearBottom) setHasScrolledBottom(true);
+    if (el.scrollHeight - el.scrollTop - el.clientHeight < 100) setHasScrolledBottom(true);
   }, []);
 
   useEffect(() => {
     const el = cardContentRef.current;
     if (!el) return;
-    if (el.scrollHeight - el.clientHeight < 100) {
-      setHasScrolledBottom(true);
-    }
+    if (el.scrollHeight - el.clientHeight < 100) setHasScrolledBottom(true);
     el.addEventListener("scroll", handleScroll);
     return () => el.removeEventListener("scroll", handleScroll);
   }, [activeModule, handleScroll, loading]);
@@ -232,9 +216,7 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
     if (!mod) return false;
     if (completed.has(mod.module_number)) return true;
     for (let i = 0; i < modules.length; i++) {
-      if (!completed.has(modules[i].module_number)) {
-        return i === index;
-      }
+      if (!completed.has(modules[i].module_number)) return i === index;
     }
     return false;
   };
@@ -251,6 +233,17 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
     }
   };
 
+  const handleMaxReachedChange = useCallback((moduleNumber: number, time: number) => {
+    setVideoMaxReached((prev) => ({
+      ...prev,
+      [moduleNumber]: Math.max(prev[moduleNumber] || 0, time),
+    }));
+  }, []);
+
+  const handleVideoComplete = useCallback((moduleNumber: number) => {
+    setVideoComplete((prev) => new Set(prev).add(moduleNumber));
+  }, []);
+
   if (loading) return <div className="text-center py-12 text-muted-foreground">Loading modules...</div>;
 
   const current = modules[activeModule];
@@ -258,16 +251,25 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
 
   const isCompleted = completed.has(current.module_number);
   const hasVideo = !!current.video_url;
-  const currentVideoProgress = videoProgress[current.module_number] || 0;
-  const videoGateMet = hasVideo ? currentVideoProgress >= VIDEO_THRESHOLD : true;
-  const textGateMet = hasVideo ? true : countdown === 0 && hasScrolledBottom;
+  const isSupabase = hasVideo && isSupabaseVideo(current.video_url!);
+  const isYT = hasVideo && isYouTubeVideo(current.video_url!);
   const hasQuiz = current.comprehension_questions && current.comprehension_questions.length > 0;
+
+  // Video gate
+  const supabaseVideoGateMet = isSupabase ? videoComplete.has(current.module_number) : true;
+  const ytProgress = ytVideoProgress[current.module_number] || 0;
+  const ytVideoGateMet = isYT ? ytProgress >= 80 : true;
+  const videoGateMet = supabaseVideoGateMet && ytVideoGateMet;
+
+  const textGateMet = hasVideo ? true : countdown === 0 && hasScrolledBottom;
   const quizGateMet = hasQuiz ? quizPassed.has(current.module_number) : true;
   const canComplete = videoGateMet && textGateMet && hasScrolledBottom && quizGateMet && !isCompleted;
 
-  // For video modules, also require scroll to bottom
+  // For supabase video modules, hide quiz & complete until video is done
+  const showQuizAndComplete = isSupabase ? supabaseVideoGateMet : true;
+
   const getButtonLabel = () => {
-    if (hasVideo && currentVideoProgress < VIDEO_THRESHOLD) return `Watch video (${currentVideoProgress}% / ${VIDEO_THRESHOLD}%)`;
+    if (isYT && ytProgress < 80) return `Watch video (${ytProgress}% / 80%)`;
     if (hasVideo && !hasScrolledBottom) return "Scroll to the end";
     if (!hasVideo && countdown > 0) return `Available in ${countdown}s`;
     if (!hasVideo && !hasScrolledBottom) return "Scroll to the end";
@@ -277,9 +279,7 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
 
   const getHintText = () => {
     if (isCompleted) return null;
-    if (hasVideo && currentVideoProgress < VIDEO_THRESHOLD) {
-      return `Video progress: ${currentVideoProgress}% watched — watch at least ${VIDEO_THRESHOLD}% to continue`;
-    }
+    if (isYT && ytProgress < 80) return `Video progress: ${ytProgress}% watched — watch at least 80% to continue`;
     if (hasVideo && !hasScrolledBottom) return "Scroll to the end to continue";
     if (!hasVideo && countdown > 0) return null;
     if (!hasVideo && !hasScrolledBottom) return "Scroll to the end to continue";
@@ -343,13 +343,19 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
             <span className="text-sm text-muted-foreground">{current.duration}</span>
           </div>
         </CardHeader>
-        <div
-          ref={cardContentRef}
-          className="max-h-[60vh] overflow-y-auto"
-        >
+        <div ref={cardContentRef} className="max-h-[60vh] overflow-y-auto">
           <CardContent className="space-y-6">
             {/* Video */}
-            {hasVideo ? (
+            {isSupabase ? (
+              <CustomVideoPlayer
+                src={current.video_url!}
+                moduleNumber={current.module_number}
+                maxReached={videoMaxReached[current.module_number] || 0}
+                onMaxReachedChange={handleMaxReachedChange}
+                onComplete={() => handleVideoComplete(current.module_number)}
+                isComplete={videoComplete.has(current.module_number)}
+              />
+            ) : isYT ? (
               <div className="space-y-3">
                 <div className="rounded-lg overflow-hidden" style={{ position: "relative", paddingBottom: "56.25%", width: "100%" }}>
                   <div
@@ -359,13 +365,25 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
                 </div>
                 {!isCompleted && (
                   <div className="space-y-1.5">
-                    <Progress value={Math.min(currentVideoProgress, 100)} className="h-2" />
-                    <p className={`text-xs ${currentVideoProgress >= VIDEO_THRESHOLD ? "text-success" : "text-muted-foreground"}`}>
-                      Video progress: {currentVideoProgress}% watched
-                      {currentVideoProgress < VIDEO_THRESHOLD && ` — watch at least ${VIDEO_THRESHOLD}% to continue`}
+                    <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
+                      <div
+                        className="h-full bg-primary rounded-full transition-all"
+                        style={{ width: `${Math.min(ytProgress, 100)}%` }}
+                      />
+                    </div>
+                    <p className={`text-xs ${ytProgress >= 80 ? "text-success" : "text-muted-foreground"}`}>
+                      Video progress: {ytProgress}% watched
+                      {ytProgress < 80 && ` — watch at least 80% to continue`}
                     </p>
                   </div>
                 )}
+              </div>
+            ) : hasVideo ? (
+              <div className="rounded-lg bg-muted flex items-center justify-center py-12 border border-dashed border-border">
+                <div className="text-center text-muted-foreground">
+                  <PlayCircle className="w-10 h-10 mx-auto mb-2 opacity-40" />
+                  <p className="text-sm">Video walkthrough coming soon</p>
+                </div>
               </div>
             ) : (
               <div className="rounded-lg bg-muted flex items-center justify-center py-12 border border-dashed border-border">
@@ -389,38 +407,41 @@ const TrainingModules = ({ onComplete }: TrainingModulesProps) => {
               </div>
             ))}
 
-            {/* Comprehension quiz */}
-            {hasQuiz && !isCompleted && (
-              <ComprehensionQuiz
-                questions={current.comprehension_questions}
-                moduleNumber={current.module_number}
-                passed={quizPassed.has(current.module_number)}
-                onPass={() => setQuizPassed(prev => new Set(prev).add(current.module_number))}
-              />
-            )}
+            {/* Comprehension quiz & Mark complete — hidden until video done for supabase videos */}
+            {showQuizAndComplete && (
+              <>
+                {hasQuiz && !isCompleted && (
+                  <ComprehensionQuiz
+                    questions={current.comprehension_questions}
+                    moduleNumber={current.module_number}
+                    passed={quizPassed.has(current.module_number)}
+                    onPass={() => setQuizPassed((prev) => new Set(prev).add(current.module_number))}
+                  />
+                )}
 
-            {/* Mark complete button */}
-            <div className="pt-4 border-t space-y-2">
-              {isCompleted ? (
-                <div className="flex items-center gap-2 text-success font-medium">
-                  <Check className="w-5 h-5" />
-                  Module completed
-                </div>
-              ) : (
-                <>
-                  <Button
-                    onClick={() => markComplete(current.module_number)}
-                    disabled={!canComplete}
-                    className="w-full sm:w-auto"
-                  >
-                    {getButtonLabel()}
-                  </Button>
-                  {getHintText() && (
-                    <p className="text-sm text-muted-foreground">{getHintText()}</p>
+                <div className="pt-4 border-t space-y-2">
+                  {isCompleted ? (
+                    <div className="flex items-center gap-2 text-success font-medium">
+                      <Check className="w-5 h-5" />
+                      Module completed
+                    </div>
+                  ) : (
+                    <>
+                      <Button
+                        onClick={() => markComplete(current.module_number)}
+                        disabled={!canComplete}
+                        className="w-full sm:w-auto"
+                      >
+                        {getButtonLabel()}
+                      </Button>
+                      {getHintText() && (
+                        <p className="text-sm text-muted-foreground">{getHintText()}</p>
+                      )}
+                    </>
                   )}
-                </>
-              )}
-            </div>
+                </div>
+              </>
+            )}
           </CardContent>
         </div>
       </Card>
