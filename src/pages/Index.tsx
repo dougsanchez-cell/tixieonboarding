@@ -38,6 +38,7 @@ const Index = () => {
                 setContractor(c);
                 setStep(2);
               }}
+              demoMode={demoMode}
             />
           )}
           {step === 2 && <TrainingModules onComplete={() => setStep(3)} demoMode={demoMode} />}

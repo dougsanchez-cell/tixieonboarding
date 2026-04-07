@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,14 +7,31 @@ import { toast } from "sonner";
 
 interface RegistrationStepProps {
   onComplete: (contractor: { id: string; name: string; email: string; phone: string }) => void;
+  demoMode?: boolean;
 }
 
-const RegistrationStep = ({ onComplete }: RegistrationStepProps) => {
+const RegistrationStep = ({ onComplete, demoMode = false }: RegistrationStepProps) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Demo mode: auto-register with fake data
+  useEffect(() => {
+    if (!demoMode) return;
+    const autoRegister = async () => {
+      const id = crypto.randomUUID();
+      const demoData = { id, name: "Demo User", email: "demo@tixie.com", phone: "5555555555" };
+      try {
+        await supabase.from("contractors").insert(demoData);
+        onComplete(demoData);
+      } catch {
+        onComplete(demoData);
+      }
+    };
+    autoRegister();
+  }, [demoMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const validate = () => {
     const e: Record<string, string> = {};
