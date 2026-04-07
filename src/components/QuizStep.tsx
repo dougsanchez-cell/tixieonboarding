@@ -66,6 +66,19 @@ const QuizStep = ({ contractorId, onPass, demoMode = false }: QuizStepProps) => 
           <p className="text-sm mt-1" style={{ color: "#9898B0" }}>Score {passThreshold}% or higher to get cleared</p>
         </div>
 
+        {/* Demo auto-pass button */}
+        {demoMode && !submitted && (
+          <div className="mb-6 text-center">
+            <button
+              onClick={() => onPass(100)}
+              className="px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:brightness-125"
+              style={{ background: "#F59E0B", color: "#1C1D2E" }}
+            >
+              🎬 Demo: Auto-pass quiz
+            </button>
+          </div>
+        )}
+
         {/* Pass / fail banner */}
         {submitted && (
           <div
