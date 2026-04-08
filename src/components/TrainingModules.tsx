@@ -167,6 +167,8 @@ const TrainingModules = ({ onComplete, demoMode = false, userPath = null }: Trai
   if (!current) return null;
 
   const isCompleted = completed.has(current.module_number);
+  const hasVideo = !!current.video_url;
+  const hideVideo = userPath === "a1" && current.module_number === 2;
   const effectiveHasVideo = hasVideo && !hideVideo;
   const isSupabase = effectiveHasVideo && isSupabaseVideo(current.video_url!);
   const isYT = effectiveHasVideo && isYouTubeVideo(current.video_url!);
@@ -184,8 +186,8 @@ const TrainingModules = ({ onComplete, demoMode = false, userPath = null }: Trai
   const getButtonLabel = () => {
     if (isYT && ytProgress < 100) return `Watch video (${ytProgress}% watched)`;
     if (effectiveHasVideo && !hasScrolledBottom) return "Scroll to the end";
-    if (!hasVideo && countdown > 0) return `Available in ${countdown}s`;
-    if (!hasVideo && !hasScrolledBottom) return "Scroll to the end";
+    if (!effectiveHasVideo && countdown > 0) return `Available in ${countdown}s`;
+    if (!effectiveHasVideo && !hasScrolledBottom) return "Scroll to the end";
     if (hasQuiz && !quizGateMet) return "Answer all questions correctly";
     return "Mark as Complete ✓";
   };
@@ -193,14 +195,12 @@ const TrainingModules = ({ onComplete, demoMode = false, userPath = null }: Trai
   const getHintText = () => {
     if (isCompleted) return null;
     if (isYT && ytProgress < 100) return `Video progress: ${ytProgress}% watched — you must watch the full video to continue`;
-    if (hasVideo && !hasScrolledBottom) return "Scroll to the end to continue";
-    if (!hasVideo && countdown > 0) return null;
-    if (!hasVideo && !hasScrolledBottom) return "Scroll to the end to continue";
+    if (effectiveHasVideo && !hasScrolledBottom) return "Scroll to the end to continue";
+    if (!effectiveHasVideo && countdown > 0) return null;
+    if (!effectiveHasVideo && !hasScrolledBottom) return "Scroll to the end to continue";
     if (hasQuiz && !quizGateMet) return "Answer all comprehension questions correctly to continue";
     return null;
   };
-
-  const hideVideo = userPath === "a1" && current.module_number === 2;
 
   return (
     <div className="min-h-screen py-6 px-4" style={{ background: "#1C1D2E" }}>
