@@ -81,6 +81,7 @@ export type Database = {
           email: string
           id: string
           name: string
+          path: string | null
           phone: string
           quiz_attempts: number
           quiz_score: number | null
@@ -92,6 +93,7 @@ export type Database = {
           email: string
           id?: string
           name: string
+          path?: string | null
           phone: string
           quiz_attempts?: number
           quiz_score?: number | null
@@ -103,6 +105,7 @@ export type Database = {
           email?: string
           id?: string
           name?: string
+          path?: string | null
           phone?: string
           quiz_attempts?: number
           quiz_score?: number | null
