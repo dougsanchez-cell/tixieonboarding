@@ -22,6 +22,7 @@ interface Contractor {
   quiz_attempts: number;
   created_at: string;
   completed_at: string | null;
+  path: string | null;
 }
 
 interface CompQuestion {
@@ -58,6 +59,7 @@ interface ContractorGroup {
   rolledStatus: string;
   totalAttempts: number;
   firstRegisteredAt: string;
+  path: string | null;
 }
 
 const formatStatusLabel = (status: string) =>
