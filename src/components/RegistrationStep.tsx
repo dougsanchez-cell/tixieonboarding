@@ -8,9 +8,10 @@ import { toast } from "sonner";
 interface RegistrationStepProps {
   onComplete: (contractor: { id: string; name: string; email: string; phone: string }) => void;
   demoMode?: boolean;
+  userPath?: string | null;
 }
 
-const RegistrationStep = ({ onComplete, demoMode = false }: RegistrationStepProps) => {
+const RegistrationStep = ({ onComplete, demoMode = false, userPath = null }: RegistrationStepProps) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -21,7 +22,7 @@ const RegistrationStep = ({ onComplete, demoMode = false }: RegistrationStepProp
     const id = crypto.randomUUID();
     const demoData = { id, name: "Demo User", email: "demo@jomero.co", phone: "5550000000" };
     try {
-      await supabase.from("contractors").insert(demoData);
+      await supabase.from("contractors").insert({ ...demoData, path: userPath } as any);
     } catch {}
     onComplete(demoData);
   };
@@ -43,7 +44,7 @@ const RegistrationStep = ({ onComplete, demoMode = false }: RegistrationStepProp
       const id = crypto.randomUUID();
       const { error } = await supabase
         .from("contractors")
-        .insert({ id, name: name.trim(), email: email.trim(), phone: phone.trim() });
+        .insert({ id, name: name.trim(), email: email.trim(), phone: phone.trim(), path: userPath } as any);
       if (error) throw error;
       onComplete({ id, name: name.trim(), email: email.trim(), phone: phone.trim() });
     } catch {

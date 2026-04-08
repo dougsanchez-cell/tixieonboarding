@@ -1,0 +1,1 @@
+ALTER TABLE public.contractors ADD COLUMN IF NOT EXISTS path text;

@@ -22,6 +22,9 @@ const Index = () => {
   const [demoMode, setDemoMode] = useState(() => {
     return new URLSearchParams(window.location.search).get("demo") === "true";
   });
+  const [userPath] = useState<string | null>(() => {
+    return new URLSearchParams(window.location.search).get("path");
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -39,9 +42,10 @@ const Index = () => {
                 setStep(2);
               }}
               demoMode={demoMode}
+              userPath={userPath}
             />
           )}
-          {step === 2 && <TrainingModules onComplete={() => setStep(3)} demoMode={demoMode} />}
+          {step === 2 && <TrainingModules onComplete={() => setStep(3)} demoMode={demoMode} userPath={userPath} />}
           {step === 3 && <AIChatStep onComplete={() => setStep(4)} demoMode={demoMode} />}
           {step === 4 && contractor && (
             <QuizStep

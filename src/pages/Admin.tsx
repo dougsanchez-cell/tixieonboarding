@@ -22,6 +22,7 @@ interface Contractor {
   quiz_attempts: number;
   created_at: string;
   completed_at: string | null;
+  path: string | null;
 }
 
 interface CompQuestion {
@@ -58,6 +59,7 @@ interface ContractorGroup {
   rolledStatus: string;
   totalAttempts: number;
   firstRegisteredAt: string;
+  path: string | null;
 }
 
 const formatStatusLabel = (status: string) =>
@@ -79,6 +81,7 @@ const Admin = () => {
   const [opsEmail, setOpsEmail] = useState("ops@jomero.com");
   const [minQuestions, setMinQuestions] = useState("2");
   const [filter, setFilter] = useState("all");
+  const [pathFilter, setPathFilter] = useState("all");
   const [expandedEmail, setExpandedEmail] = useState<string | null>(null);
 
   useEffect(() => {
@@ -132,14 +135,19 @@ const Admin = () => {
           rolledStatus,
           totalAttempts: attempts.length,
           firstRegisteredAt: earliest.created_at,
+          path: latest.path,
         };
       })
       .sort((a, b) => new Date(b.latest.created_at).getTime() - new Date(a.latest.created_at).getTime())
   ), [groupedContractors]);
 
   const filteredContractorGroups = useMemo(
-    () => (filter === "all" ? contractorGroups : contractorGroups.filter(group => group.rolledStatus === filter)),
-    [contractorGroups, filter],
+    () => {
+      let groups = filter === "all" ? contractorGroups : contractorGroups.filter(group => group.rolledStatus === filter);
+      if (pathFilter !== "all") groups = groups.filter(group => group.path === pathFilter);
+      return groups;
+    },
+    [contractorGroups, filter, pathFilter],
   );
 
   const exportableContractors = useMemo(() => {
@@ -192,12 +200,13 @@ const Admin = () => {
   );
 
   const exportCSV = () => {
-    const rows = [["Name", "Email", "Phone", "Score", "Status", "Attempts", "Date"]];
+    const rows = [["Name", "Email", "Phone", "Path", "Score", "Status", "Attempts", "Date"]];
     exportableContractors.forEach(c => {
       rows.push([
         c.name,
         c.email,
         c.phone,
+        c.path || "",
         String(c.quiz_score ?? ""),
         c.status,
         String(c.quiz_attempts),
@@ -294,10 +303,16 @@ const Admin = () => {
 
           <TabsContent value="contractors">
             <div className="mb-4 flex items-center justify-between gap-2 flex-wrap">
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {["all", "cleared", "failed", "in_progress"].map(f => (
                   <Button key={f} variant={filter === f ? "default" : "outline"} size="sm" onClick={() => setFilter(f)}>
                     {f === "all" ? "All" : f === "in_progress" ? "In Progress" : f.charAt(0).toUpperCase() + f.slice(1)}
+                  </Button>
+                ))}
+                <span className="text-muted-foreground self-center px-1">|</span>
+                {["all", "a1", "a2", "a3"].map(p => (
+                  <Button key={p} variant={pathFilter === p ? "default" : "outline"} size="sm" onClick={() => setPathFilter(p)}>
+                    {p === "all" ? "All Paths" : p.toUpperCase()}
                   </Button>
                 ))}
               </div>
@@ -312,6 +327,7 @@ const Admin = () => {
                     <th className="p-2">Name</th>
                     <th className="p-2">Email</th>
                     <th className="p-2 hidden sm:table-cell">Phone</th>
+                    <th className="p-2">Path</th>
                     <th className="p-2">Best Score</th>
                     <th className="p-2">Status</th>
                     <th className="p-2 hidden sm:table-cell">Attempts</th>
@@ -334,6 +350,9 @@ const Admin = () => {
                           </td>
                           <td className="p-2 text-muted-foreground">{group.email}</td>
                           <td className="p-2 hidden sm:table-cell text-muted-foreground">{group.latest.phone}</td>
+                          <td className="p-2">
+                            <Badge variant="outline">{group.path ? group.path.toUpperCase() : "—"}</Badge>
+                          </td>
                           <td className="p-2">{group.bestScore != null ? `${group.bestScore}%` : "—"}</td>
                           <td className="p-2">{renderStatusBadge(group.rolledStatus)}</td>
                           <td className="p-2 hidden sm:table-cell">{group.totalAttempts}</td>
@@ -346,7 +365,7 @@ const Admin = () => {
                         </tr>
                         {isExpanded && (
                           <tr className="border-b">
-                            <td colSpan={8} className="p-0">
+                            <td colSpan={9} className="p-0">
                               <div className="my-2 ml-4 overflow-hidden rounded-lg border border-primary/15 bg-primary/5">
                                 <table className="w-full text-xs">
                                   <thead>
@@ -378,7 +397,7 @@ const Admin = () => {
                     );
                   })}
                   {filteredContractorGroups.length === 0 && (
-                    <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">No contractors found</td></tr>
+                    <tr><td colSpan={9} className="p-8 text-center text-muted-foreground">No contractors found</td></tr>
                   )}
                 </tbody>
               </table>

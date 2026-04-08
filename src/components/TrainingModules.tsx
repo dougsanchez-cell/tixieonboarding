@@ -13,7 +13,7 @@ interface Module {
   accent: string | null; light: string | null; duration: string | null;
   video_url: string | null; sections: Section[]; comprehension_questions: CompQuestion[];
 }
-interface TrainingModulesProps { onComplete: () => void; demoMode?: boolean; }
+interface TrainingModulesProps { onComplete: () => void; demoMode?: boolean; userPath?: string | null; }
 
 declare global { interface Window { YT: any; onYouTubeIframeAPIReady: (() => void) | undefined; } }
 
@@ -34,7 +34,7 @@ function loadYTApi(cb: () => void) {
 const isSupabaseVideo = (url: string) => url.includes("supabase.co");
 const isYouTubeVideo = (url: string) => url.includes("youtube.com") || url.includes("youtu.be");
 
-const TrainingModules = ({ onComplete, demoMode = false }: TrainingModulesProps) => {
+const TrainingModules = ({ onComplete, demoMode = false, userPath = null }: TrainingModulesProps) => {
   const [modules, setModules] = useState<Module[]>([]);
   const [activeModule, setActiveModule] = useState(0);
   const [completed, setCompleted] = useState<Set<number>>(new Set());
@@ -168,24 +168,26 @@ const TrainingModules = ({ onComplete, demoMode = false }: TrainingModulesProps)
 
   const isCompleted = completed.has(current.module_number);
   const hasVideo = !!current.video_url;
-  const isSupabase = hasVideo && isSupabaseVideo(current.video_url!);
-  const isYT = hasVideo && isYouTubeVideo(current.video_url!);
+  const hideVideo = userPath === "a1" && current.module_number === 2;
+  const effectiveHasVideo = hasVideo && !hideVideo;
+  const isSupabase = effectiveHasVideo && isSupabaseVideo(current.video_url!);
+  const isYT = effectiveHasVideo && isYouTubeVideo(current.video_url!);
   const hasQuiz = current.comprehension_questions && current.comprehension_questions.length > 0;
 
   const supabaseVideoGateMet = demoMode || (isSupabase ? videoComplete.has(current.module_number) : true);
   const ytProgress = ytVideoProgress[current.module_number] || 0;
   const ytVideoGateMet = demoMode || (isYT ? ytProgress >= 100 : true);
   const videoGateMet = supabaseVideoGateMet && ytVideoGateMet;
-  const textGateMet = demoMode || (hasVideo ? true : countdown === 0 && hasScrolledBottom);
+  const textGateMet = demoMode || (effectiveHasVideo ? true : countdown === 0 && hasScrolledBottom);
   const quizGateMet = demoMode || (hasQuiz ? quizPassed.has(current.module_number) : true);
   const canComplete = demoMode ? !isCompleted : (videoGateMet && textGateMet && hasScrolledBottom && quizGateMet && !isCompleted);
   const showQuizAndComplete = demoMode || (isSupabase ? supabaseVideoGateMet : true);
 
   const getButtonLabel = () => {
     if (isYT && ytProgress < 100) return `Watch video (${ytProgress}% watched)`;
-    if (hasVideo && !hasScrolledBottom) return "Scroll to the end";
-    if (!hasVideo && countdown > 0) return `Available in ${countdown}s`;
-    if (!hasVideo && !hasScrolledBottom) return "Scroll to the end";
+    if (effectiveHasVideo && !hasScrolledBottom) return "Scroll to the end";
+    if (!effectiveHasVideo && countdown > 0) return `Available in ${countdown}s`;
+    if (!effectiveHasVideo && !hasScrolledBottom) return "Scroll to the end";
     if (hasQuiz && !quizGateMet) return "Answer all questions correctly";
     return "Mark as Complete ✓";
   };
@@ -193,9 +195,9 @@ const TrainingModules = ({ onComplete, demoMode = false }: TrainingModulesProps)
   const getHintText = () => {
     if (isCompleted) return null;
     if (isYT && ytProgress < 100) return `Video progress: ${ytProgress}% watched — you must watch the full video to continue`;
-    if (hasVideo && !hasScrolledBottom) return "Scroll to the end to continue";
-    if (!hasVideo && countdown > 0) return null;
-    if (!hasVideo && !hasScrolledBottom) return "Scroll to the end to continue";
+    if (effectiveHasVideo && !hasScrolledBottom) return "Scroll to the end to continue";
+    if (!effectiveHasVideo && countdown > 0) return null;
+    if (!effectiveHasVideo && !hasScrolledBottom) return "Scroll to the end to continue";
     if (hasQuiz && !quizGateMet) return "Answer all comprehension questions correctly to continue";
     return null;
   };
@@ -203,6 +205,12 @@ const TrainingModules = ({ onComplete, demoMode = false }: TrainingModulesProps)
   return (
     <div className="min-h-screen py-6 px-4" style={{ background: "#1C1D2E" }}>
       <div className="max-w-4xl mx-auto animate-fade-in">
+        {/* A3 guided banner */}
+        {userPath === "a3" && (
+          <div className="mb-4 px-4 py-3 rounded-xl text-sm" style={{ background: "#1E3A5F", color: "#93C5FD", border: "1px solid #2563EB" }}>
+            📋 You're enrolled in guided onboarding — your 1-hour session with the Jomero team will be scheduled before you begin purchasing.
+          </div>
+        )}
         {/* Header */}
         <div className="flex items-center gap-3 mb-6 justify-center">
           
@@ -256,7 +264,14 @@ const TrainingModules = ({ onComplete, demoMode = false }: TrainingModulesProps)
           <div ref={cardContentRef} className="max-h-[60vh] overflow-y-auto px-6 pb-6">
             <div className="space-y-6 pt-2">
               {/* Video */}
-              {isSupabase ? (
+              {hideVideo ? (
+                <div className="rounded-lg flex items-center justify-center py-12" style={{ background: "#22233A", border: "1px dashed #3A3B50" }}>
+                  <div className="text-center" style={{ color: "#9898B0" }}>
+                    <PlayCircle className="w-10 h-10 mx-auto mb-2 opacity-40" />
+                    <p className="text-sm">Video walkthrough coming soon</p>
+                  </div>
+                </div>
+              ) : isSupabase ? (
                 <div style={{ background: "#0D0E1A", borderRadius: "12px", overflow: "hidden" }}>
                   <CustomVideoPlayer
                     src={current.video_url!}
