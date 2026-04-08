@@ -35,6 +35,7 @@ const isSupabaseVideo = (url: string) => url.includes("supabase.co");
 const isYouTubeVideo = (url: string) => url.includes("youtube.com") || url.includes("youtu.be");
 
 const TrainingModules = ({ onComplete, demoMode = false, userPath = null }: TrainingModulesProps) => {
+  const [a3BannerDismissed, setA3BannerDismissed] = useState(false);
   const [modules, setModules] = useState<Module[]>([]);
   const [activeModule, setActiveModule] = useState(0);
   const [completed, setCompleted] = useState<Set<number>>(new Set());
@@ -206,9 +207,10 @@ const TrainingModules = ({ onComplete, demoMode = false, userPath = null }: Trai
     <div className="min-h-screen py-6 px-4" style={{ background: "#1C1D2E" }}>
       <div className="max-w-4xl mx-auto animate-fade-in">
         {/* A3 guided banner */}
-        {userPath === "a3" && (
-          <div className="mb-4 px-4 py-3 rounded-xl text-sm" style={{ background: "#1E3A5F", color: "#93C5FD", border: "1px solid #2563EB" }}>
-            📋 You're enrolled in guided onboarding — your 1-hour session with the Jomero team will be scheduled before you begin purchasing.
+        {userPath === "a3" && !a3BannerDismissed && (
+          <div className="mb-4 px-4 py-3 rounded-xl text-sm flex items-center justify-between" style={{ background: "#E6F1FB", color: "#0C447C", border: "1px solid #B3D4F0" }}>
+            <span>📋 You're enrolled in guided onboarding — your 1-hour session with the Jomero team will be scheduled before you begin purchasing.</span>
+            <button onClick={() => setA3BannerDismissed(true)} className="ml-3 font-bold text-lg leading-none opacity-60 hover:opacity-100" style={{ color: "#0C447C" }}>✕</button>
           </div>
         )}
         {/* Header */}
