@@ -364,7 +364,7 @@ const Admin = () => {
                         </tr>
                         {isExpanded && (
                           <tr className="border-b">
-                            <td colSpan={8} className="p-0">
+                            <td colSpan={9} className="p-0">
                               <div className="my-2 ml-4 overflow-hidden rounded-lg border border-primary/15 bg-primary/5">
                                 <table className="w-full text-xs">
                                   <thead>
@@ -396,7 +396,7 @@ const Admin = () => {
                     );
                   })}
                   {filteredContractorGroups.length === 0 && (
-                    <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">No contractors found</td></tr>
+                    <tr><td colSpan={9} className="p-8 text-center text-muted-foreground">No contractors found</td></tr>
                   )}
                 </tbody>
               </table>
