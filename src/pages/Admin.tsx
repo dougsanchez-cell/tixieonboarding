@@ -200,12 +200,13 @@ const Admin = () => {
   );
 
   const exportCSV = () => {
-    const rows = [["Name", "Email", "Phone", "Score", "Status", "Attempts", "Date"]];
+    const rows = [["Name", "Email", "Phone", "Path", "Score", "Status", "Attempts", "Date"]];
     exportableContractors.forEach(c => {
       rows.push([
         c.name,
         c.email,
         c.phone,
+        c.path || "",
         String(c.quiz_score ?? ""),
         c.status,
         String(c.quiz_attempts),
