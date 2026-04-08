@@ -3,7 +3,7 @@ import { Check } from "lucide-react";
 const steps = [
   { label: "Register", short: "1" },
   { label: "Training", short: "2" },
-  { label: "AI Chat", short: "3" },
+  { label: "Tixie U", short: "3" },
   { label: "Quiz", short: "4" },
   { label: "Cleared", short: "5" },
 ];
