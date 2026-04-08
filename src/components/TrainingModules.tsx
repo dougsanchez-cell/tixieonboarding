@@ -200,9 +200,17 @@ const TrainingModules = ({ onComplete, demoMode = false, userPath = null }: Trai
     return null;
   };
 
+  const hideVideo = userPath === "a1" && current.module_number === 2;
+
   return (
     <div className="min-h-screen py-6 px-4" style={{ background: "#1C1D2E" }}>
       <div className="max-w-4xl mx-auto animate-fade-in">
+        {/* A3 guided banner */}
+        {userPath === "a3" && (
+          <div className="mb-4 px-4 py-3 rounded-xl text-sm" style={{ background: "#1E3A5F", color: "#93C5FD", border: "1px solid #2563EB" }}>
+            📋 You're enrolled in guided onboarding — your 1-hour session with the Jomero team will be scheduled before you begin purchasing.
+          </div>
+        )}
         {/* Header */}
         <div className="flex items-center gap-3 mb-6 justify-center">
           
