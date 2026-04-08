@@ -81,6 +81,7 @@ const Admin = () => {
   const [opsEmail, setOpsEmail] = useState("ops@jomero.com");
   const [minQuestions, setMinQuestions] = useState("2");
   const [filter, setFilter] = useState("all");
+  const [pathFilter, setPathFilter] = useState("all");
   const [expandedEmail, setExpandedEmail] = useState<string | null>(null);
 
   useEffect(() => {
@@ -134,14 +135,19 @@ const Admin = () => {
           rolledStatus,
           totalAttempts: attempts.length,
           firstRegisteredAt: earliest.created_at,
+          path: latest.path,
         };
       })
       .sort((a, b) => new Date(b.latest.created_at).getTime() - new Date(a.latest.created_at).getTime())
   ), [groupedContractors]);
 
   const filteredContractorGroups = useMemo(
-    () => (filter === "all" ? contractorGroups : contractorGroups.filter(group => group.rolledStatus === filter)),
-    [contractorGroups, filter],
+    () => {
+      let groups = filter === "all" ? contractorGroups : contractorGroups.filter(group => group.rolledStatus === filter);
+      if (pathFilter !== "all") groups = groups.filter(group => group.path === pathFilter);
+      return groups;
+    },
+    [contractorGroups, filter, pathFilter],
   );
 
   const exportableContractors = useMemo(() => {
