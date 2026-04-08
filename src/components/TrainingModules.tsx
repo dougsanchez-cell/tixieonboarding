@@ -167,23 +167,23 @@ const TrainingModules = ({ onComplete, demoMode = false, userPath = null }: Trai
   if (!current) return null;
 
   const isCompleted = completed.has(current.module_number);
-  const hasVideo = !!current.video_url;
-  const isSupabase = hasVideo && isSupabaseVideo(current.video_url!);
-  const isYT = hasVideo && isYouTubeVideo(current.video_url!);
+  const effectiveHasVideo = hasVideo && !hideVideo;
+  const isSupabase = effectiveHasVideo && isSupabaseVideo(current.video_url!);
+  const isYT = effectiveHasVideo && isYouTubeVideo(current.video_url!);
   const hasQuiz = current.comprehension_questions && current.comprehension_questions.length > 0;
 
   const supabaseVideoGateMet = demoMode || (isSupabase ? videoComplete.has(current.module_number) : true);
   const ytProgress = ytVideoProgress[current.module_number] || 0;
   const ytVideoGateMet = demoMode || (isYT ? ytProgress >= 100 : true);
   const videoGateMet = supabaseVideoGateMet && ytVideoGateMet;
-  const textGateMet = demoMode || (hasVideo ? true : countdown === 0 && hasScrolledBottom);
+  const textGateMet = demoMode || (effectiveHasVideo ? true : countdown === 0 && hasScrolledBottom);
   const quizGateMet = demoMode || (hasQuiz ? quizPassed.has(current.module_number) : true);
   const canComplete = demoMode ? !isCompleted : (videoGateMet && textGateMet && hasScrolledBottom && quizGateMet && !isCompleted);
   const showQuizAndComplete = demoMode || (isSupabase ? supabaseVideoGateMet : true);
 
   const getButtonLabel = () => {
     if (isYT && ytProgress < 100) return `Watch video (${ytProgress}% watched)`;
-    if (hasVideo && !hasScrolledBottom) return "Scroll to the end";
+    if (effectiveHasVideo && !hasScrolledBottom) return "Scroll to the end";
     if (!hasVideo && countdown > 0) return `Available in ${countdown}s`;
     if (!hasVideo && !hasScrolledBottom) return "Scroll to the end";
     if (hasQuiz && !quizGateMet) return "Answer all questions correctly";
