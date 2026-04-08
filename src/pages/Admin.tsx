@@ -302,10 +302,16 @@ const Admin = () => {
 
           <TabsContent value="contractors">
             <div className="mb-4 flex items-center justify-between gap-2 flex-wrap">
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {["all", "cleared", "failed", "in_progress"].map(f => (
                   <Button key={f} variant={filter === f ? "default" : "outline"} size="sm" onClick={() => setFilter(f)}>
                     {f === "all" ? "All" : f === "in_progress" ? "In Progress" : f.charAt(0).toUpperCase() + f.slice(1)}
+                  </Button>
+                ))}
+                <span className="text-muted-foreground self-center px-1">|</span>
+                {["all", "a1", "a2", "a3"].map(p => (
+                  <Button key={p} variant={pathFilter === p ? "default" : "outline"} size="sm" onClick={() => setPathFilter(p)}>
+                    {p === "all" ? "All Paths" : p.toUpperCase()}
                   </Button>
                 ))}
               </div>
@@ -320,6 +326,7 @@ const Admin = () => {
                     <th className="p-2">Name</th>
                     <th className="p-2">Email</th>
                     <th className="p-2 hidden sm:table-cell">Phone</th>
+                    <th className="p-2">Path</th>
                     <th className="p-2">Best Score</th>
                     <th className="p-2">Status</th>
                     <th className="p-2 hidden sm:table-cell">Attempts</th>
