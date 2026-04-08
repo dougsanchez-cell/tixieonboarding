@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import TixieHeader from "@/components/TixieHeader";
 import ProgressBar from "@/components/ProgressBar";
 import RegistrationStep from "@/components/RegistrationStep";
