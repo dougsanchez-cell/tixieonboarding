@@ -349,6 +349,9 @@ const Admin = () => {
                           </td>
                           <td className="p-2 text-muted-foreground">{group.email}</td>
                           <td className="p-2 hidden sm:table-cell text-muted-foreground">{group.latest.phone}</td>
+                          <td className="p-2">
+                            <Badge variant="outline">{group.path ? group.path.toUpperCase() : "—"}</Badge>
+                          </td>
                           <td className="p-2">{group.bestScore != null ? `${group.bestScore}%` : "—"}</td>
                           <td className="p-2">{renderStatusBadge(group.rolledStatus)}</td>
                           <td className="p-2 hidden sm:table-cell">{group.totalAttempts}</td>
