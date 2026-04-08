@@ -264,7 +264,14 @@ const TrainingModules = ({ onComplete, demoMode = false, userPath = null }: Trai
           <div ref={cardContentRef} className="max-h-[60vh] overflow-y-auto px-6 pb-6">
             <div className="space-y-6 pt-2">
               {/* Video */}
-              {isSupabase ? (
+              {hideVideo ? (
+                <div className="rounded-lg flex items-center justify-center py-12" style={{ background: "#22233A", border: "1px dashed #3A3B50" }}>
+                  <div className="text-center" style={{ color: "#9898B0" }}>
+                    <PlayCircle className="w-10 h-10 mx-auto mb-2 opacity-40" />
+                    <p className="text-sm">Video walkthrough coming soon</p>
+                  </div>
+                </div>
+              ) : isSupabase ? (
                 <div style={{ background: "#0D0E1A", borderRadius: "12px", overflow: "hidden" }}>
                   <CustomVideoPlayer
                     src={current.video_url!}
