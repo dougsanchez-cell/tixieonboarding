@@ -173,9 +173,9 @@ const TOPICS: TopicCard[] = [
   },
 ];
 
-interface AIChatStepProps { onComplete: () => void; demoMode?: boolean; }
+interface AIChatStepProps { onComplete: () => void; demoMode?: boolean; userPath?: string | null; }
 
-const AIChatStep = ({ onComplete, demoMode = false }: AIChatStepProps) => {
+const AIChatStep = ({ onComplete, demoMode = false, userPath = null }: AIChatStepProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
