@@ -121,6 +121,10 @@ const TrainingModules = ({ onComplete, demoMode = false, userPath = null }: Trai
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [activeModule, modules, completed]);
 
+  useEffect(() => {
+    setGuideCompleted(false);
+  }, [activeModule]);
+
   const handleScroll = useCallback(() => {
     const el = cardContentRef.current;
     if (!el) return;
@@ -185,7 +189,7 @@ const TrainingModules = ({ onComplete, demoMode = false, userPath = null }: Trai
   const quizGateMet = demoMode || (hasQuiz ? quizPassed.has(current.module_number) : true);
   const canComplete = demoMode ? !isCompleted : (videoGateMet && textGateMet && hasScrolledBottom && quizGateMet && !isCompleted);
   const isModule2 = current.module_number === 2;
-  const guideGateMet = demoMode || !isModule2 || guideCompleted;
+  const guideGateMet = demoMode || !hideVideo || guideCompleted;
   const showQuizAndComplete = demoMode || ((isSupabase ? supabaseVideoGateMet : true) && guideGateMet);
 
   const getButtonLabel = () => {
@@ -271,7 +275,7 @@ const TrainingModules = ({ onComplete, demoMode = false, userPath = null }: Trai
             <div className="space-y-6 pt-2">
               {/* Video */}
               {/* Purchasing Guide for Module 2 */}
-              {isModule2 && (
+              {isModule2 && hideVideo && (
                 <PurchasingGuide
                   completed={guideCompleted}
                   onComplete={() => setGuideCompleted(true)}
