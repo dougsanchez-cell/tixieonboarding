@@ -9,7 +9,9 @@ import NotFound from "./pages/NotFound.tsx";
 
 const Admin = lazy(() => import("./pages/Admin.tsx"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: 1 } },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
