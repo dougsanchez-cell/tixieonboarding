@@ -29,7 +29,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {demoMode && (
-        <DemoModeBanner onExit={() => setDemoMode(false)} />
+        <DemoModeBanner onExit={() => setDemoMode(false)} userPath={userPath} />
       )}
       <div className={`max-w-5xl mx-auto ${demoMode ? "pt-8" : ""}`}>
         <TixieHeader />
