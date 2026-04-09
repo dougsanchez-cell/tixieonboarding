@@ -99,7 +99,7 @@ const CompletionStep = ({ name, email, score, contractorId, userPath = null }: C
             <div className="flex gap-3 items-start p-3 rounded-xl" style={{ background: "#1A2A3A", border: "1px solid #B3D4F0" }}>
               <span className="text-lg shrink-0">📞</span>
               <span style={{ color: "#7BC8F6" }}>
-                <strong className="text-white">Next step:</strong> A Jomero team member will reach out to schedule your 1-hour guided session with Kay before you begin live purchasing.
+                <strong className="text-white">Next step:</strong> A Jomero team member will reach out to schedule your 1-hour guided session before you begin live purchasing.
               </span>
             </div>
           )}
