@@ -266,15 +266,7 @@ const TrainingModules = ({ onComplete, demoMode = false, userPath = null }: Trai
           <div ref={cardContentRef} className="max-h-[60vh] overflow-y-auto px-6 pb-6">
             <div className="space-y-6 pt-2">
               {/* Video */}
-              {hideVideo ? (
-                <div className="rounded-lg flex items-center justify-center py-12" style={{ background: "#22233A", border: "1px dashed #3A3B50" }}>
-                  <div className="text-center" style={{ color: "#9898B0" }}>
-                    <BookOpen className="w-10 h-10 mx-auto mb-2 opacity-40" />
-                    <p className="text-sm font-semibold text-white">📖 Text-based module</p>
-                    <p className="text-xs mt-1">Read through the content below carefully, then answer the comprehension questions to continue.</p>
-                  </div>
-                </div>
-              ) : isSupabase ? (
+              {hideVideo ? null : isSupabase ? (
                 <div style={{ background: "#0D0E1A", borderRadius: "12px", overflow: "hidden" }}>
                   <CustomVideoPlayer
                     src={current.video_url!}
