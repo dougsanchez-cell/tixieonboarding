@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ComprehensionQuiz from "@/components/ComprehensionQuiz";
 import CustomVideoPlayer from "@/components/CustomVideoPlayer";
+import PurchasingGuide from "@/components/PurchasingGuide";
 
 interface Section { heading: string; body: string; }
 interface CompQuestion { q: string; options: string[]; correct: number; }
@@ -46,6 +47,7 @@ const TrainingModules = ({ onComplete, demoMode = false, userPath = null }: Trai
   const [videoComplete, setVideoComplete] = useState<Set<number>>(new Set());
   const [quizPassed, setQuizPassed] = useState<Set<number>>(new Set());
   const [ytVideoProgress, setYtVideoProgress] = useState<Record<number, number>>({});
+  const [guideCompleted, setGuideCompleted] = useState(false);
   const cardContentRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const playerRef = useRef<any>(null);
@@ -182,7 +184,9 @@ const TrainingModules = ({ onComplete, demoMode = false, userPath = null }: Trai
   const textGateMet = demoMode || (effectiveHasVideo ? true : countdown === 0 && hasScrolledBottom);
   const quizGateMet = demoMode || (hasQuiz ? quizPassed.has(current.module_number) : true);
   const canComplete = demoMode ? !isCompleted : (videoGateMet && textGateMet && hasScrolledBottom && quizGateMet && !isCompleted);
-  const showQuizAndComplete = demoMode || (isSupabase ? supabaseVideoGateMet : true);
+  const isModule2 = current.module_number === 2;
+  const guideGateMet = demoMode || !isModule2 || guideCompleted;
+  const showQuizAndComplete = demoMode || ((isSupabase ? supabaseVideoGateMet : true) && guideGateMet);
 
   const getButtonLabel = () => {
     if (isYT && ytProgress < 100) return `Watch video (${ytProgress}% watched)`;
@@ -266,6 +270,15 @@ const TrainingModules = ({ onComplete, demoMode = false, userPath = null }: Trai
           <div ref={cardContentRef} className="max-h-[60vh] overflow-y-auto px-6 pb-6">
             <div className="space-y-6 pt-2">
               {/* Video */}
+              {/* Purchasing Guide for Module 2 */}
+              {isModule2 && (
+                <PurchasingGuide
+                  completed={guideCompleted}
+                  onComplete={() => setGuideCompleted(true)}
+                  demoMode={demoMode}
+                />
+              )}
+
               {hideVideo ? null : isSupabase ? (
                 <div style={{ background: "#0D0E1A", borderRadius: "12px", overflow: "hidden" }}>
                   <CustomVideoPlayer
