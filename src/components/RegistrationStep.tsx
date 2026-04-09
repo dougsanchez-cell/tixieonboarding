@@ -110,9 +110,17 @@ const RegistrationStep = ({ onComplete, demoMode = false, userPath = null }: Reg
       >
         <div className="w-full max-w-md">
           <h2 className="text-xl font-bold text-white mb-2">Let's get you set up</h2>
-          <p className="text-sm mb-8" style={{ color: "#9898B0" }}>
+          <p className="text-sm mb-4" style={{ color: "#9898B0" }}>
             Complete this orientation to get cleared for live purchasing
           </p>
+
+          {userPath === "a3" && (
+            <div className="mb-6 px-4 py-3 rounded-xl text-sm flex items-start gap-3"
+                 style={{ background: "#1A2A3A", border: "1px solid #B3D4F0", color: "#7BC8F6" }}>
+              <span className="text-base shrink-0">📋</span>
+              <span>You're on the <strong className="text-white">guided onboarding path</strong> — complete this orientation, then a Jomero team member will schedule your 1-hour session with Kay before your first live session.</span>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {[
