@@ -62,7 +62,7 @@ const CompletionStep = ({ name, email, score, contractorId }: CompletionStepProp
       </div>
 
       <h1 className="text-4xl font-black text-white text-center z-10 mb-2 animate-fade-in" style={{ animationDelay: "0.3s" }}>
-        {firstName}, you're cleared! 🎉
+        Congratulations {firstName}! 🎉
       </h1>
       <p className="text-center z-10 mb-8 animate-fade-in" style={{ color: "#9898B0", animationDelay: "0.4s" }}>
         Your status has been updated and the ops team has been notified.
@@ -91,10 +91,6 @@ const CompletionStep = ({ name, email, score, contractorId }: CompletionStepProp
       <div className="rounded-2xl p-6 w-full max-w-lg z-10 animate-fade-in" style={{ background: "#2A2B3D", border: "1px solid #3A3B50", animationDelay: "0.6s" }}>
         <h2 className="font-bold text-lg mb-4 text-white">What happens next</h2>
         <div className="space-y-3 text-sm" style={{ color: "#9898B0" }}>
-          <div className="flex gap-3 items-start">
-            <Mail className="w-5 h-5 shrink-0 mt-0.5" style={{ color: "#8B50CC" }} />
-            <span>Check <strong className="text-white">{email}</strong> for your Tixie login credentials</span>
-          </div>
           <div className="flex gap-3 items-start">
             <Terminal className="w-5 h-5 shrink-0 mt-0.5" style={{ color: "#8B50CC" }} />
             <span>Install Tixie via Terminal if you haven't already (Module 1)</span>
