@@ -105,7 +105,7 @@ const CompletionStep = ({ name, email, score, contractorId }: CompletionStepProp
           </div>
           <div className="flex gap-3 items-start">
             <HelpCircle className="w-5 h-5 shrink-0 mt-0.5" style={{ color: "#4CAF82" }} />
-            <span>Questions? Reach out to the Jomero team</span>
+            <span>Questions? Email <a href="mailto:gigsupport@jomero.co" className="underline" style={{ color: "#8B50CC" }}>gigsupport@jomero.co</a></span>
           </div>
         </div>
       </div>

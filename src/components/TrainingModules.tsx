@@ -269,8 +269,9 @@ const TrainingModules = ({ onComplete, demoMode = false, userPath = null }: Trai
               {hideVideo ? (
                 <div className="rounded-lg flex items-center justify-center py-12" style={{ background: "#22233A", border: "1px dashed #3A3B50" }}>
                   <div className="text-center" style={{ color: "#9898B0" }}>
-                    <PlayCircle className="w-10 h-10 mx-auto mb-2 opacity-40" />
-                    <p className="text-sm">Video walkthrough coming soon</p>
+                    <BookOpen className="w-10 h-10 mx-auto mb-2 opacity-40" />
+                    <p className="text-sm font-semibold text-white">📖 Text-based module</p>
+                    <p className="text-xs mt-1">Read through the content below carefully, then answer the comprehension questions to continue.</p>
                   </div>
                 </div>
               ) : isSupabase ? (
