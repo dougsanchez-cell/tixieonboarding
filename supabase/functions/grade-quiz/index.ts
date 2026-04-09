@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": Deno.env.get("ALLOWED_ORIGIN") || "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
@@ -32,7 +32,6 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Fetch questions with correct answers (server-side only)
     const { data: questions, error: qError } = await supabaseAdmin
       .from("quiz_questions")
       .select("*")
@@ -42,7 +41,6 @@ Deno.serve(async (req) => {
       throw new Error(qError?.message || "Failed to load questions");
     }
 
-    // Fetch pass threshold
     const { data: configData } = await supabaseAdmin
       .from("app_config")
       .select("value")
@@ -51,7 +49,6 @@ Deno.serve(async (req) => {
 
     const passThreshold = parseInt(configData?.value || "80") || 80;
 
-    // Grade
     let correct = 0;
     const results: Record<number, { correct: boolean; correct_index: number; explanation: string | null }> = {};
 
@@ -69,7 +66,6 @@ Deno.serve(async (req) => {
     const pct = Math.round((correct / questions.length) * 100);
     const passed = pct >= passThreshold;
 
-    // Get current attempts
     const { data: contractor } = await supabaseAdmin
       .from("contractors")
       .select("quiz_attempts")
@@ -78,7 +74,6 @@ Deno.serve(async (req) => {
 
     const newAttempts = (contractor?.quiz_attempts || 0) + 1;
 
-    // Update contractor
     const updateData: Record<string, unknown> = {
       quiz_score: pct,
       quiz_attempts: newAttempts,

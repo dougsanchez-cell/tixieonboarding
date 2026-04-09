@@ -8,9 +8,10 @@ interface CompletionStepProps {
   score: number;
   contractorId: string;
   userPath?: string | null;
+  moduleCount?: number;
 }
 
-const CompletionStep = ({ name, email, score, contractorId, userPath = null }: CompletionStepProps) => {
+const CompletionStep = ({ name, email, score, contractorId, userPath = null, moduleCount = 3 }: CompletionStepProps) => {
   const firstName = name.split(" ")[0];
   const isA3 = userPath === "a3";
 
@@ -76,7 +77,7 @@ const CompletionStep = ({ name, email, score, contractorId, userPath = null }: C
       <div className="grid grid-cols-3 gap-3 mb-8 w-full max-w-lg z-10 animate-fade-in" style={{ animationDelay: "0.5s" }}>
         {[
           { icon: "🏆", value: `${score}%`, label: "Quiz Score" },
-          { icon: "📚", value: "3/3", label: "Modules" },
+          { icon: "📚", value: `${moduleCount}/${moduleCount}`, label: "Modules" },
           { icon: "✅", value: "Cleared", label: "Status" },
         ].map((card) => (
           <div

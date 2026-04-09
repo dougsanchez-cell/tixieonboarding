@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { BookOpen, ChevronRight, Check } from "lucide-react";
+import DOMPurify from "dompurify";
 
 interface PurchasingGuideProps {
   completed: boolean;
@@ -146,7 +147,7 @@ const PurchasingGuide = ({ completed, onComplete, demoMode = false }: Purchasing
                 <p
                   className="text-sm leading-relaxed mt-1"
                   style={{ color: "#9898B0" }}
-                  dangerouslySetInnerHTML={{ __html: section.body }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(section.body) }}
                 />
               </div>
             </div>

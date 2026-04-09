@@ -22,7 +22,7 @@ const RegistrationStep = ({ onComplete, demoMode = false, userPath = null }: Reg
     const id = crypto.randomUUID();
     const demoData = { id, name: "Demo User", email: "demo@jomero.co", phone: "5550000000" };
     try {
-      await supabase.from("contractors").insert({ ...demoData, path: userPath } as any);
+      await supabase.from("contractors").insert({ ...demoData, path: userPath });
     } catch {}
     onComplete(demoData);
   };
@@ -44,7 +44,7 @@ const RegistrationStep = ({ onComplete, demoMode = false, userPath = null }: Reg
       const id = crypto.randomUUID();
       const { error } = await supabase
         .from("contractors")
-        .insert({ id, name: name.trim(), email: email.trim(), phone: phone.trim(), path: userPath } as any);
+        .insert({ id, name: name.trim(), email: email.trim(), phone: phone.trim(), path: userPath });
       if (error) throw error;
       onComplete({ id, name: name.trim(), email: email.trim(), phone: phone.trim() });
     } catch {
