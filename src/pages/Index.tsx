@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import TixieHeader from "@/components/TixieHeader";
 import ProgressBar from "@/components/ProgressBar";
 import RegistrationStep from "@/components/RegistrationStep";
@@ -20,12 +21,19 @@ const Index = () => {
   const [contractor, setContractor] = useState<Contractor | null>(null);
   const [finalScore, setFinalScore] = useState(0);
   const [a3BannerDismissed, setA3BannerDismissed] = useState(false);
+  const [moduleCount, setModuleCount] = useState(3);
   const [demoMode, setDemoMode] = useState(() => {
     return new URLSearchParams(window.location.search).get("demo") === "true";
   });
   const [userPath] = useState<string | null>(() => {
     return new URLSearchParams(window.location.search).get("path");
   });
+
+  useEffect(() => {
+    supabase.from("content_modules").select("id", { count: "exact", head: true }).then(({ count }) => {
+      if (count) setModuleCount(count);
+    });
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -74,6 +82,7 @@ const Index = () => {
               score={finalScore}
               contractorId={contractor.id}
               userPath={userPath}
+              moduleCount={moduleCount}
             />
           )}
         </div>

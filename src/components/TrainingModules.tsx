@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import DOMPurify from "dompurify";
 
 import { Check, PlayCircle, BookOpen, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -84,7 +85,7 @@ const TrainingModules = ({ onComplete, demoMode = false, userPath = null }: Trai
         if (!el) return;
         playerRef.current = new window.YT.Player(playerDivId, {
           videoId,
-          playerVars: { enablejsapi: 1, origin: "https://tixieonboarding.lovable.app", rel: 0 },
+          playerVars: { enablejsapi: 1, origin: window.location.origin, rel: 0 },
           events: {
             onReady: () => {
               pollRef.current = setInterval(() => {
@@ -319,7 +320,7 @@ const TrainingModules = ({ onComplete, demoMode = false, userPath = null }: Trai
                       <p
                         className="text-sm leading-relaxed mt-1 [&_a]:text-[#8B50CC] [&_a]:underline [&_a]:hover:text-[#a76de8]"
                         style={{ color: "#9898B0" }}
-                        dangerouslySetInnerHTML={{ __html: section.body }}
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(section.body) }}
                       />
                     </div>
                   </div>
