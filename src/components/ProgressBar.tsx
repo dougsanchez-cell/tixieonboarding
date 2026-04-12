@@ -10,9 +10,10 @@ const steps = [
 
 interface ProgressBarProps {
   currentStep: number; // 1-5
+  onStepClick?: (step: number) => void;
 }
 
-const ProgressBar = ({ currentStep }: ProgressBarProps) => (
+const ProgressBar = ({ currentStep, onStepClick }: ProgressBarProps) => (
   <div className="flex items-center justify-center gap-1 sm:gap-2 px-4 pb-4">
     {steps.map((step, i) => {
       const stepNum = i + 1;
@@ -24,11 +25,12 @@ const ProgressBar = ({ currentStep }: ProgressBarProps) => (
             <div
               className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
                 isComplete
-                  ? "bg-success text-success-foreground"
+                  ? "bg-success text-success-foreground cursor-pointer hover:ring-2 hover:ring-success/50"
                   : isCurrent
                   ? "bg-primary text-primary-foreground shadow-md"
                   : "bg-muted text-muted-foreground"
               }`}
+              onClick={() => isComplete && onStepClick?.(stepNum)}
             >
               {isComplete ? <Check className="w-4 h-4" /> : step.short}
             </div>
