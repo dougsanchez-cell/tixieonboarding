@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Send, Bot, User, ArrowRight, Search, ChevronRight } from "lucide-react";
+import { Send, Bot, User, ArrowRight, Search, ChevronRight, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Message { role: "user" | "assistant"; content: string; }
@@ -132,6 +132,7 @@ const TOPICS: TopicCard[] = [
         <li>On the seat map, <span className="text-white font-semibold">blue seats</span> are available for purchase — <span style={{ color: "#9898B0" }}>grey seats</span> are unavailable. Only select from the blue seats in your assigned section</li>
         <li><span style={{ color: "#E05555" }} className="font-semibold">NEVER</span> purchase seats labeled: LV (Limited View), OV (Obstructed View), SS (Side Stage), WC (Wheelchair), ADA — unless the Request explicitly states they are acceptable</li>
         <li>When in doubt: use the Select Option dropdown and move to the next request</li>
+        <li>📄 For visual examples of seat maps and section layouts, see the <a href="https://docs.google.com/document/d/1Ngg2ZojvJovk65_5D_d0TWpmj4hbgQXfAVD26M6jhwA/edit" target="_blank" rel="noopener noreferrer" className="text-[#8B50CC] underline hover:text-[#a76de8]">Tixie Tester Guideline</a></li>
       </ul>
     ),
   },
@@ -196,11 +197,23 @@ const TOPICS: TopicCard[] = [
       </div>
     ),
   },
+  {
+    id: 10, icon: "🤖", title: "No Automated Tools Policy", accent: "#E05555",
+    collapsed: "Bots, scripts, and automated purchasing tools are strictly prohibited",
+    content: (
+      <div className="space-y-3 text-sm" style={{ color: "#9898B0" }}>
+        <p>The use of <span className="text-white font-semibold">bots, scripts, browser extensions, or any automated purchasing tools</span> is <span style={{ color: "#E05555" }} className="font-semibold">strictly prohibited</span>.</p>
+        <p>All ticket purchases must be made manually by you. Automated tools undermine the integrity of the purchasing process and violate your contractor agreement.</p>
+        <p className="font-semibold text-white">Violation of this policy will result in immediate termination of your contractor access.</p>
+        <p className="text-xs italic" style={{ color: "#9898B0" }}>By completing this orientation, you acknowledge that you understand and agree to this policy.</p>
+      </div>
+    ),
+  },
 ];
 
-interface AIChatStepProps { onComplete: () => void; demoMode?: boolean; userPath?: string | null; }
+interface AIChatStepProps { onComplete: () => void; onBack?: () => void; demoMode?: boolean; userPath?: string | null; }
 
-const AIChatStep = ({ onComplete, demoMode = false, userPath = null }: AIChatStepProps) => {
+const AIChatStep = ({ onComplete, onBack, demoMode = false, userPath = null }: AIChatStepProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -270,6 +283,16 @@ const AIChatStep = ({ onComplete, demoMode = false, userPath = null }: AIChatSte
   return (
     <div className="min-h-screen py-6 px-4 flex flex-col items-center" style={{ background: "#1C1D2E" }}>
       <div className="w-full max-w-4xl space-y-6 animate-fade-in">
+
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="flex items-center gap-1 text-sm font-medium transition-colors hover:brightness-125"
+            style={{ color: "#9898B0" }}
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to Training
+          </button>
+        )}
 
         {/* SECTION 1 — Header */}
         <div className="rounded-[16px] p-6" style={{ background: "#2A2B3D", border: "1px solid #3A3B50" }}>

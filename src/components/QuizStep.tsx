@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
-import { Check, X, RotateCcw, Trophy } from "lucide-react";
+import { Check, X, RotateCcw, Trophy, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface Question { id: number; question_number: number; question_text: string; options: string[]; }
 interface GradeResult { correct: boolean; correct_index: number; explanation: string | null; }
-interface QuizStepProps { contractorId: string; onPass: (score: number) => void; demoMode?: boolean; }
+interface QuizStepProps { contractorId: string; onPass: (score: number) => void; onBack?: () => void; demoMode?: boolean; }
 
-const QuizStep = ({ contractorId, onPass, demoMode = false }: QuizStepProps) => {
+const QuizStep = ({ contractorId, onPass, onBack, demoMode = false }: QuizStepProps) => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [submitted, setSubmitted] = useState(false);
@@ -59,6 +59,15 @@ const QuizStep = ({ contractorId, onPass, demoMode = false }: QuizStepProps) => 
   return (
     <div className="min-h-screen py-8 px-4" style={{ background: "#1C1D2E" }}>
       <div className="max-w-3xl mx-auto animate-fade-in">
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="flex items-center gap-1 text-sm font-medium mb-4 transition-colors hover:brightness-125"
+            style={{ color: "#9898B0" }}
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to Tixie U
+          </button>
+        )}
         {/* Header */}
         <div className="text-center mb-6">
           <p className="text-4xl mb-2">📝</p>

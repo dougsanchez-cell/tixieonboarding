@@ -42,7 +42,7 @@ const Index = () => {
       )}
       <div className={`max-w-5xl mx-auto ${demoMode ? "pt-8" : ""}`}>
         <TixieHeader />
-        <ProgressBar currentStep={step} />
+        <ProgressBar currentStep={step} onStepClick={(s) => setStep(s)} />
         <div className="pb-8">
           {step === 1 && (
             <RegistrationStep
@@ -54,8 +54,8 @@ const Index = () => {
               userPath={userPath}
             />
           )}
-          {step === 2 && <TrainingModules onComplete={() => setStep(3)} demoMode={demoMode} userPath={userPath} />}
-          {step === 3 && <AIChatStep onComplete={() => setStep(4)} demoMode={demoMode} userPath={userPath} />}
+          {step === 2 && <TrainingModules onComplete={() => setStep(3)} onBack={() => setStep(1)} demoMode={demoMode} userPath={userPath} />}
+          {step === 3 && <AIChatStep onComplete={() => setStep(4)} onBack={() => setStep(2)} demoMode={demoMode} userPath={userPath} />}
           {step === 4 && contractor && (
             <QuizStep
               contractorId={contractor.id}
@@ -63,6 +63,7 @@ const Index = () => {
                 setFinalScore(score);
                 setStep(5);
               }}
+              onBack={() => setStep(3)}
               demoMode={demoMode}
             />
           )}

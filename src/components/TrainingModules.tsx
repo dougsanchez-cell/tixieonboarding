@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import DOMPurify from "dompurify";
 
-import { Check, PlayCircle, BookOpen, Lock } from "lucide-react";
+import { Check, PlayCircle, BookOpen, Lock, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ComprehensionQuiz from "@/components/ComprehensionQuiz";
@@ -15,7 +15,7 @@ interface Module {
   accent: string | null; light: string | null; duration: string | null;
   video_url: string | null; sections: Section[]; comprehension_questions: CompQuestion[];
 }
-interface TrainingModulesProps { onComplete: () => void; demoMode?: boolean; userPath?: string | null; }
+interface TrainingModulesProps { onComplete: () => void; onBack?: () => void; demoMode?: boolean; userPath?: string | null; }
 
 declare global { interface Window { YT: any; onYouTubeIframeAPIReady: (() => void) | undefined; } }
 
@@ -36,7 +36,7 @@ function loadYTApi(cb: () => void) {
 const isSupabaseVideo = (url: string) => url.includes("supabase.co");
 const isYouTubeVideo = (url: string) => url.includes("youtube.com") || url.includes("youtu.be");
 
-const TrainingModules = ({ onComplete, demoMode = false, userPath = null }: TrainingModulesProps) => {
+const TrainingModules = ({ onComplete, onBack, demoMode = false, userPath = null }: TrainingModulesProps) => {
   const [modules, setModules] = useState<Module[]>([]);
   const [activeModule, setActiveModule] = useState(0);
   const [completed, setCompleted] = useState<Set<number>>(new Set());
@@ -222,6 +222,16 @@ const TrainingModules = ({ onComplete, demoMode = false, userPath = null }: Trai
             <p className="text-xs" style={{ color: "#9898B0" }}>Complete all modules to unlock the AI assistant</p>
           </div>
         </div>
+
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="flex items-center gap-1 text-sm font-medium mb-4 transition-colors hover:brightness-125"
+            style={{ color: "#9898B0" }}
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to Registration
+          </button>
+        )}
 
         {/* Module tabs */}
         <div className="grid grid-cols-3 gap-2 mb-6">
