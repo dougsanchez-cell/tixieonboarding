@@ -20,7 +20,7 @@ const Index = () => {
   const [step, setStep] = useState(1);
   const [contractor, setContractor] = useState<Contractor | null>(null);
   const [finalScore, setFinalScore] = useState(0);
-  const [a3BannerDismissed, setA3BannerDismissed] = useState(false);
+  
   const [moduleCount, setModuleCount] = useState(3);
   const [demoMode, setDemoMode] = useState(() => {
     return new URLSearchParams(window.location.search).get("demo") === "true";
@@ -39,15 +39,6 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {demoMode && (
         <DemoModeBanner onExit={() => setDemoMode(false)} userPath={userPath} />
-      )}
-      {userPath === "a3" && !a3BannerDismissed && (
-        <div className="w-full px-4 py-3 text-sm flex items-center justify-between"
-             style={{ background: "#E6F1FB", color: "#0C447C", borderBottom: "1px solid #B3D4F0" }}>
-          <span>📋 You're on the <strong>guided onboarding path</strong> — a 1-hour session with the Jomero team will be scheduled before you begin live purchasing.</span>
-          <button onClick={() => setA3BannerDismissed(true)}
-                  className="ml-4 font-bold text-lg leading-none opacity-60 hover:opacity-100"
-                  style={{ color: "#0C447C" }}>✕</button>
-        </div>
       )}
       <div className={`max-w-5xl mx-auto ${demoMode ? "pt-8" : ""}`}>
         <TixieHeader />

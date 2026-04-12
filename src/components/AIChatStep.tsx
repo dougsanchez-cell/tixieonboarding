@@ -36,29 +36,51 @@ const GlossaryPill = ({ status, abbr, desc }: { status: "ok" | "warn" | "no"; ab
 
 const TOPICS: TopicCard[] = [
   {
-    id: 1, icon: "⏰", title: "Operating Hours", accent: "#4CAF82",
-    collapsed: "Mon–Fri, 6:00 AM – 12:00 PM PST · Max 1 hour per session",
+    id: 1, icon: "⏰", title: "Hours & Availability", accent: "#4CAF82",
+    collapsed: "Peak hours Mon–Fri 6 AM–12 PM PST · Log in anytime · 10 hr/week max",
     content: (
       <ul className="space-y-2 text-sm" style={{ color: "#9898B0" }}>
-        <li>Sessions run <span className="text-white font-semibold">Monday through Friday, 6:00 AM – 12:00 PM PST</span> only</li>
-        <li>Total session time must not exceed <span className="text-white font-semibold">one hour</span></li>
-        <li>Sessions can be split across multiple shorter windows as long as cumulative time stays under 1 hour</li>
-        <li>You will not receive requests outside these hours</li>
+        <li><span className="text-white font-semibold">Peak demand hours</span> are Monday through Friday, 6:00 AM – 12:00 PM PST — this is when the majority of requests come in</li>
+        <li>You can log in and purchase <span className="text-white font-semibold">anytime</span> — you are not restricted to peak hours</li>
+        <li>Weekly maximum is <span className="text-white font-semibold">10 hours</span> — distribute however you like (e.g. 2 hrs/day across 5 days, or 5 hrs on two days)</li>
+        <li>Request volume outside peak hours may be lower, but you're welcome to log in whenever it works for you</li>
       </ul>
     ),
   },
   {
     id: 2, icon: "⚙️", title: "Installing & Starting Tixie", accent: "#8B50CC",
-    collapsed: "Mac install command + startup flow",
+    collapsed: "Download for Windows or Mac · Security prompts · First launch",
     content: (
-      <ol className="space-y-2 text-sm list-decimal list-inside" style={{ color: "#9898B0" }}>
-        <li>Open Terminal (Finder → search Terminal)</li>
-        <li>Paste and press Return: <code className="text-xs px-2 py-0.5 rounded" style={{ background: "#1C1D2E", color: "#E8E8F0" }}>curl -fsSL https://kraken-app.s3.us-east-2.amazonaws.com/releases/tixie/install-mac.command | bash</code></li>
-        <li>Tixie downloads and launches automatically</li>
-        <li>After login: toggle <span className="text-white font-semibold">"Enable Local Connection"</span> in the top right</li>
-        <li>When a request is ready you'll see a toast notification</li>
-        <li>Click <span className="text-white font-semibold">"Start Purchasing"</span> → wait for seat map to fully load before interacting</li>
-      </ol>
+      <div className="space-y-4 text-sm" style={{ color: "#9898B0" }}>
+        <p>The Tixie app is <span className="text-white font-semibold">not compatible with mobile devices</span> — you'll need a Windows or Mac desktop/laptop.</p>
+
+        <div>
+          <p className="text-white font-semibold mb-1">Step 1: Download Tixie</p>
+          <p>Select the link for your operating system:</p>
+          <ul className="mt-1 space-y-1 ml-4 list-disc">
+            <li>🪟 <span className="text-white">Windows:</span> <a href="https://kraken-app.s3.us-east-2.amazonaws.com/releases/tixie/tixie-setup-win.exe" className="text-[#8B50CC] underline hover:text-[#a76de8]">Download for Windows</a></li>
+            <li>🍎 <span className="text-white">Mac OS — Apple Silicon:</span> <a href="https://kraken-app.s3.us-east-2.amazonaws.com/releases/tixie/tixie-setup-mac-arm64.dmg" className="text-[#8B50CC] underline hover:text-[#a76de8]">Download for Mac (M1, M2, or newer)</a></li>
+            <li>🍎 <span className="text-white">Mac OS — Intel:</span> <a href="https://kraken-app.s3.us-east-2.amazonaws.com/releases/tixie/tixie-setup-mac-x64.dmg" className="text-[#8B50CC] underline hover:text-[#a76de8]">Download for Mac (Intel processor)</a></li>
+          </ul>
+          <p className="mt-1 text-xs italic">Not sure which Mac version? Click the Apple icon (top left of your screen) → "About This Mac" to check your processor.</p>
+        </div>
+
+        <div>
+          <p className="text-white font-semibold mb-1">Step 2: Install</p>
+          <p>Click the downloaded file — the installer will begin automatically.</p>
+          <ul className="mt-1 space-y-1 ml-4 list-disc">
+            <li><span className="text-white">Windows:</span> You may see a blue "Windows protected your PC" popup. Click "More info" → then "Run anyway"</li>
+            <li><span className="text-white">Mac:</span> You may see "app can't be opened because it is from an unidentified developer." Go to System Settings → Privacy & Security → under "Allow applications from," select "App Store and known developers"</li>
+          </ul>
+        </div>
+
+        <div>
+          <p className="text-white font-semibold mb-1">Step 3: Open & log in</p>
+          <p>Open the Tixie app and log in with the credentials provided by our team. If prompted, allow any necessary permissions so the app can function properly.</p>
+        </div>
+
+        <p>Having trouble installing? Email <a href="mailto:gigsupport@jomero.co" className="text-[#8B50CC] underline hover:text-[#a76de8]">gigsupport@jomero.co</a> and we'll help you get set up.</p>
+      </div>
     ),
   },
   {
@@ -66,7 +88,7 @@ const TOPICS: TopicCard[] = [
     collapsed: "Request ID, Section, After Fees, Before Fees, Select Option",
     content: (
       <ul className="space-y-2 text-sm" style={{ color: "#9898B0" }}>
-        <li><span className="text-white font-semibold">Request ID</span> — click the icon to copy it. Always copy this before reporting any issue</li>
+        <li><span className="text-white font-semibold">Request ID</span> — identifies the request. Copy this if you need to report an issue</li>
         <li><span className="text-white font-semibold">Section</span> — the exact section to purchase in (e.g. "sec 213/202")</li>
         <li><span className="text-white font-semibold">After Fees</span> — your maximum per-ticket price including all fees</li>
         <li><span className="text-white font-semibold">Before Fees</span> — face value per ticket only</li>
@@ -106,7 +128,8 @@ const TOPICS: TopicCard[] = [
     collapsed: "Closer to stage is better · Never buy LV, OV, SS, WC, ADA",
     content: (
       <ul className="space-y-2 text-sm" style={{ color: "#9898B0" }}>
-        <li>Closer to the stage is <span className="text-white font-semibold">ALWAYS</span> better — prioritize the best available view</li>
+        <li>Think about it from a <span className="text-white font-semibold">fan's perspective</span> — within the requested section, pick the seats you'd want if you were attending the show. Closer to the stage is always better</li>
+        <li>On the seat map, <span className="text-white font-semibold">blue seats</span> are available for purchase — <span style={{ color: "#9898B0" }}>grey seats</span> are unavailable. Only select from the blue seats in your assigned section</li>
         <li><span style={{ color: "#E05555" }} className="font-semibold">NEVER</span> purchase seats labeled: LV (Limited View), OV (Obstructed View), SS (Side Stage), WC (Wheelchair), ADA — unless the Request explicitly states they are acceptable</li>
         <li>When in doubt: use the Select Option dropdown and move to the next request</li>
       </ul>
@@ -126,6 +149,7 @@ const TOPICS: TopicCard[] = [
         <GlossaryPill status="ok" abbr="IV" desc="In-View, clear sightline (good)" />
         <GlossaryPill status="ok" abbr="SRO" desc="Standing Room Only (OK to buy)" />
         <GlossaryPill status="ok" abbr="Clubs / Loges" desc="Premium indoor sections (OK to buy)" />
+        <GlossaryPill status="ok" abbr="Uppers" desc="Upper-level seating, furthest from stage (OK to buy)" />
         <GlossaryPill status="warn" abbr="LV" desc="Limited View (avoid unless stated)" />
         <GlossaryPill status="warn" abbr="OV" desc="Obstructed View (avoid unless stated)" />
         <GlossaryPill status="warn" abbr="SS" desc="Side Stage (avoid unless stated)" />
@@ -142,9 +166,10 @@ const TOPICS: TopicCard[] = [
     content: (
       <ul className="space-y-2 text-sm" style={{ color: "#9898B0" }}>
         <li>If the seat map won't load or Tixie appears frozen: <span className="text-white font-semibold">wait up to 2 full minutes</span></li>
-        <li>If still unresponsive: use the Select Option dropdown → "Map didn't load" or "Code didn't work" → move to next request</li>
+        <li>If still unresponsive: log the issue using the Select Option dropdown (choose "Map didn't load" or "Code didn't work") — this reports the problem and moves you to the next request</li>
         <li>Do not force-quit unless absolutely necessary</li>
         <li>To report an issue: (1) take a screenshot, (2) copy the Request ID from the Request Info box, (3) write what happened vs. what you expected. Save in a Google Doc</li>
+        <li>As a Tixie tester, <span className="text-white font-semibold">reporting new bugs is part of your role</span>. If you encounter something new, report it once with a screenshot, the Request ID, and what happened. If the same issue keeps happening, note the frequency — no need to report it every time</li>
       </ul>
     ),
   },
@@ -156,7 +181,7 @@ const TOPICS: TopicCard[] = [
         <div className="space-y-3">
           {[
             "NEVER purchase single tickets or WC/ADA seats — no exceptions",
-            "Reach out if you are unsure — do not guess",
+            "Reach out if you are unsure — do not guess. Email gigsupport@jomero.co or message via the app",
             "NEVER purchase LV, OV, or SS seats unless the Request explicitly states they are acceptable",
           ].map((rule, i) => (
             <div key={i} className="flex gap-3 items-start rounded-xl px-4 py-3" style={{ background: "#3A1A1A", border: "1px solid #E05555" }}>

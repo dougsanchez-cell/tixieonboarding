@@ -11,7 +11,7 @@ interface PurchasingGuideProps {
 const GUIDE_SECTIONS = [
   {
     heading: "The Request Info Box",
-    body: `Every request shows a dialog in the top-left of Tixie with: <strong>Request ID</strong> (always copy this first by clicking the icon), <strong>Section</strong> (the exact section to purchase in, e.g. "sec 213"), <strong>After Fees</strong> (your maximum per-ticket price including all fees), <strong>Before Fees</strong> (face value only). There is also a <strong>"Select reason to see next request"</strong> dropdown — use this when you CANNOT complete a purchase.`,
+    body: `Every request shows a dialog in the top-left of Tixie with: <strong>Request ID</strong> (identifies the request — copy this if you need to report an issue), <strong>Section</strong> (the exact section to purchase in, e.g. "sec 213"), <strong>After Fees</strong> (your maximum per-ticket price including all fees), <strong>Before Fees</strong> (face value only). There is also a <strong>"Select reason to see next request"</strong> dropdown — use this when you CANNOT complete a purchase.`,
   },
   {
     heading: "Quantity Rules",
@@ -23,7 +23,7 @@ const GUIDE_SECTIONS = [
   },
   {
     heading: "Seat Selection",
-    body: `Closer to the stage is <strong>ALWAYS better</strong>. NEVER purchase seats labeled <strong>LV</strong> (Limited View), <strong>OV</strong> (Obstructed View), <strong>SS</strong> (Side Stage), <strong>WC</strong> (Wheelchair), or <strong>ADA</strong> — unless the Request explicitly states they are acceptable. When in doubt, use the Select Option dropdown and move to the next request.`,
+    body: `Think about it from a fan's perspective — within your assigned section, pick the seats you'd want if you were going to the show. Closer to the stage is <strong>ALWAYS better</strong>. On the seat map, blue seats are available and grey seats are unavailable — only select from the blue seats. NEVER purchase seats labeled <strong>LV</strong> (Limited View), <strong>OV</strong> (Obstructed View), <strong>SS</strong> (Side Stage), <strong>WC</strong> (Wheelchair), or <strong>ADA</strong> — unless the Request explicitly states they are acceptable. When in doubt, use the Select Option dropdown and move to the next request.`,
   },
   {
     heading: "The Select Option Dropdown",

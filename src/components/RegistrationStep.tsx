@@ -114,13 +114,11 @@ const RegistrationStep = ({ onComplete, demoMode = false, userPath = null }: Reg
             Complete this orientation to get cleared for live purchasing
           </p>
 
-          {userPath === "a3" && (
-            <div className="mb-6 px-4 py-3 rounded-xl text-sm flex items-start gap-3"
-                 style={{ background: "#1A2A3A", border: "1px solid #B3D4F0", color: "#7BC8F6" }}>
-              <span className="text-base shrink-0">📋</span>
-              <span>You're on the <strong className="text-white">guided onboarding path</strong> — complete this orientation, then a Jomero team member will schedule your 1-hour session before your first live session.</span>
-            </div>
-          )}
+          <div className="mb-6 px-4 py-3 rounded-xl text-sm flex items-start gap-3"
+               style={{ background: "#1A2A3A", border: "1px solid #B3D4F0", color: "#7BC8F6" }}>
+            <span className="text-base shrink-0">💡</span>
+            <span>Complete this orientation to get cleared for live purchasing. If you'd like additional support, a guided 1-hour session is available — just email <a href="mailto:gigsupport@jomero.co" className="underline text-[#8B50CC]">gigsupport@jomero.co</a> after completing orientation.</span>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {[
