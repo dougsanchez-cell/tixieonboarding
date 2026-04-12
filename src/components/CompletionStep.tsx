@@ -13,7 +13,6 @@ interface CompletionStepProps {
 
 const CompletionStep = ({ name, email, score, contractorId, userPath = null, moduleCount = 3 }: CompletionStepProps) => {
   const firstName = name.split(" ")[0];
-  const isA3 = userPath === "a3";
 
   useEffect(() => {
     supabase.functions.invoke("notify-ops", {
@@ -68,9 +67,7 @@ const CompletionStep = ({ name, email, score, contractorId, userPath = null, mod
         Congratulations {firstName}! 🎉
       </h1>
       <p className="text-center z-10 mb-8 animate-fade-in" style={{ color: "#9898B0", animationDelay: "0.4s" }}>
-        {isA3
-          ? "You've completed the Tixie Orientation — your guided session will be scheduled next."
-          : "Your status has been updated and the ops team has been notified."}
+        Your status has been updated and the ops team has been notified.
       </p>
 
       {/* Score cards — glassmorphism */}
@@ -96,21 +93,19 @@ const CompletionStep = ({ name, email, score, contractorId, userPath = null, mod
       <div className="rounded-2xl p-6 w-full max-w-lg z-10 animate-fade-in" style={{ background: "#2A2B3D", border: "1px solid #3A3B50", animationDelay: "0.6s" }}>
         <h2 className="font-bold text-lg mb-4 text-white">What happens next</h2>
         <div className="space-y-3 text-sm" style={{ color: "#9898B0" }}>
-          {isA3 && (
-            <div className="flex gap-3 items-start p-3 rounded-xl" style={{ background: "#1A2A3A", border: "1px solid #B3D4F0" }}>
+          <div className="flex gap-3 items-start p-3 rounded-xl" style={{ background: "#1A2A3A", border: "1px solid #B3D4F0" }}>
               <span className="text-lg shrink-0">📞</span>
               <span style={{ color: "#7BC8F6" }}>
-                <strong className="text-white">Next step:</strong> A Jomero team member will reach out to schedule your 1-hour guided session before you begin live purchasing.
+                <strong className="text-white">Need more help?</strong> If you'd like a guided 1-hour training session with the Jomero team before your first live session, email <a href="mailto:gigsupport@jomero.co" className="underline text-[#8B50CC]">gigsupport@jomero.co</a> and we'll set it up.
               </span>
             </div>
-          )}
           <div className="flex gap-3 items-start">
             <Terminal className="w-5 h-5 shrink-0 mt-0.5" style={{ color: "#8B50CC" }} />
             <span>Install Tixie via Terminal if you haven't already (Module 1)</span>
           </div>
           <div className="flex gap-3 items-start">
             <Clock className="w-5 h-5 shrink-0 mt-0.5" style={{ color: "#4CAF82" }} />
-            <span>Sessions run Mon–Fri, 6:00 AM – 12:00 PM PST, max 1 hour</span>
+            <span>Peak hours are Mon–Fri, 6:00 AM – 12:00 PM PST — you can log in anytime, 10 hr/week max</span>
           </div>
           <div className="flex gap-3 items-start">
             <HelpCircle className="w-5 h-5 shrink-0 mt-0.5" style={{ color: "#4CAF82" }} />
