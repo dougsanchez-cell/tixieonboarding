@@ -58,9 +58,9 @@ const TOPICS: TopicCard[] = [
           <p className="text-white font-semibold mb-1">Step 1: Download Tixie</p>
           <p>Select the link for your operating system:</p>
           <ul className="mt-1 space-y-1 ml-4 list-disc">
-            <li>🪟 <span className="text-white">Windows:</span> <a href="https://kraken-app.s3.us-east-2.amazonaws.com/releases/tixie/tixie-setup-win.exe" className="text-[#8B50CC] underline hover:text-[#a76de8]">Download for Windows</a></li>
-            <li>🍎 <span className="text-white">Mac OS — Apple Silicon:</span> <a href="https://kraken-app.s3.us-east-2.amazonaws.com/releases/tixie/tixie-setup-mac-arm64.dmg" className="text-[#8B50CC] underline hover:text-[#a76de8]">Download for Mac (M1, M2, or newer)</a></li>
-            <li>🍎 <span className="text-white">Mac OS — Intel:</span> <a href="https://kraken-app.s3.us-east-2.amazonaws.com/releases/tixie/tixie-setup-mac-x64.dmg" className="text-[#8B50CC] underline hover:text-[#a76de8]">Download for Mac (Intel processor)</a></li>
+            <li>🪟 <span className="text-white">Windows:</span> <a href="https://kraken-app.s3.us-east-2.amazonaws.com/releases/tixie/prod/v1.0.0-build-202603191132/tixie-app-v1.0.0-x64-setup.exe" className="text-[#8B50CC] underline hover:text-[#a76de8]">Download for Windows</a></li>
+            <li>🍎 <span className="text-white">Mac OS — Apple Silicon:</span> <a href="https://kraken-app.s3.us-east-2.amazonaws.com/releases/tixie/prod/v1.0.0-build-202603191132/tixie-app-v1.0.0-arm64.dmg" className="text-[#8B50CC] underline hover:text-[#a76de8]">Download for Mac (M1, M2, or newer)</a></li>
+            <li>🍎 <span className="text-white">Mac OS — Intel:</span> <a href="https://kraken-app.s3.us-east-2.amazonaws.com/releases/tixie/prod/v1.0.0-build-202603191132/tixie-app-v1.0.0-x64.dmg" className="text-[#8B50CC] underline hover:text-[#a76de8]">Download for Mac (Intel processor)</a></li>
           </ul>
           <p className="mt-1 text-xs italic">Not sure which Mac version? Click the Apple icon (top left of your screen) → "About This Mac" to check your processor.</p>
         </div>
