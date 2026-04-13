@@ -232,6 +232,38 @@ const Admin = () => {
         await supabase.from("app_config").insert({ key: "contractor_notes", value: "{}" });
       }
     }
+    if (seRes.data) setSessionEvents(seRes.data as SessionEvent[]);
+  };
+
+  const getTimePerStep = (contractorId: string) => {
+    const events = sessionEvents.filter(e => e.contractor_id === contractorId);
+    const timeByStep: Record<string, number> = {};
+    const enterStack: Record<string, string> = {};
+    for (const event of events) {
+      if (event.event_type === "enter") {
+        enterStack[event.step_name] = event.event_at;
+      } else if (event.event_type === "exit" && enterStack[event.step_name]) {
+        const duration = (new Date(event.event_at).getTime() - new Date(enterStack[event.step_name]).getTime()) / 1000;
+        if (duration > 0 && duration < 7200) {
+          timeByStep[event.step_name] = (timeByStep[event.step_name] || 0) + duration;
+        }
+        delete enterStack[event.step_name];
+      }
+    }
+    return timeByStep;
+  };
+
+  const getTotalTime = (contractorId: string) => {
+    return Object.values(getTimePerStep(contractorId)).reduce((sum, t) => sum + t, 0);
+  };
+
+  const formatDuration = (seconds: number) => {
+    if (seconds < 60) return `${Math.round(seconds)}s`;
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.round(seconds % 60);
+    if (mins < 60) return `${mins}m ${secs}s`;
+    const hrs = Math.floor(mins / 60);
+    return `${hrs}h ${mins % 60}m`;
   };
 
   const login = async (e: React.FormEvent) => {
