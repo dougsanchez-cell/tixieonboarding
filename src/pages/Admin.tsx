@@ -12,6 +12,14 @@ import { LogOut, Download, Save, Users, BookOpen, HelpCircle, Settings, Bot, Che
 import TixieHeader from "@/components/TixieHeader";
 import type { Session } from "@supabase/supabase-js";
 
+interface SessionEvent {
+  id: number;
+  contractor_id: string;
+  step_name: string;
+  event_type: string;
+  event_at: string;
+}
+
 interface Contractor {
   id: string;
   name: string;
@@ -81,6 +89,7 @@ const Admin = () => {
   const [opsEmail, setOpsEmail] = useState("ops@jomero.com");
   const [minQuestions, setMinQuestions] = useState("2");
   const [filter, setFilter] = useState("all");
+  const [sessionEvents, setSessionEvents] = useState<SessionEvent[]>([]);
   const [pathFilter, setPathFilter] = useState("all");
   const [expandedEmail, setExpandedEmail] = useState<string | null>(null);
 
@@ -175,6 +184,7 @@ const Admin = () => {
         case "attempts": cmp = a.totalAttempts - b.totalAttempts; break;
         case "date": cmp = new Date(a.firstRegisteredAt).getTime() - new Date(b.firstRegisteredAt).getTime(); break;
         case "lastActivity": cmp = new Date(a.latest.created_at).getTime() - new Date(b.latest.created_at).getTime(); break;
+        case "totalTime": cmp = getTotalTime(a.latest.id) - getTotalTime(b.latest.id); break;
         default: cmp = 0;
       }
       return sortDirection === "asc" ? cmp : -cmp;
@@ -198,11 +208,12 @@ const Admin = () => {
   };
 
   const loadAll = async () => {
-    const [cRes, mRes, qRes, cfgRes] = await Promise.all([
+    const [cRes, mRes, qRes, cfgRes, seRes] = await Promise.all([
       supabase.from("contractors").select("*").order("created_at", { ascending: false }),
       supabase.from("content_modules").select("*").order("module_number"),
       supabase.from("quiz_questions").select("*").order("question_number"),
       supabase.from("app_config").select("*"),
+      supabase.from("session_events").select("*").order("event_at", { ascending: true }),
     ]);
     if (cRes.data) setContractors(cRes.data as Contractor[]);
     if (mRes.data) setModules(mRes.data.map(m => ({ ...m, sections: m.sections as unknown as { heading: string; body: string }[], comprehension_questions: (m.comprehension_questions as unknown as CompQuestion[]) || [] })));
@@ -222,6 +233,38 @@ const Admin = () => {
         await supabase.from("app_config").insert({ key: "contractor_notes", value: "{}" });
       }
     }
+    if (seRes.data) setSessionEvents(seRes.data as SessionEvent[]);
+  };
+
+  const getTimePerStep = (contractorId: string) => {
+    const events = sessionEvents.filter(e => e.contractor_id === contractorId);
+    const timeByStep: Record<string, number> = {};
+    const enterStack: Record<string, string> = {};
+    for (const event of events) {
+      if (event.event_type === "enter") {
+        enterStack[event.step_name] = event.event_at;
+      } else if (event.event_type === "exit" && enterStack[event.step_name]) {
+        const duration = (new Date(event.event_at).getTime() - new Date(enterStack[event.step_name]).getTime()) / 1000;
+        if (duration > 0 && duration < 7200) {
+          timeByStep[event.step_name] = (timeByStep[event.step_name] || 0) + duration;
+        }
+        delete enterStack[event.step_name];
+      }
+    }
+    return timeByStep;
+  };
+
+  const getTotalTime = (contractorId: string) => {
+    return Object.values(getTimePerStep(contractorId)).reduce((sum, t) => sum + t, 0);
+  };
+
+  const formatDuration = (seconds: number) => {
+    if (seconds < 60) return `${Math.round(seconds)}s`;
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.round(seconds % 60);
+    if (mins < 60) return `${mins}m ${secs}s`;
+    const hrs = Math.floor(mins / 60);
+    return `${hrs}h ${mins % 60}m`;
   };
 
   const login = async (e: React.FormEvent) => {
@@ -287,7 +330,7 @@ const Admin = () => {
   };
 
   const exportCSV = () => {
-    const rows = [["Name", "Email", "Phone", "Path", "Score", "Status", "Attempts", "Date"]];
+    const rows = [["Name", "Email", "Phone", "Path", "Score", "Status", "Attempts", "Total Time", "Date"]];
     exportableContractors.forEach(c => {
       rows.push([
         c.name,
@@ -297,6 +340,7 @@ const Admin = () => {
         String(c.quiz_score ?? ""),
         c.status,
         String(c.quiz_attempts),
+        formatDuration(getTotalTime(c.id)),
         new Date(c.created_at).toLocaleDateString(),
       ]);
     });
@@ -349,7 +393,7 @@ const Admin = () => {
     </th>
   );
 
-  const COL_SPAN = 11; // checkbox + 8 data cols + last activity + expand arrow
+  const COL_SPAN = 12; // checkbox + 9 data cols + last activity + expand arrow
 
   if (checking) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading...</div>;
 
@@ -488,6 +532,7 @@ const Admin = () => {
                     {renderSortHeader("Attempts", "attempts", "hidden sm:table-cell")}
                     {renderSortHeader("First Registered", "date")}
                     {renderSortHeader("Last Activity", "lastActivity")}
+                    {renderSortHeader("Total Time", "totalTime")}
                     <th className="w-8 p-2" aria-label="Expand row"></th>
                   </tr>
                 </thead>
@@ -525,6 +570,7 @@ const Admin = () => {
                           <td className="p-2 hidden sm:table-cell">{group.totalAttempts}</td>
                           <td className="p-2 text-muted-foreground">{new Date(group.firstRegisteredAt).toLocaleDateString()}</td>
                           <td className="p-2 text-muted-foreground">{new Date(group.latest.created_at).toLocaleDateString()}</td>
+                          <td className="p-2 text-muted-foreground">{formatDuration(getTotalTime(group.latest.id))}</td>
                           <td className="p-2">
                             <div className="flex justify-end">
                               <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`} />
@@ -586,6 +632,20 @@ const Admin = () => {
                                     ))}
                                   </tbody>
                                 </table>
+                                {/* Time per Step */}
+                                <div className="p-3 border-t border-primary/15">
+                                  <Label className="text-xs font-medium">Time per Step</Label>
+                                  <div className="flex flex-wrap gap-3 mt-1">
+                                    {Object.entries(getTimePerStep(group.latest.id)).map(([stepName, seconds]) => (
+                                      <span key={stepName} className="text-xs text-muted-foreground">
+                                        {stepName}: <span className="font-medium text-foreground">{formatDuration(seconds)}</span>
+                                      </span>
+                                    ))}
+                                    {Object.keys(getTimePerStep(group.latest.id)).length === 0 && (
+                                      <span className="text-xs text-muted-foreground">No session data recorded</span>
+                                    )}
+                                  </div>
+                                </div>
                                 {/* Notes */}
                                 <div className="p-3 border-t border-primary/15">
                                   <Label className="text-xs font-medium">Internal Notes</Label>

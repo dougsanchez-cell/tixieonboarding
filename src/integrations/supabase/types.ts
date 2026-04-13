@@ -143,6 +143,30 @@ export type Database = {
         }
         Relationships: []
       }
+      session_events: {
+        Row: {
+          contractor_id: string
+          event_at: string
+          event_type: string
+          id: number
+          step_name: string
+        }
+        Insert: {
+          contractor_id: string
+          event_at?: string
+          event_type: string
+          id?: number
+          step_name: string
+        }
+        Update: {
+          contractor_id?: string
+          event_at?: string
+          event_type?: string
+          id?: number
+          step_name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
