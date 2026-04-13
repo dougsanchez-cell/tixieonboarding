@@ -882,7 +882,146 @@ const Admin = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="ai">
+          <TabsContent value="analytics">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Average Time per Step */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Average Time per Step</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {(() => {
+                    const STEP_ORDER = ["Registration", "Training", "Tixie U", "Quiz", "Cleared"];
+                    const STEP_COLORS = ["hsl(var(--primary))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
+                    const stepTotals: Record<string, { total: number; count: number }> = {};
+                    contractors.forEach(c => {
+                      const tps = getTimePerStep(c.id);
+                      Object.entries(tps).forEach(([step, secs]) => {
+                        if (!stepTotals[step]) stepTotals[step] = { total: 0, count: 0 };
+                        stepTotals[step].total += secs;
+                        stepTotals[step].count += 1;
+                      });
+                    });
+                    const data = STEP_ORDER
+                      .filter(s => stepTotals[s])
+                      .map((s, i) => ({
+                        step: s,
+                        avgMinutes: Math.round((stepTotals[s].total / stepTotals[s].count) / 60 * 10) / 10,
+                        fill: STEP_COLORS[i % STEP_COLORS.length],
+                      }));
+                    if (data.length === 0) return <p className="text-sm text-muted-foreground text-center py-8">No session data yet</p>;
+                    return (
+                      <ResponsiveContainer width="100%" height={280}>
+                        <BarChart data={data}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                          <XAxis dataKey="step" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} />
+                          <YAxis tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} label={{ value: "Minutes", angle: -90, position: "insideLeft", style: { fontSize: 12, fill: "hsl(var(--muted-foreground))" } }} />
+                          <Tooltip
+                            contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, color: "hsl(var(--popover-foreground))" }}
+                            formatter={(value: number) => [`${value} min`, "Avg Time"]}
+                          />
+                          <Bar dataKey="avgMinutes" radius={[4, 4, 0, 0]}>
+                            {data.map((entry, i) => (
+                              <Cell key={i} fill={entry.fill} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+
+              {/* Daily Session Activity */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Daily Session Activity (Last 30 Days)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {(() => {
+                    const now = new Date();
+                    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    const dailyCounts: Record<string, { sessions: number; totalMin: number }> = {};
+                    for (let d = new Date(thirtyDaysAgo); d <= now; d.setDate(d.getDate() + 1)) {
+                      const key = d.toISOString().slice(0, 10);
+                      dailyCounts[key] = { sessions: 0, totalMin: 0 };
+                    }
+                    sessionEvents.forEach(e => {
+                      if (e.event_type === "enter") {
+                        const key = e.event_at.slice(0, 10);
+                        if (dailyCounts[key]) dailyCounts[key].sessions += 1;
+                      }
+                    });
+                    const data = Object.entries(dailyCounts)
+                      .sort(([a], [b]) => a.localeCompare(b))
+                      .map(([date, v]) => ({
+                        date: new Date(date).toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+                        sessions: v.sessions,
+                      }));
+                    if (data.every(d => d.sessions === 0)) return <p className="text-sm text-muted-foreground text-center py-8">No session data yet</p>;
+                    return (
+                      <ResponsiveContainer width="100%" height={280}>
+                        <LineChart data={data}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                          <XAxis dataKey="date" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} interval="preserveStartEnd" />
+                          <YAxis tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} />
+                          <Tooltip
+                            contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, color: "hsl(var(--popover-foreground))" }}
+                          />
+                          <Line type="monotone" dataKey="sessions" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} name="Step Entries" />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+
+              {/* Completion Funnel */}
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-base">Completion Funnel</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {(() => {
+                    const STEP_ORDER = ["Registration", "Training", "Tixie U", "Quiz", "Cleared"];
+                    const STEP_COLORS = ["hsl(var(--primary))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
+                    const stepUsers: Record<string, Set<string>> = {};
+                    STEP_ORDER.forEach(s => stepUsers[s] = new Set());
+                    sessionEvents.forEach(e => {
+                      if (e.event_type === "enter" && stepUsers[e.step_name]) {
+                        stepUsers[e.step_name].add(e.contractor_id);
+                      }
+                    });
+                    const data = STEP_ORDER.map((s, i) => ({
+                      step: s,
+                      contractors: stepUsers[s].size,
+                      fill: STEP_COLORS[i],
+                    }));
+                    if (data.every(d => d.contractors === 0)) return <p className="text-sm text-muted-foreground text-center py-8">No session data yet</p>;
+                    return (
+                      <ResponsiveContainer width="100%" height={280}>
+                        <BarChart data={data}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                          <XAxis dataKey="step" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} />
+                          <YAxis tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} label={{ value: "Contractors", angle: -90, position: "insideLeft", style: { fontSize: 12, fill: "hsl(var(--muted-foreground))" } }} />
+                          <Tooltip
+                            contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, color: "hsl(var(--popover-foreground))" }}
+                            formatter={(value: number) => [value, "Contractors"]}
+                          />
+                          <Bar dataKey="contractors" radius={[4, 4, 0, 0]}>
+                            {data.map((entry, i) => (
+                              <Cell key={i} fill={entry.fill} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
             <Card>
               <CardContent className="pt-4 space-y-3">
                 <Label>AI System Prompt</Label>
