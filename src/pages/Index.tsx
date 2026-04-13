@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
 import TixieHeader from "@/components/TixieHeader";
@@ -16,6 +16,14 @@ interface Contractor {
   email: string;
   phone: string;
 }
+
+const STEP_NAMES: Record<number, string> = {
+  1: "Registration",
+  2: "Training",
+  3: "Tixie U",
+  4: "Quiz",
+  5: "Cleared",
+};
 
 const loadProgress = () => {
   try {
@@ -41,6 +49,64 @@ const Index = () => {
   const [userPath] = useState<string | null>(() => {
     return new URLSearchParams(window.location.search).get("path");
   });
+
+  const prevStepRef = useRef(step);
+
+  // Session event logger
+  const logSessionEvent = async (stepName: string, eventType: "enter" | "exit") => {
+    if (!contractor || demoMode) return;
+    try {
+      await supabase.functions.invoke("log-session-event", {
+        body: {
+          contractorId: contractor.id,
+          step: stepName,
+          event: eventType,
+          timestamp: new Date().toISOString(),
+        },
+      });
+    } catch {} // Fire and forget
+  };
+
+  // Log enter/exit on step changes
+  useEffect(() => {
+    const prevStep = prevStepRef.current;
+    if (prevStep !== step && contractor) {
+      if (STEP_NAMES[prevStep]) {
+        logSessionEvent(STEP_NAMES[prevStep], "exit");
+      }
+      if (STEP_NAMES[step]) {
+        logSessionEvent(STEP_NAMES[step], "enter");
+      }
+    }
+    prevStepRef.current = step;
+  }, [step, contractor]);
+
+  // Log enter for initial step after registration
+  useEffect(() => {
+    if (contractor && step >= 2) {
+      logSessionEvent(STEP_NAMES[step], "enter");
+    }
+  }, [contractor]);
+
+  // Log exit on page unload
+  useEffect(() => {
+    const handleUnload = () => {
+      if (contractor && STEP_NAMES[step] && !demoMode) {
+        const payload = JSON.stringify({
+          contractorId: contractor.id,
+          step: STEP_NAMES[step],
+          event: "exit",
+          timestamp: new Date().toISOString(),
+        });
+        navigator.sendBeacon?.(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/log-session-event`,
+          new Blob([payload], { type: "application/json" })
+        );
+      }
+    };
+    window.addEventListener("beforeunload", handleUnload);
+    return () => window.removeEventListener("beforeunload", handleUnload);
+  }, [contractor, step, demoMode]);
 
   // Persist progress to sessionStorage
   useEffect(() => {
