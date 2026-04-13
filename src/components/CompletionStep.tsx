@@ -9,9 +9,10 @@ interface CompletionStepProps {
   contractorId: string;
   userPath?: string | null;
   moduleCount?: number;
+  onBack?: () => void;
 }
 
-const CompletionStep = ({ name, email, score, contractorId, userPath = null, moduleCount = 3 }: CompletionStepProps) => {
+const CompletionStep = ({ name, email, score, contractorId, userPath = null, moduleCount = 3, onBack }: CompletionStepProps) => {
   const firstName = name.split(" ")[0];
 
   useEffect(() => {
@@ -112,6 +113,15 @@ const CompletionStep = ({ name, email, score, contractorId, userPath = null, mod
             <span>Questions? Email <a href="mailto:gigsupport@jomero.co" className="underline" style={{ color: "#8B50CC" }}>gigsupport@jomero.co</a></span>
           </div>
         </div>
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="w-full mt-4 py-3 rounded-xl text-sm font-semibold transition-all hover:brightness-125"
+            style={{ background: "#22233A", border: "1px solid #3A3B50", color: "#E8E8F0" }}
+          >
+            ← Review Training Materials
+          </button>
+        )}
       </div>
 
       <style>{`
