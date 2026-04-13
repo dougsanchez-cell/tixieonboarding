@@ -89,6 +89,7 @@ const Admin = () => {
   const [opsEmail, setOpsEmail] = useState("ops@jomero.com");
   const [minQuestions, setMinQuestions] = useState("2");
   const [filter, setFilter] = useState("all");
+  const [sessionEvents, setSessionEvents] = useState<SessionEvent[]>([]);
   const [pathFilter, setPathFilter] = useState("all");
   const [expandedEmail, setExpandedEmail] = useState<string | null>(null);
 
@@ -206,11 +207,12 @@ const Admin = () => {
   };
 
   const loadAll = async () => {
-    const [cRes, mRes, qRes, cfgRes] = await Promise.all([
+    const [cRes, mRes, qRes, cfgRes, seRes] = await Promise.all([
       supabase.from("contractors").select("*").order("created_at", { ascending: false }),
       supabase.from("content_modules").select("*").order("module_number"),
       supabase.from("quiz_questions").select("*").order("question_number"),
       supabase.from("app_config").select("*"),
+      supabase.from("session_events").select("*").order("event_at", { ascending: true }),
     ]);
     if (cRes.data) setContractors(cRes.data as Contractor[]);
     if (mRes.data) setModules(mRes.data.map(m => ({ ...m, sections: m.sections as unknown as { heading: string; body: string }[], comprehension_questions: (m.comprehension_questions as unknown as CompQuestion[]) || [] })));
