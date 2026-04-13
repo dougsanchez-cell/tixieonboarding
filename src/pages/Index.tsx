@@ -20,6 +20,7 @@ const Index = () => {
   const [step, setStep] = useState(1);
   const [contractor, setContractor] = useState<Contractor | null>(null);
   const [finalScore, setFinalScore] = useState(0);
+  const [reviewMode, setReviewMode] = useState(false);
   
   const [moduleCount, setModuleCount] = useState(3);
   const [demoMode, setDemoMode] = useState(() => {
