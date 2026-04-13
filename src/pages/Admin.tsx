@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { LogOut, Download, Save, Users, BookOpen, HelpCircle, Settings, Bot, ChevronRight } from "lucide-react";
+import { LogOut, Download, Save, Users, BookOpen, HelpCircle, Settings, Bot, ChevronRight, Search } from "lucide-react";
 import TixieHeader from "@/components/TixieHeader";
 import type { Session } from "@supabase/supabase-js";
 
@@ -84,6 +84,14 @@ const Admin = () => {
   const [pathFilter, setPathFilter] = useState("all");
   const [expandedEmail, setExpandedEmail] = useState<string | null>(null);
 
+  // New state for improvements
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortColumn, setSortColumn] = useState<string>("date");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [editingContractor, setEditingContractor] = useState<Contractor | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [contractorNotes, setContractorNotes] = useState<Record<string, string>>({});
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
@@ -141,20 +149,53 @@ const Admin = () => {
       .sort((a, b) => new Date(b.latest.created_at).getTime() - new Date(a.latest.created_at).getTime())
   ), [groupedContractors]);
 
-  const filteredContractorGroups = useMemo(
-    () => {
-      let groups = filter === "all" ? contractorGroups : contractorGroups.filter(group => group.rolledStatus === filter);
-      if (pathFilter !== "all") groups = groups.filter(group => group.path === pathFilter);
-      return groups;
-    },
-    [contractorGroups, filter, pathFilter],
-  );
+  const filteredContractorGroups = useMemo(() => {
+    let groups = filter === "all" ? contractorGroups : contractorGroups.filter(group => group.rolledStatus === filter);
+    if (pathFilter !== "all") groups = groups.filter(group => group.path === pathFilter);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      groups = groups.filter(group =>
+        group.latest.name.toLowerCase().includes(q) ||
+        group.email.toLowerCase().includes(q)
+      );
+    }
+    return groups;
+  }, [contractorGroups, filter, pathFilter, searchQuery]);
+
+  const sortedContractorGroups = useMemo(() => {
+    const sorted = [...filteredContractorGroups];
+    sorted.sort((a, b) => {
+      let cmp = 0;
+      switch (sortColumn) {
+        case "name": cmp = a.latest.name.localeCompare(b.latest.name); break;
+        case "email": cmp = a.email.localeCompare(b.email); break;
+        case "path": cmp = (a.path || "").localeCompare(b.path || ""); break;
+        case "score": cmp = (a.bestScore ?? -1) - (b.bestScore ?? -1); break;
+        case "status": cmp = a.rolledStatus.localeCompare(b.rolledStatus); break;
+        case "attempts": cmp = a.totalAttempts - b.totalAttempts; break;
+        case "date": cmp = new Date(a.firstRegisteredAt).getTime() - new Date(b.firstRegisteredAt).getTime(); break;
+        case "lastActivity": cmp = new Date(a.latest.created_at).getTime() - new Date(b.latest.created_at).getTime(); break;
+        default: cmp = 0;
+      }
+      return sortDirection === "asc" ? cmp : -cmp;
+    });
+    return sorted;
+  }, [filteredContractorGroups, sortColumn, sortDirection]);
 
   const exportableContractors = useMemo(() => {
     if (filter === "all") return contractors;
     const visibleEmails = new Set(filteredContractorGroups.map(group => group.email));
     return contractors.filter(contractor => visibleEmails.has(contractor.email));
   }, [contractors, filter, filteredContractorGroups]);
+
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(prev => prev === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
 
   const loadAll = async () => {
     const [cRes, mRes, qRes, cfgRes] = await Promise.all([
@@ -172,7 +213,14 @@ const Admin = () => {
         if (c.key === "pass_threshold") setPassThreshold(c.value);
         if (c.key === "ops_notification_email") setOpsEmail(c.value);
         if (c.key === "min_chat_questions") setMinQuestions(c.value);
+        if (c.key === "contractor_notes") {
+          try { setContractorNotes(JSON.parse(c.value)); } catch { setContractorNotes({}); }
+        }
       });
+      const hasNotesKey = cfgRes.data.some(c => c.key === "contractor_notes");
+      if (!hasNotesKey) {
+        await supabase.from("app_config").insert({ key: "contractor_notes", value: "{}" });
+      }
     }
   };
 
@@ -198,6 +246,45 @@ const Admin = () => {
       {formatStatusLabel(status)}
     </Badge>
   );
+
+  const deleteContractor = async (id: string, name: string) => {
+    if (!confirm(`Delete contractor "${name}"? This cannot be undone.`)) return;
+    const { error } = await supabase.from("contractors").delete().eq("id", id);
+    if (error) toast.error("Failed to delete");
+    else { toast.success("Contractor deleted"); loadAll(); }
+  };
+
+  const saveContractor = async (c: Contractor) => {
+    const { error } = await supabase.from("contractors").update({
+      name: c.name,
+      email: c.email,
+      phone: c.phone,
+      path: c.path,
+      status: c.status,
+    }).eq("id", c.id);
+    if (error) toast.error("Failed to save");
+    else { toast.success("Contractor updated"); setEditingContractor(null); loadAll(); }
+  };
+
+  const resetContractor = async (id: string, name: string) => {
+    if (!confirm(`Reset "${name}" to In Progress? This will clear their score and attempts.`)) return;
+    const { error } = await supabase.from("contractors").update({
+      status: "in_progress",
+      quiz_score: null,
+      quiz_attempts: 0,
+      completed_at: null,
+    }).eq("id", id);
+    if (error) toast.error("Failed to reset");
+    else { toast.success("Contractor reset to In Progress"); loadAll(); }
+  };
+
+  const saveNote = async (email: string, note: string) => {
+    const updated = { ...contractorNotes, [email]: note };
+    if (!note.trim()) delete updated[email];
+    const { error } = await supabase.from("app_config").upsert({ key: "contractor_notes", value: JSON.stringify(updated) });
+    if (error) toast.error("Failed to save note");
+    else { setContractorNotes(updated); toast.success("Note saved"); }
+  };
 
   const exportCSV = () => {
     const rows = [["Name", "Email", "Phone", "Path", "Score", "Status", "Attempts", "Date"]];
@@ -253,6 +340,17 @@ const Admin = () => {
     else toast.success("Saved");
   };
 
+  const renderSortHeader = (label: string, column: string, extraClass = "") => (
+    <th
+      className={`p-2 cursor-pointer select-none hover:text-foreground ${extraClass}`}
+      onClick={() => handleSort(column)}
+    >
+      {label} {sortColumn === column && (sortDirection === "asc" ? "↑" : "↓")}
+    </th>
+  );
+
+  const COL_SPAN = 11; // checkbox + 8 data cols + last activity + expand arrow
+
   if (checking) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading...</div>;
 
   if (!session) {
@@ -303,7 +401,7 @@ const Admin = () => {
 
           <TabsContent value="contractors">
             <div className="mb-4 flex items-center justify-between gap-2 flex-wrap">
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex gap-2 flex-wrap items-center">
                 {["all", "cleared", "failed", "in_progress"].map(f => (
                   <Button key={f} variant={filter === f ? "default" : "outline"} size="sm" onClick={() => setFilter(f)}>
                     {f === "all" ? "All" : f === "in_progress" ? "In Progress" : f.charAt(0).toUpperCase() + f.slice(1)}
@@ -315,28 +413,86 @@ const Admin = () => {
                     {p === "all" ? "All Paths" : p.toUpperCase()}
                   </Button>
                 ))}
+                <span className="text-muted-foreground self-center px-1">|</span>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by name or email..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="max-w-xs pl-8 h-9"
+                  />
+                </div>
               </div>
               <Button variant="outline" size="sm" onClick={exportCSV}>
                 <Download className="w-4 h-4 mr-1" /> Export CSV
               </Button>
             </div>
+
+            {/* Bulk actions bar */}
+            {selectedIds.size > 0 && (
+              <div className="flex items-center gap-3 p-3 mb-3 rounded-lg bg-primary/10 border border-primary/20">
+                <span className="text-sm font-medium">{selectedIds.size} selected</span>
+                <Button size="sm" variant="outline" onClick={() => {
+                  if (!confirm(`Delete ${selectedIds.size} contractor records? This cannot be undone.`)) return;
+                  Promise.all([...selectedIds].map(id => supabase.from("contractors").delete().eq("id", id)))
+                    .then(() => { toast.success(`${selectedIds.size} records deleted`); setSelectedIds(new Set()); loadAll(); })
+                    .catch(() => toast.error("Failed to delete some records"));
+                }} className="text-destructive border-destructive">
+                  Delete Selected
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => {
+                  const rows = [["Name", "Email", "Phone", "Path", "Score", "Status", "Attempts", "Date"]];
+                  contractors.filter(c => selectedIds.has(c.id)).forEach(c => {
+                    rows.push([c.name, c.email, c.phone, c.path || "", String(c.quiz_score ?? ""), c.status, String(c.quiz_attempts), new Date(c.created_at).toLocaleDateString()]);
+                  });
+                  const csv = rows.map(r => r.map(v => `"${v}"`).join(",")).join("\n");
+                  const blob = new Blob([csv], { type: "text/csv" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a"); a.href = url; a.download = `selected-contractors-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+                  URL.revokeObjectURL(url);
+                }}>
+                  Export Selected
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setSelectedIds(new Set())}>
+                  Clear Selection
+                </Button>
+              </div>
+            )}
+
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-left text-muted-foreground">
-                    <th className="p-2">Name</th>
-                    <th className="p-2">Email</th>
-                    <th className="p-2 hidden sm:table-cell">Phone</th>
-                    <th className="p-2">Path</th>
-                    <th className="p-2">Best Score</th>
-                    <th className="p-2">Status</th>
-                    <th className="p-2 hidden sm:table-cell">Attempts</th>
-                    <th className="p-2">First Registered</th>
+                    <th className="p-2 w-8">
+                      <input type="checkbox"
+                        checked={selectedIds.size > 0 && selectedIds.size === sortedContractorGroups.reduce((sum, g) => sum + g.attempts.length, 0)}
+                        onChange={e => {
+                          if (e.target.checked) {
+                            const all = new Set<string>();
+                            sortedContractorGroups.forEach(g => g.attempts.forEach(a => all.add(a.id)));
+                            setSelectedIds(all);
+                          } else {
+                            setSelectedIds(new Set());
+                          }
+                        }}
+                        className="accent-primary"
+                      />
+                    </th>
+                    {renderSortHeader("Name", "name")}
+                    {renderSortHeader("Email", "email")}
+                    <th className="p-2 hidden sm:table-cell cursor-pointer select-none hover:text-foreground">Phone</th>
+                    {renderSortHeader("Path", "path")}
+                    {renderSortHeader("Best Score", "score")}
+                    {renderSortHeader("Status", "status")}
+                    {renderSortHeader("Attempts", "attempts", "hidden sm:table-cell")}
+                    {renderSortHeader("First Registered", "date")}
+                    {renderSortHeader("Last Activity", "lastActivity")}
                     <th className="w-8 p-2" aria-label="Expand row"></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredContractorGroups.map(group => {
+                  {sortedContractorGroups.map(group => {
                     const isExpanded = expandedEmail === group.email;
 
                     return (
@@ -345,6 +501,17 @@ const Admin = () => {
                           className="cursor-pointer border-b transition-colors hover:bg-accent/50"
                           onClick={() => toggleExpandedEmail(group.email)}
                         >
+                          <td className="p-2" onClick={e => e.stopPropagation()}>
+                            <input type="checkbox"
+                              checked={group.attempts.every(a => selectedIds.has(a.id))}
+                              onChange={e => {
+                                const next = new Set(selectedIds);
+                                group.attempts.forEach(a => e.target.checked ? next.add(a.id) : next.delete(a.id));
+                                setSelectedIds(next);
+                              }}
+                              className="accent-primary"
+                            />
+                          </td>
                           <td className={`p-2 font-medium ${isExpanded ? "border-l-4 border-primary pl-1" : ""}`}>
                             {group.latest.name}
                           </td>
@@ -357,6 +524,7 @@ const Admin = () => {
                           <td className="p-2">{renderStatusBadge(group.rolledStatus)}</td>
                           <td className="p-2 hidden sm:table-cell">{group.totalAttempts}</td>
                           <td className="p-2 text-muted-foreground">{new Date(group.firstRegisteredAt).toLocaleDateString()}</td>
+                          <td className="p-2 text-muted-foreground">{new Date(group.latest.created_at).toLocaleDateString()}</td>
                           <td className="p-2">
                             <div className="flex justify-end">
                               <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`} />
@@ -365,8 +533,20 @@ const Admin = () => {
                         </tr>
                         {isExpanded && (
                           <tr className="border-b">
-                            <td colSpan={9} className="p-0">
+                            <td colSpan={COL_SPAN} className="p-0">
                               <div className="my-2 ml-4 overflow-hidden rounded-lg border border-primary/15 bg-primary/5">
+                                <div className="flex justify-end p-2">
+                                  <Button size="sm" variant="ghost" className="text-destructive text-xs"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (!confirm(`Delete ALL ${group.attempts.length} records for ${group.email}? This cannot be undone.`)) return;
+                                      Promise.all(group.attempts.map(a => supabase.from("contractors").delete().eq("id", a.id)))
+                                        .then(() => { toast.success("All records deleted"); loadAll(); })
+                                        .catch(() => toast.error("Failed to delete some records"));
+                                    }}>
+                                    Delete All Records
+                                  </Button>
+                                </div>
                                 <table className="w-full text-xs">
                                   <thead>
                                     <tr className="border-b text-left text-muted-foreground">
@@ -375,6 +555,7 @@ const Admin = () => {
                                       <th className="p-2">Status</th>
                                       <th className="p-2">Date</th>
                                       <th className="p-2 hidden sm:table-cell">Quiz Attempts</th>
+                                      <th className="p-2">Actions</th>
                                     </tr>
                                   </thead>
                                   <tbody>
@@ -385,10 +566,43 @@ const Admin = () => {
                                         <td className="p-2">{renderStatusBadge(attempt.status)}</td>
                                         <td className="p-2 text-muted-foreground">{new Date(attempt.created_at).toLocaleString()}</td>
                                         <td className="p-2 hidden sm:table-cell">{attempt.quiz_attempts}</td>
+                                        <td className="p-2">
+                                          <div className="flex gap-1">
+                                            <Button size="sm" variant="ghost" className="h-6 px-2 text-xs"
+                                              onClick={(e) => { e.stopPropagation(); setEditingContractor(attempt); }}>
+                                              Edit
+                                            </Button>
+                                            <Button size="sm" variant="ghost" className="text-orange-500 h-6 px-2 text-xs"
+                                              onClick={(e) => { e.stopPropagation(); resetContractor(attempt.id, attempt.name); }}>
+                                              Reset
+                                            </Button>
+                                            <Button size="sm" variant="ghost" className="text-destructive h-6 px-2 text-xs"
+                                              onClick={(e) => { e.stopPropagation(); deleteContractor(attempt.id, attempt.name); }}>
+                                              Delete
+                                            </Button>
+                                          </div>
+                                        </td>
                                       </tr>
                                     ))}
                                   </tbody>
                                 </table>
+                                {/* Notes */}
+                                <div className="p-3 border-t border-primary/15">
+                                  <Label className="text-xs font-medium">Internal Notes</Label>
+                                  <div className="flex gap-2 mt-1">
+                                    <Textarea
+                                      value={contractorNotes[group.email] || ""}
+                                      placeholder="Add internal notes (e.g. 'needs follow-up', 'referred by Nick')..."
+                                      rows={2}
+                                      className="text-xs"
+                                      onChange={e => setContractorNotes(prev => ({ ...prev, [group.email]: e.target.value }))}
+                                    />
+                                    <Button size="sm" variant="outline" className="shrink-0 self-end"
+                                      onClick={(e) => { e.stopPropagation(); saveNote(group.email, contractorNotes[group.email] || ""); }}>
+                                      <Save className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                </div>
                               </div>
                             </td>
                           </tr>
@@ -396,12 +610,62 @@ const Admin = () => {
                       </Fragment>
                     );
                   })}
-                  {filteredContractorGroups.length === 0 && (
-                    <tr><td colSpan={9} className="p-8 text-center text-muted-foreground">No contractors found</td></tr>
+                  {sortedContractorGroups.length === 0 && (
+                    <tr><td colSpan={COL_SPAN} className="p-8 text-center text-muted-foreground">No contractors found</td></tr>
                   )}
                 </tbody>
               </table>
             </div>
+
+            {/* Edit Contractor Modal */}
+            {editingContractor && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setEditingContractor(null)}>
+                <Card className="w-full max-w-md" onClick={e => e.stopPropagation()}>
+                  <CardHeader>
+                    <CardTitle>Edit Contractor</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <Label>Name</Label>
+                      <Input value={editingContractor.name} onChange={e => setEditingContractor({ ...editingContractor, name: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Email</Label>
+                      <Input value={editingContractor.email} onChange={e => setEditingContractor({ ...editingContractor, email: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Phone</Label>
+                      <Input value={editingContractor.phone} onChange={e => setEditingContractor({ ...editingContractor, phone: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Path</Label>
+                      <select value={editingContractor.path || ""} onChange={e => setEditingContractor({ ...editingContractor, path: e.target.value || null })}
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                        <option value="">None</option>
+                        <option value="a1">A1</option>
+                        <option value="a2">A2</option>
+                        <option value="a3">A3</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label>Status</Label>
+                      <select value={editingContractor.status} onChange={e => setEditingContractor({ ...editingContractor, status: e.target.value })}
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                        <option value="in_progress">In Progress</option>
+                        <option value="cleared">Cleared</option>
+                        <option value="failed">Failed</option>
+                      </select>
+                    </div>
+                    <div className="flex gap-2 pt-2">
+                      <Button onClick={() => saveContractor(editingContractor)} className="flex-1">
+                        <Save className="w-4 h-4 mr-1" /> Save Changes
+                      </Button>
+                      <Button variant="outline" onClick={() => setEditingContractor(null)}>Cancel</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="modules">
