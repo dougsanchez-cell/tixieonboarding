@@ -298,27 +298,27 @@ const AIChatStep = ({ onComplete, onBack, demoMode = false, userPath = null }: A
         <div className="rounded-[16px] p-6" style={{ background: "#2A2B3D", border: "1px solid #3A3B50" }}>
           <h1 className="text-3xl font-black text-white mb-1">Tixie U 🎓</h1>
           <p className="text-sm mb-4" style={{ color: "#9898B0" }}>
-            Your Tixie knowledge base — browse topics or ask anything below
+            Browse the reference topics below, or scroll down to ask Tixie U anything
           </p>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "#9898B0" }} />
-            <input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search topics... e.g. 'LV seats', 'price tolerance', 'even quantities'"
-              className="w-full rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 transition-all"
-              style={{ background: "#22233A", border: "1px solid #3A3B50", focusRingColor: "#8B50CC" } as React.CSSProperties}
-            />
-          </div>
-          <p className="text-xs mt-3" style={{ color: canAdvance ? "#4CAF82" : "#9898B0" }}>
+          <p className="text-xs" style={{ color: canAdvance ? "#4CAF82" : "#9898B0" }}>
             {canAdvance
               ? "✅ Ready to take the quiz!"
-              : `Ask at least ${minQuestions} questions below to unlock the quiz`}
+              : `Ask Tixie U at least ${minQuestions} questions in the chat below to unlock the quiz`}
           </p>
         </div>
 
         {/* SECTION 2 — Topic Card Library */}
         <div>
+          <div className="relative mb-3">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "#9898B0" }} />
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Filter topics... e.g. 'price', 'seats', 'hours'"
+              className="w-full rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 transition-all"
+              style={{ background: "#22233A", border: "1px solid #3A3B50", focusRingColor: "#8B50CC" } as React.CSSProperties}
+            />
+          </div>
           {filteredTopics.length === 0 && searchQuery.trim() && (
             <div className="text-center py-8">
               <p className="text-sm" style={{ color: "#9898B0" }}>
