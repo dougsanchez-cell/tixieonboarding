@@ -41,13 +41,9 @@ const RegistrationStep = ({ onComplete, demoMode = false, userPath = null }: Reg
     if (!validate()) return;
     setLoading(true);
     try {
-      // Check for existing registration with same email
+      // Check for existing registration with same email via secure function
       const { data: existing } = await supabase
-        .from("contractors")
-        .select("id, status")
-        .eq("email", email.trim())
-        .order("created_at", { ascending: false })
-        .limit(1);
+        .rpc("check_contractor_email", { _email: email.trim() });
 
       if (existing && existing.length > 0) {
         const prev = existing[0];
