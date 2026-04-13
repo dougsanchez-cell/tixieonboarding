@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { LogOut, Download, Save, Users, BookOpen, HelpCircle, Settings, Bot, ChevronRight, Search } from "lucide-react";
+import { LogOut, Download, Save, Users, BookOpen, HelpCircle, Settings, Bot, ChevronRight, Search, BarChart3 } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend, Cell } from "recharts";
 import TixieHeader from "@/components/TixieHeader";
 import type { Session } from "@supabase/supabase-js";
 
@@ -439,6 +440,7 @@ const Admin = () => {
             <TabsTrigger value="contractors"><Users className="w-4 h-4 mr-1" />Contractors</TabsTrigger>
             <TabsTrigger value="modules"><BookOpen className="w-4 h-4 mr-1" />Modules</TabsTrigger>
             <TabsTrigger value="quiz"><HelpCircle className="w-4 h-4 mr-1" />Quiz</TabsTrigger>
+            <TabsTrigger value="analytics"><BarChart3 className="w-4 h-4 mr-1" />Analytics</TabsTrigger>
             <TabsTrigger value="ai"><Bot className="w-4 h-4 mr-1" />AI Prompt</TabsTrigger>
             <TabsTrigger value="settings"><Settings className="w-4 h-4 mr-1" />Settings</TabsTrigger>
           </TabsList>
