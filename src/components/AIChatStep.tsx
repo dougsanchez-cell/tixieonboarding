@@ -169,7 +169,7 @@ const TOPICS: TopicCard[] = [
         <li>If the seat map won't load or Tixie appears frozen: <span className="text-white font-semibold">wait up to 2 full minutes</span></li>
         <li>If still unresponsive: log the issue using the Select Option dropdown (choose "Map didn't load" or "Code didn't work") — this reports the problem and moves you to the next request</li>
         <li>Do not force-quit unless absolutely necessary</li>
-        <li>To report an issue: (1) take a screenshot, (2) copy the Request ID from the Request Info box, (3) write what happened vs. what you expected. Save in a Google Doc</li>
+        <li>To report an issue: use the <span className="text-white font-semibold">Tixie Support icon</span> in the Tixie app — you can submit text and attachments directly. Include the Request ID and describe what happened vs. what you expected</li>
         <li>As a Tixie tester, <span className="text-white font-semibold">reporting new bugs is part of your role</span>. If you encounter something new, report it once with a screenshot, the Request ID, and what happened. If the same issue keeps happening, note the frequency — no need to report it every time</li>
       </ul>
     ),

@@ -23,7 +23,7 @@ const GUIDE_SECTIONS = [
   },
   {
     heading: "Seat Selection",
-    body: `Think about it from a fan's perspective — within your assigned section, pick the seats you'd want if you were going to the show. Closer to the stage is <strong>ALWAYS better</strong>. On the seat map, blue seats are available and grey seats are unavailable — only select from the blue seats. NEVER purchase seats labeled <strong>LV</strong> (Limited View), <strong>OV</strong> (Obstructed View), <strong>SS</strong> (Side Stage), <strong>WC</strong> (Wheelchair), or <strong>ADA</strong> — unless the Request explicitly states they are acceptable. When in doubt, use the Select Option dropdown and move to the next request.`,
+    body: `Think about it from a fan's perspective — within your assigned section, pick the seats you'd want if you were going to the show. Closer to the stage is <strong>ALWAYS better</strong>. On the seat map, blue seats are available and grey seats are unavailable — only select from the blue seats. NEVER purchase seats labeled <strong>LV</strong> (Limited View), <strong>OV</strong> (Obstructed View), <strong>SS</strong> (Side Stage), <strong>WC</strong> (Wheelchair), or <strong>ADA</strong> — unless the Request explicitly states they are acceptable. When in doubt, use the Select Option dropdown and move to the next request. For visual examples of seat maps and section layouts, see the <a href="https://opyxdjxlkobucilpyqgi.supabase.co/storage/v1/object/public/Docs/Tixie%20Tester%20Guideline.pdf" target="_blank">Tixie Tester Guideline</a>.`,
   },
   {
     heading: "The Select Option Dropdown",
@@ -31,7 +31,11 @@ const GUIDE_SECTIONS = [
   },
   {
     heading: "Session Flow",
-    body: `When a request is available you'll see a toast notification. A countdown timer shows how long you have to start. Click <strong>"Start Purchasing"</strong> → wait for the seat map to fully load → read the Request Info box → select seats → verify price → complete purchase. If the tool is stuck, wait up to 2 minutes then use Select Option → "Map didn't load."`,
+    body: `When a request is available you'll see a toast notification. A countdown timer shows how long you have to start. Click <strong>"Start Purchasing"</strong> → wait for the seat map to fully load → read the Request Info box → select seats → verify price → complete purchase. If the tool is stuck, wait up to 2 minutes then use Select Option → "Map didn't load." <strong>Peak demand hours</strong> are Mon–Fri 6:00 AM–12:00 PM PST, but you can log in anytime. Weekly max is <strong>10 hours</strong>.`,
+  },
+  {
+    heading: "Reporting Issues & Policies",
+    body: `As a Tixie tester, <strong>reporting new bugs is part of your role</strong>. Use the <strong>Tixie Support icon</strong> inside the Tixie app to submit issues — you can include text and attachments directly. Report new issues once — if the same bug recurs, note the frequency. If you are unsure about a purchase, <strong>reach out — do not guess</strong>. Email <a href="mailto:gigsupport@jomero.co">gigsupport@jomero.co</a> or use Tixie Support in the app. The use of <strong>bots, scripts, or automated tools is strictly prohibited</strong> — all purchases must be made manually.`,
   },
 ];
 
