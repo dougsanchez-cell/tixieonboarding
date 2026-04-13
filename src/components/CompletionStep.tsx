@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Mail, Terminal, Clock, HelpCircle } from "lucide-react";
+import { Mail, Download, Clock, HelpCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface CompletionStepProps {
@@ -101,8 +101,8 @@ const CompletionStep = ({ name, email, score, contractorId, userPath = null, mod
               </span>
             </div>
           <div className="flex gap-3 items-start">
-            <Terminal className="w-5 h-5 shrink-0 mt-0.5" style={{ color: "#8B50CC" }} />
-            <span>Install Tixie via Terminal if you haven't already (Module 1)</span>
+            <Download className="w-5 h-5 shrink-0 mt-0.5" style={{ color: "#8B50CC" }} />
+            <span>Download and install Tixie if you haven't already (see Module 1)</span>
           </div>
           <div className="flex gap-3 items-start">
             <Clock className="w-5 h-5 shrink-0 mt-0.5" style={{ color: "#4CAF82" }} />
