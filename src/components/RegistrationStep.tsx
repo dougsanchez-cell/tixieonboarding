@@ -78,21 +78,15 @@ const RegistrationStep = ({ onComplete, onReturningUser, demoMode = false, userP
     }
     setReturningLoading(true);
     try {
-      const { data } = await supabase
-        .rpc("check_contractor_email", { _email: returningEmail.trim() });
+      // Query the cleared contractor directly — skips the status-check step
+      // which could return a newer in_progress row instead of the cleared one
+      const { data: fullData } = await supabase
+        .rpc("get_returning_contractor" as any, { _email: returningEmail.trim() });
 
-      if (data && data.length > 0 && data[0].status === "cleared") {
-        // Fetch full contractor details for the cleared user
-        const { data: fullData } = await supabase
-          .rpc("get_returning_contractor" as any, { _email: returningEmail.trim() });
-
-        if (fullData && (fullData as any[]).length > 0) {
-          const c = (fullData as any[])[0];
-          if (onReturningUser) {
-            onReturningUser({ id: c.id, name: c.name, email: c.email, phone: c.phone });
-          }
-        } else {
-          toast.error("Could not retrieve your account details. Please try again.");
+      if (fullData && (fullData as any[]).length > 0) {
+        const c = (fullData as any[])[0];
+        if (onReturningUser) {
+          onReturningUser({ id: c.id, name: c.name, email: c.email, phone: c.phone });
         }
       } else {
         toast.error("No cleared account found with this email. Complete the orientation first.");
