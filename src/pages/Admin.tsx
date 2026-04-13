@@ -1022,6 +1022,7 @@ const Admin = () => {
             </div>
           </TabsContent>
 
+          <TabsContent value="ai">
             <Card>
               <CardContent className="pt-4 space-y-3">
                 <Label>AI System Prompt</Label>
