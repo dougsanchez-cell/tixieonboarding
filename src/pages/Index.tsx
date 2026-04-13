@@ -20,6 +20,7 @@ const Index = () => {
   const [step, setStep] = useState(1);
   const [contractor, setContractor] = useState<Contractor | null>(null);
   const [finalScore, setFinalScore] = useState(0);
+  const [reviewMode, setReviewMode] = useState(false);
   
   const [moduleCount, setModuleCount] = useState(3);
   const [demoMode, setDemoMode] = useState(() => {
@@ -54,8 +55,8 @@ const Index = () => {
               userPath={userPath}
             />
           )}
-          {step === 2 && <TrainingModules onComplete={() => setStep(3)} demoMode={demoMode} userPath={userPath} />}
-          {step === 3 && <AIChatStep onComplete={() => setStep(4)} onBack={() => setStep(2)} demoMode={demoMode} userPath={userPath} />}
+          {step === 2 && <TrainingModules onComplete={() => setStep(3)} demoMode={demoMode || reviewMode} userPath={userPath} />}
+          {step === 3 && <AIChatStep onComplete={() => setStep(4)} onBack={() => setStep(2)} demoMode={demoMode || reviewMode} userPath={userPath} />}
           {step === 4 && contractor && (
             <QuizStep
               contractorId={contractor.id}
@@ -75,7 +76,7 @@ const Index = () => {
               contractorId={contractor.id}
               userPath={userPath}
               moduleCount={moduleCount}
-              onBack={() => setStep(2)}
+              onBack={() => { setReviewMode(true); setStep(2); }}
             />
           )}
         </div>
