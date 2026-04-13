@@ -16,10 +16,20 @@ interface Contractor {
   phone: string;
 }
 
+const loadProgress = () => {
+  try {
+    const saved = sessionStorage.getItem("tixie_progress");
+    if (saved) return JSON.parse(saved);
+  } catch {}
+  return null;
+};
+
 const Index = () => {
-  const [step, setStep] = useState(1);
-  const [contractor, setContractor] = useState<Contractor | null>(null);
-  const [finalScore, setFinalScore] = useState(0);
+  const saved = loadProgress();
+
+  const [step, setStep] = useState(saved?.step || 1);
+  const [contractor, setContractor] = useState<Contractor | null>(saved?.contractor || null);
+  const [finalScore, setFinalScore] = useState(saved?.finalScore || 0);
   const [reviewMode, setReviewMode] = useState(false);
   
   const [moduleCount, setModuleCount] = useState(3);
@@ -29,6 +39,15 @@ const Index = () => {
   const [userPath] = useState<string | null>(() => {
     return new URLSearchParams(window.location.search).get("path");
   });
+
+  // Persist progress to sessionStorage
+  useEffect(() => {
+    try {
+      sessionStorage.setItem("tixie_progress", JSON.stringify({
+        step, contractor, finalScore,
+      }));
+    } catch {}
+  }, [step, contractor, finalScore]);
 
   useEffect(() => {
     supabase.from("content_modules").select("id", { count: "exact", head: true }).then(({ count }) => {

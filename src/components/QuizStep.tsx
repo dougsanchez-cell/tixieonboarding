@@ -3,6 +3,15 @@ import { Check, X, RotateCcw, Trophy, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+function shuffleArray<T>(arr: T[]): T[] {
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 interface Question { id: number; question_number: number; question_text: string; options: string[]; }
 interface GradeResult { correct: boolean; correct_index: number; explanation: string | null; }
 interface QuizStepProps { contractorId: string; onPass: (score: number) => void; onBack?: () => void; demoMode?: boolean; }
@@ -21,7 +30,8 @@ const QuizStep = ({ contractorId, onPass, onBack, demoMode = false }: QuizStepPr
     const load = async () => {
       const { data, error } = await supabase.rpc("get_quiz_questions");
       if (data && !error) {
-        setQuestions((data as unknown as Question[]).map((q) => ({ ...q, options: (q.options as unknown as string[]) || [] })));
+        const mapped = (data as unknown as Question[]).map((q) => ({ ...q, options: (q.options as unknown as string[]) || [] }));
+        setQuestions(shuffleArray(mapped));
       }
       const { data: configData } = await supabase.functions.invoke("get-public-config");
       if (configData?.pass_threshold) setPassThreshold(parseInt(configData.pass_threshold) || 80);
@@ -46,7 +56,7 @@ const QuizStep = ({ contractorId, onPass, onBack, demoMode = false }: QuizStepPr
     } finally { setGrading(false); }
   };
 
-  const retry = () => { setAnswers({}); setSubmitted(false); setScore(0); setResults({}); };
+  const retry = () => { setAnswers({}); setSubmitted(false); setScore(0); setResults({}); setQuestions(prev => shuffleArray([...prev])); };
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: "#1C1D2E" }}>

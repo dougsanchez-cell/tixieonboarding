@@ -41,6 +41,24 @@ const RegistrationStep = ({ onComplete, demoMode = false, userPath = null }: Reg
     if (!validate()) return;
     setLoading(true);
     try {
+      // Check for existing registration with same email
+      const { data: existing } = await supabase
+        .from("contractors")
+        .select("id, status")
+        .eq("email", email.trim())
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (existing && existing.length > 0) {
+        const prev = existing[0];
+        if (prev.status === "cleared") {
+          toast.info("You've already completed orientation with this email. Contact gigsupport@jomero.co if you need help.");
+          setLoading(false);
+          return;
+        }
+        toast.info("Welcome back! Starting a new orientation attempt.");
+      }
+
       const id = crypto.randomUUID();
       const { error } = await supabase
         .from("contractors")

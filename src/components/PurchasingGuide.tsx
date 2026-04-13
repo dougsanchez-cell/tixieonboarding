@@ -141,7 +141,7 @@ const PurchasingGuide = ({ completed, onComplete, demoMode = false }: Purchasing
       </div>
 
       {/* Scrollable content */}
-      <div ref={scrollRef} onScroll={handleScroll} className="max-h-[400px] overflow-y-auto px-5 py-4 space-y-5">
+      <div ref={scrollRef} onScroll={handleScroll} className="max-h-[60vh] overflow-y-auto px-5 py-4 space-y-5">
         {GUIDE_SECTIONS.map((section, i) => (
           <div key={i} className="space-y-1.5">
             <div className="flex items-start gap-2">
