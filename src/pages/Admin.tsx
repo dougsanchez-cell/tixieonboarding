@@ -184,6 +184,7 @@ const Admin = () => {
         case "attempts": cmp = a.totalAttempts - b.totalAttempts; break;
         case "date": cmp = new Date(a.firstRegisteredAt).getTime() - new Date(b.firstRegisteredAt).getTime(); break;
         case "lastActivity": cmp = new Date(a.latest.created_at).getTime() - new Date(b.latest.created_at).getTime(); break;
+        case "totalTime": cmp = getTotalTime(a.latest.id) - getTotalTime(b.latest.id); break;
         default: cmp = 0;
       }
       return sortDirection === "asc" ? cmp : -cmp;
