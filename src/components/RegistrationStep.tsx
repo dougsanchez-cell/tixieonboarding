@@ -2,21 +2,25 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-
 import { toast } from "sonner";
 
 interface RegistrationStepProps {
   onComplete: (contractor: { id: string; name: string; email: string; phone: string }) => void;
+  onReturningUser?: (contractor: { id: string; name: string; email: string; phone: string }) => void;
   demoMode?: boolean;
   userPath?: string | null;
 }
 
-const RegistrationStep = ({ onComplete, demoMode = false, userPath = null }: RegistrationStepProps) => {
+const RegistrationStep = ({ onComplete, onReturningUser, demoMode = false, userPath = null }: RegistrationStepProps) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Returning user state
+  const [returningEmail, setReturningEmail] = useState("");
+  const [returningLoading, setReturningLoading] = useState(false);
 
   const handleDemoSkip = async () => {
     const id = crypto.randomUUID();
@@ -41,7 +45,6 @@ const RegistrationStep = ({ onComplete, demoMode = false, userPath = null }: Reg
     if (!validate()) return;
     setLoading(true);
     try {
-      // Check for existing registration with same email via secure function
       const { data: existing } = await supabase
         .rpc("check_contractor_email", { _email: email.trim() });
 
@@ -68,6 +71,39 @@ const RegistrationStep = ({ onComplete, demoMode = false, userPath = null }: Reg
     }
   };
 
+  const handleReturningSignIn = async () => {
+    if (!returningEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(returningEmail)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    setReturningLoading(true);
+    try {
+      const { data } = await supabase
+        .rpc("check_contractor_email", { _email: returningEmail.trim() });
+
+      if (data && data.length > 0 && data[0].status === "cleared") {
+        // Fetch full contractor details for the cleared user
+        const { data: fullData } = await supabase
+          .rpc("get_returning_contractor", { _email: returningEmail.trim() });
+
+        if (fullData && fullData.length > 0) {
+          const c = fullData[0];
+          if (onReturningUser) {
+            onReturningUser({ id: c.id, name: c.name, email: c.email, phone: c.phone });
+          }
+        } else {
+          toast.error("Could not retrieve your account details. Please try again.");
+        }
+      } else {
+        toast.error("No cleared account found with this email. Complete the orientation first.");
+      }
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setReturningLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left hero panel */}
@@ -75,7 +111,6 @@ const RegistrationStep = ({ onComplete, demoMode = false, userPath = null }: Reg
         className="relative lg:w-[40%] w-full px-8 py-16 lg:py-0 flex flex-col items-center justify-center overflow-hidden"
         style={{ background: "#D4B8F8" }}
       >
-        {/* Organic blob shapes */}
         <div
           className="absolute w-[300px] h-[300px] opacity-60"
           style={{
@@ -186,6 +221,40 @@ const RegistrationStep = ({ onComplete, demoMode = false, userPath = null }: Reg
               </button>
             )}
           </form>
+
+          {/* Returning user section */}
+          <div className="mt-8">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex-1 h-px" style={{ background: "#3A3B50" }} />
+              <span className="text-xs font-medium" style={{ color: "#9898B0" }}>Already completed orientation?</span>
+              <div className="flex-1 h-px" style={{ background: "#3A3B50" }} />
+            </div>
+
+            <div className="px-4 py-5 rounded-xl" style={{ background: "#22233A", border: "1px solid #3A3B50" }}>
+              <p className="text-sm font-medium text-white mb-3">Sign in to review materials</p>
+              <Input
+                type="email"
+                value={returningEmail}
+                onChange={(e) => setReturningEmail(e.target.value)}
+                placeholder="Enter your registered email"
+                className="mb-3 text-white placeholder:text-white/30 rounded-xl border focus:ring-2 transition-colors"
+                style={{
+                  background: "#2A2B3D",
+                  borderColor: "#3A3B50",
+                }}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleReturningSignIn(); } }}
+              />
+              <button
+                type="button"
+                onClick={handleReturningSignIn}
+                disabled={returningLoading}
+                className="w-full py-3 rounded-[10px] font-semibold text-sm transition-all duration-200 hover:brightness-125 disabled:opacity-60 disabled:pointer-events-none"
+                style={{ background: "transparent", border: "1px solid #6B5498", color: "#B89CE8" }}
+              >
+                {returningLoading ? "Checking..." : "Sign In to Review →"}
+              </button>
+            </div>
+          </div>
 
           {/* Progress preview */}
           <div className="mt-10 flex flex-wrap justify-center gap-x-2 gap-y-1 text-xs font-medium" style={{ color: "#9898B0" }}>
