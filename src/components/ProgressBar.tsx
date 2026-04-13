@@ -30,7 +30,7 @@ const ProgressBar = ({ currentStep, onStepClick }: ProgressBarProps) => (
                   ? "bg-primary text-primary-foreground shadow-md"
                   : "bg-muted text-muted-foreground"
               }`}
-              onClick={() => isComplete && onStepClick?.(stepNum)}
+              onClick={() => isComplete && stepNum > 1 && onStepClick?.(stepNum)}
             >
               {isComplete ? <Check className="w-4 h-4" /> : step.short}
             </div>
