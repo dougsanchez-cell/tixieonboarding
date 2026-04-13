@@ -164,6 +164,15 @@ export type Database = {
           question_text: string
         }[]
       }
+      get_returning_contractor: {
+        Args: { _email: string }
+        Returns: {
+          email: string
+          id: string
+          name: string
+          phone: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
