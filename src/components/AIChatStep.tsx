@@ -132,7 +132,7 @@ const TOPICS: TopicCard[] = [
         <li>On the seat map, <span className="text-white font-semibold">blue seats</span> are available for purchase — <span style={{ color: "#9898B0" }}>grey seats</span> are unavailable. Only select from the blue seats in your assigned section</li>
         <li><span style={{ color: "#E05555" }} className="font-semibold">NEVER</span> purchase seats labeled: LV (Limited View), OV (Obstructed View), SS (Side Stage), WC (Wheelchair), ADA — unless the Request explicitly states they are acceptable</li>
         <li>When in doubt: use the Select Option dropdown and move to the next request</li>
-        <li>📄 For visual examples of seat maps and section layouts, see the <a href="https://docs.google.com/document/d/1Ngg2ZojvJovk65_5D_d0TWpmj4hbgQXfAVD26M6jhwA/edit" target="_blank" rel="noopener noreferrer" className="text-[#8B50CC] underline hover:text-[#a76de8]">Tixie Tester Guideline</a></li>
+        <li>📄 For visual examples of seat maps and section layouts, see the <a href="https://opyxdjxlkobucilpyqgi.supabase.co/storage/v1/object/public/Docs/Tixie%20Tester%20Guideline.pdf" target="_blank" rel="noopener noreferrer" className="text-[#8B50CC] underline hover:text-[#a76de8]">Tixie Tester Guideline</a></li>
       </ul>
     ),
   },
