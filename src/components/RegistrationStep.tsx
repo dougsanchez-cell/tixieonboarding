@@ -84,10 +84,10 @@ const RegistrationStep = ({ onComplete, onReturningUser, demoMode = false, userP
       if (data && data.length > 0 && data[0].status === "cleared") {
         // Fetch full contractor details for the cleared user
         const { data: fullData } = await supabase
-          .rpc("get_returning_contractor", { _email: returningEmail.trim() });
+          .rpc("get_returning_contractor" as any, { _email: returningEmail.trim() });
 
-        if (fullData && fullData.length > 0) {
-          const c = fullData[0];
+        if (fullData && (fullData as any[]).length > 0) {
+          const c = (fullData as any[])[0];
           if (onReturningUser) {
             onReturningUser({ id: c.id, name: c.name, email: c.email, phone: c.phone });
           }
