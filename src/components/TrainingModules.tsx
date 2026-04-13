@@ -378,7 +378,17 @@ const TrainingModules = ({ onComplete, onBack, demoMode = false, reviewMode = fa
         </div>
 
         {/* Progress counter pill */}
-        {!reviewMode && (
+        {reviewMode ? (
+          <div className="mt-5 flex justify-center">
+            <button
+              onClick={onComplete}
+              className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:brightness-125"
+              style={{ background: "#6B5498", border: "1px solid #8B50CC" }}
+            >
+              Continue to Tixie U →
+            </button>
+          </div>
+        ) : (
           <div className="mt-5 flex justify-center">
             <div className="px-5 py-2 rounded-full text-sm font-medium" style={{ background: "#22233A", color: "#E8E8F0" }}>
               {completed.size} of {modules.length} modules completed 🎯
