@@ -75,6 +75,7 @@ const Index = () => {
               contractorId={contractor.id}
               userPath={userPath}
               moduleCount={moduleCount}
+              onBack={() => setStep(2)}
             />
           )}
         </div>
