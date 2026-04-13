@@ -112,7 +112,7 @@ const TrainingModules = ({ onComplete, onBack, demoMode = false, userPath = null
     const current = modules[activeModule];
     if (!current || completed.has(current.module_number)) { setCountdown(0); setHasScrolledBottom(true); return; }
     if (current.video_url) { setCountdown(0); setHasScrolledBottom(false); return; }
-    const duration = 90;
+    const duration = 0;
     setCountdown(duration); setHasScrolledBottom(false);
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
