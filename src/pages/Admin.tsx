@@ -12,6 +12,14 @@ import { LogOut, Download, Save, Users, BookOpen, HelpCircle, Settings, Bot, Che
 import TixieHeader from "@/components/TixieHeader";
 import type { Session } from "@supabase/supabase-js";
 
+interface SessionEvent {
+  id: number;
+  contractor_id: string;
+  step_name: string;
+  event_type: string;
+  event_at: string;
+}
+
 interface Contractor {
   id: string;
   name: string;
