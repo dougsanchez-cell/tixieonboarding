@@ -211,9 +211,9 @@ const TOPICS: TopicCard[] = [
   },
 ];
 
-interface AIChatStepProps { onComplete: () => void; onBack?: () => void; demoMode?: boolean; userPath?: string | null; }
+interface AIChatStepProps { onComplete: () => void; onBack?: () => void; demoMode?: boolean; reviewMode?: boolean; userPath?: string | null; }
 
-const AIChatStep = ({ onComplete, onBack, demoMode = false, userPath = null }: AIChatStepProps) => {
+const AIChatStep = ({ onComplete, onBack, demoMode = false, reviewMode = false, userPath = null }: AIChatStepProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -257,7 +257,8 @@ const AIChatStep = ({ onComplete, onBack, demoMode = false, userPath = null }: A
     }
   };
 
-  const canAdvance = demoMode || userQuestionCount >= minQuestions;
+  const bypassGates = demoMode || reviewMode;
+  const canAdvance = bypassGates || userQuestionCount >= minQuestions;
 
   const TOPIC_SEARCH_INDEX: Record<number, string> = {
     1: "peak hours monday friday 6am 12pm pst anytime 10 hours week",
@@ -479,7 +480,9 @@ const AIChatStep = ({ onComplete, onBack, demoMode = false, userPath = null }: A
                   color: canAdvance ? "#FFFFFF" : "#9898B0",
                 }}
               >
-                {demoMode
+                {reviewMode
+                  ? "📚 Reviewing training materials"
+                  : demoMode
                   ? "Demo: question gate bypassed"
                   : canAdvance
                   ? `✅ ${userQuestionCount}/${minQuestions} — ready to take the quiz!`

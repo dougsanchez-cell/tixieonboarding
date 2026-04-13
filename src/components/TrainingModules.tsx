@@ -15,7 +15,7 @@ interface Module {
   accent: string | null; light: string | null; duration: string | null;
   video_url: string | null; sections: Section[]; comprehension_questions: CompQuestion[];
 }
-interface TrainingModulesProps { onComplete: () => void; onBack?: () => void; demoMode?: boolean; userPath?: string | null; }
+interface TrainingModulesProps { onComplete: () => void; onBack?: () => void; demoMode?: boolean; reviewMode?: boolean; userPath?: string | null; }
 
 declare global { interface Window { YT: any; onYouTubeIframeAPIReady: (() => void) | undefined; } }
 
@@ -36,7 +36,8 @@ function loadYTApi(cb: () => void) {
 const isSupabaseVideo = (url: string) => url.includes("supabase.co");
 const isYouTubeVideo = (url: string) => url.includes("youtube.com") || url.includes("youtu.be");
 
-const TrainingModules = ({ onComplete, onBack, demoMode = false, userPath = null }: TrainingModulesProps) => {
+const TrainingModules = ({ onComplete, onBack, demoMode = false, reviewMode = false, userPath = null }: TrainingModulesProps) => {
+  const bypassGates = demoMode || reviewMode;
   const [modules, setModules] = useState<Module[]>([]);
   const [activeModule, setActiveModule] = useState(0);
   const [completed, setCompleted] = useState<Set<number>>(new Set());
@@ -140,7 +141,7 @@ const TrainingModules = ({ onComplete, onBack, demoMode = false, userPath = null
   }, [activeModule, handleScroll, loading]);
 
   const isModuleAccessible = (index: number): boolean => {
-    if (demoMode) return true;
+    if (bypassGates) return true;
     if (index === activeModule) return true;
     const mod = modules[index];
     if (!mod) return false;
@@ -181,16 +182,16 @@ const TrainingModules = ({ onComplete, onBack, demoMode = false, userPath = null
   const isYT = effectiveHasVideo && isYouTubeVideo(current.video_url!);
   const hasQuiz = current.comprehension_questions && current.comprehension_questions.length > 0;
 
-  const supabaseVideoGateMet = demoMode || (isSupabase ? videoComplete.has(current.module_number) : true);
+  const supabaseVideoGateMet = bypassGates || (isSupabase ? videoComplete.has(current.module_number) : true);
   const ytProgress = ytVideoProgress[current.module_number] || 0;
-  const ytVideoGateMet = demoMode || (isYT ? ytProgress >= 100 : true);
+  const ytVideoGateMet = bypassGates || (isYT ? ytProgress >= 100 : true);
   const videoGateMet = supabaseVideoGateMet && ytVideoGateMet;
-  const textGateMet = demoMode || (effectiveHasVideo ? true : countdown === 0 && hasScrolledBottom);
-  const quizGateMet = demoMode || (hasQuiz ? quizPassed.has(current.module_number) : true);
-  const canComplete = demoMode ? !isCompleted : (videoGateMet && textGateMet && hasScrolledBottom && quizGateMet && !isCompleted);
+  const textGateMet = bypassGates || (effectiveHasVideo ? true : countdown === 0 && hasScrolledBottom);
+  const quizGateMet = bypassGates || (hasQuiz ? quizPassed.has(current.module_number) : true);
+  const canComplete = bypassGates ? !isCompleted : (videoGateMet && textGateMet && hasScrolledBottom && quizGateMet && !isCompleted);
   const isModule2 = current.module_number === 2;
-  const guideGateMet = demoMode || !hideVideo || guideCompleted;
-  const showQuizAndComplete = demoMode || ((isSupabase ? supabaseVideoGateMet : true) && guideGateMet);
+  const guideGateMet = bypassGates || !hideVideo || guideCompleted;
+  const showQuizAndComplete = bypassGates || ((isSupabase ? supabaseVideoGateMet : true) && guideGateMet);
 
   const getButtonLabel = () => {
     if (isYT && ytProgress < 100) return `Watch video (${ytProgress}% watched)`;
@@ -338,7 +339,7 @@ const TrainingModules = ({ onComplete, onBack, demoMode = false, userPath = null
               ))}
 
               {/* Comprehension quiz & Mark complete */}
-              {showQuizAndComplete && (
+              {showQuizAndComplete && !reviewMode && (
                 <>
                   {hasQuiz && !isCompleted && (
                     <ComprehensionQuiz
@@ -377,11 +378,13 @@ const TrainingModules = ({ onComplete, onBack, demoMode = false, userPath = null
         </div>
 
         {/* Progress counter pill */}
-        <div className="mt-5 flex justify-center">
-          <div className="px-5 py-2 rounded-full text-sm font-medium" style={{ background: "#22233A", color: "#E8E8F0" }}>
-            {completed.size} of {modules.length} modules completed 🎯
+        {!reviewMode && (
+          <div className="mt-5 flex justify-center">
+            <div className="px-5 py-2 rounded-full text-sm font-medium" style={{ background: "#22233A", color: "#E8E8F0" }}>
+              {completed.size} of {modules.length} modules completed 🎯
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
