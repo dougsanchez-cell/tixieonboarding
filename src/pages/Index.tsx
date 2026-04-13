@@ -54,7 +54,7 @@ const Index = () => {
               userPath={userPath}
             />
           )}
-          {step === 2 && <TrainingModules onComplete={() => setStep(3)} onBack={() => setStep(1)} demoMode={demoMode} userPath={userPath} />}
+          {step === 2 && <TrainingModules onComplete={() => setStep(3)} demoMode={demoMode} userPath={userPath} />}
           {step === 3 && <AIChatStep onComplete={() => setStep(4)} onBack={() => setStep(2)} demoMode={demoMode} userPath={userPath} />}
           {step === 4 && contractor && (
             <QuizStep
