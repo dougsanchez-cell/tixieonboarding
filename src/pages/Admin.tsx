@@ -330,7 +330,7 @@ const Admin = () => {
   };
 
   const exportCSV = () => {
-    const rows = [["Name", "Email", "Phone", "Path", "Score", "Status", "Attempts", "Date"]];
+    const rows = [["Name", "Email", "Phone", "Path", "Score", "Status", "Attempts", "Total Time", "Date"]];
     exportableContractors.forEach(c => {
       rows.push([
         c.name,
@@ -340,6 +340,7 @@ const Admin = () => {
         String(c.quiz_score ?? ""),
         c.status,
         String(c.quiz_attempts),
+        formatDuration(getTotalTime(c.id)),
         new Date(c.created_at).toLocaleDateString(),
       ]);
     });
@@ -392,7 +393,7 @@ const Admin = () => {
     </th>
   );
 
-  const COL_SPAN = 11; // checkbox + 8 data cols + last activity + expand arrow
+  const COL_SPAN = 12; // checkbox + 9 data cols + last activity + expand arrow
 
   if (checking) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading...</div>;
 
@@ -531,6 +532,7 @@ const Admin = () => {
                     {renderSortHeader("Attempts", "attempts", "hidden sm:table-cell")}
                     {renderSortHeader("First Registered", "date")}
                     {renderSortHeader("Last Activity", "lastActivity")}
+                    {renderSortHeader("Total Time", "totalTime")}
                     <th className="w-8 p-2" aria-label="Expand row"></th>
                   </tr>
                 </thead>
@@ -568,6 +570,7 @@ const Admin = () => {
                           <td className="p-2 hidden sm:table-cell">{group.totalAttempts}</td>
                           <td className="p-2 text-muted-foreground">{new Date(group.firstRegisteredAt).toLocaleDateString()}</td>
                           <td className="p-2 text-muted-foreground">{new Date(group.latest.created_at).toLocaleDateString()}</td>
+                          <td className="p-2 text-muted-foreground">{formatDuration(getTotalTime(group.latest.id))}</td>
                           <td className="p-2">
                             <div className="flex justify-end">
                               <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`} />
@@ -629,6 +632,20 @@ const Admin = () => {
                                     ))}
                                   </tbody>
                                 </table>
+                                {/* Time per Step */}
+                                <div className="p-3 border-t border-primary/15">
+                                  <Label className="text-xs font-medium">Time per Step</Label>
+                                  <div className="flex flex-wrap gap-3 mt-1">
+                                    {Object.entries(getTimePerStep(group.latest.id)).map(([stepName, seconds]) => (
+                                      <span key={stepName} className="text-xs text-muted-foreground">
+                                        {stepName}: <span className="font-medium text-foreground">{formatDuration(seconds)}</span>
+                                      </span>
+                                    ))}
+                                    {Object.keys(getTimePerStep(group.latest.id)).length === 0 && (
+                                      <span className="text-xs text-muted-foreground">No session data recorded</span>
+                                    )}
+                                  </div>
+                                </div>
                                 {/* Notes */}
                                 <div className="p-3 border-t border-primary/15">
                                   <Label className="text-xs font-medium">Internal Notes</Label>
