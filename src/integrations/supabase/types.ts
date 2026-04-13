@@ -148,6 +148,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_contractor_email: {
+        Args: { _email: string }
+        Returns: {
+          id: string
+          status: string
+        }[]
+      }
       get_quiz_questions: {
         Args: never
         Returns: {
