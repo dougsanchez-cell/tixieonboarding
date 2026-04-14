@@ -241,6 +241,20 @@ const TOPICS: TopicCard[] = [
   },
 ];
 
+const TOPIC_SEARCH_INDEX: Record<number, string> = {
+  1: "peak hours monday friday 6am 12pm pst anytime 10 hours week",
+  2: "install download windows mac silicon intel terminal dmg exe security",
+  3: "request id section after fees before fees select option dropdown",
+  4: "quantity even 2 4 6 8 single odd tickets never",
+  5: "price after fees $2 tolerance below above checkout subtotal",
+  6: "seat selection fan perspective blue grey stage closer section LV OV SS WC ADA tester guideline",
+  7: "glossary GA PIT lawn PAV ORCH MEZZ clubs loges IV LV OV SS WC ADA CS CTS SRO resale uppers upper balcony floor pit center aisle GTB RW",
+  8: "troubleshooting stuck frozen 2 minutes select option map load bug report tester tixie support",
+  9: "three core rules never single wheelchair ADA reach out guess LV OV SS",
+  10: "bots scripts automated tools prohibited manual policy termination",
+  11: "section interpretation floor GA general admission range 101 102 103 slash dash pit center left right uppers backs mezzanine lawn aisle any playbook",
+};
+
 interface AIChatStepProps { onComplete: () => void; onBack?: () => void; demoMode?: boolean; reviewMode?: boolean; userPath?: string | null; }
 
 const AIChatStep = ({ onComplete, onBack, demoMode = false, reviewMode = false, userPath = null }: AIChatStepProps) => {
@@ -290,19 +304,8 @@ const AIChatStep = ({ onComplete, onBack, demoMode = false, reviewMode = false, 
   const bypassGates = demoMode || reviewMode;
   const canAdvance = bypassGates || userQuestionCount >= minQuestions;
 
-  const TOPIC_SEARCH_INDEX: Record<number, string> = {
-    1: "peak hours monday friday 6am 12pm pst anytime 10 hours week",
-    2: "install download windows mac silicon intel terminal dmg exe security",
-    3: "request id section after fees before fees select option dropdown",
-    4: "quantity even 2 4 6 8 single odd tickets never",
-    5: "price after fees $2 tolerance below above checkout subtotal",
-    6: "seat selection fan perspective blue grey stage closer section LV OV SS WC ADA tester guideline",
-    7: "glossary GA PIT lawn PAV ORCH MEZZ clubs loges IV LV OV SS WC ADA CS CTS SRO resale uppers upper balcony floor pit center aisle GTB RW",
-    8: "troubleshooting stuck frozen 2 minutes select option map load bug report tester tixie support",
-    9: "three core rules never single wheelchair ADA reach out guess LV OV SS",
-    10: "bots scripts automated tools prohibited manual policy termination",
-    11: "section interpretation floor GA general admission range 101 102 103 slash dash pit center left right uppers backs mezzanine lawn aisle any playbook",
-  };
+  const bypassGates = demoMode || reviewMode;
+  const canAdvance = bypassGates || userQuestionCount >= minQuestions;
 
   const filteredTopics = useMemo(() => {
     if (!searchQuery.trim()) return TOPICS;
@@ -312,7 +315,7 @@ const AIChatStep = ({ onComplete, onBack, demoMode = false, reviewMode = false, 
              t.collapsed.toLowerCase().includes(q) ||
              (TOPIC_SEARCH_INDEX[t.id] || "").toLowerCase().includes(q)
     );
-  }, [searchQuery]);
+  }, [searchQuery, TOPIC_SEARCH_INDEX]);
 
   // Auto-expand first matching card on search
   useEffect(() => {
