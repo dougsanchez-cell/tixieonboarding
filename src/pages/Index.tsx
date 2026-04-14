@@ -139,43 +139,41 @@ const Index = () => {
       <div className={`max-w-5xl mx-auto ${demoMode || isReturningUser ? "pt-8" : ""}`}>
         <TixieHeader />
         <ProgressBar currentStep={step} onStepClick={(s) => setStep(s)} />
-{!demoMode && (
-          <div className="flex justify-end mb-4 px-4 sm:px-0 relative">
-            <button
-              onClick={() => setShowContact(!showContact)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all hover:brightness-125"
-              style={{ background: "#7B51D3", border: "1px solid #9B71E3", color: "white" }}
+        <div className="flex justify-end mb-4 px-4 sm:px-0 relative">
+          <button
+            onClick={() => setShowContact(!showContact)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all hover:brightness-125"
+            style={{ background: "#7B51D3", border: "1px solid #9B71E3", color: "white" }}
+          >
+            💬 Contact Us
+          </button>
+          {showContact && (
+            <div
+              className="absolute top-full right-0 mt-2 w-64 rounded-xl p-4 shadow-lg z-50"
+              style={{ background: "#2A2B3D", border: "1px solid #3A3B50" }}
             >
-              💬 Contact Us
-            </button>
-            {showContact && (
-              <div
-                className="absolute top-full right-0 mt-2 w-64 rounded-xl p-4 shadow-lg z-50"
-                style={{ background: "#2A2B3D", border: "1px solid #3A3B50" }}
-              >
-                <p className="text-sm font-semibold text-white mb-1">Need help?</p>
-                <p className="text-xs mb-3" style={{ color: "#9898B0" }}>
-                  Email us at
-                </p>
-                <div className="text-sm">
-                  <a
-                    href="mailto:gigsupport@jomero.co?subject=Tixie Orientation Help"
-                    className="flex items-center gap-2 text-[#8B50CC] underline hover:text-[#a76de8]"
-                  >
-                    ✉️ gigsupport@jomero.co
-                  </a>
-                </div>
-                <button
-                  onClick={() => setShowContact(false)}
-                  className="mt-3 w-full py-1.5 rounded-lg text-xs font-medium transition-all hover:brightness-125"
-                  style={{ background: "#1C1D2E", color: "#9898B0" }}
+              <p className="text-sm font-semibold text-white mb-1">Need help?</p>
+              <p className="text-xs mb-3" style={{ color: "#9898B0" }}>
+                Email us at
+              </p>
+              <div className="text-sm">
+                <a
+                  href="mailto:gigsupport@jomero.co?subject=Tixie Orientation Help"
+                  className="flex items-center gap-2 text-[#8B50CC] underline hover:text-[#a76de8]"
                 >
-                  Close
-                </button>
+                  ✉️ gigsupport@jomero.co
+                </a>
               </div>
-            )}
-          </div>
-        )}
+              <button
+                onClick={() => setShowContact(false)}
+                className="mt-3 w-full py-1.5 rounded-lg text-xs font-medium transition-all hover:brightness-125"
+                style={{ background: "#1C1D2E", color: "#9898B0" }}
+              >
+                Close
+              </button>
+            </div>
+          )}
+        </div>
         <div className="pb-8">
           {step === 1 && (
             <RegistrationStep
