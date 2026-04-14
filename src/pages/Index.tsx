@@ -136,6 +136,17 @@ const Index = () => {
       <div className={`max-w-5xl mx-auto ${demoMode || isReturningUser ? "pt-8" : ""}`}>
         <TixieHeader />
         <ProgressBar currentStep={step} onStepClick={(s) => setStep(s)} />
+        {contractor && step >= 2 && step <= 4 && !demoMode && (
+          <div className="flex justify-end mb-4 px-4 sm:px-0">
+            <a
+              href="mailto:gigsupport@jomero.co?subject=Tixie Orientation Help"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all hover:brightness-125"
+              style={{ background: "#2A2B3D", border: "1px solid #3A3B50", color: "#9898B0" }}
+            >
+              💬 Contact Us
+            </a>
+          </div>
+        )}
         <div className="pb-8">
           {step === 1 && (
             <RegistrationStep
