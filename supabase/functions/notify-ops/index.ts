@@ -74,9 +74,32 @@ Deno.serve(async (req) => {
     console.log(`[NOTIFY-OPS] Resend response: ${emailRes.status} ${resText}`);
 
     if (!emailRes.ok) {
-      return new Response(JSON.stringify({ error: "Email failed", details: resText }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      console.error("[NOTIFY-OPS] Email failed:", resText);
+    } else {
+      console.log("[NOTIFY-OPS] Email sent successfully");
+    }
+
+    // Send Slack notification
+    const SLACK_WEBHOOK_URL = Deno.env.get("SLACK_WEBHOOK_URL");
+    if (SLACK_WEBHOOK_URL) {
+      const slackMessage = guidedSessionRequest
+        ? `🎓 *Guided Session Request*\n*${name}* (${email}) has completed orientation and is requesting a guided 1-hour training session.\nQuiz Score: ${score}%`
+        : `✅ *New Contractor Cleared*\n*${name}* (${email}) has been cleared for live purchasing.\nQuiz Score: ${score}%\nContractor ID: ${contractorId}`;
+
+      try {
+        const slackRes = await fetch(SLACK_WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: slackMessage }),
+        });
+        if (!slackRes.ok) {
+          console.error("[NOTIFY-OPS] Slack error:", await slackRes.text());
+        } else {
+          console.log("[NOTIFY-OPS] Slack notification sent");
+        }
+      } catch (slackErr) {
+        console.error("[NOTIFY-OPS] Slack failed:", slackErr);
+      }
     }
 
     return new Response(JSON.stringify({ success: true, notified: opsEmail }), {
