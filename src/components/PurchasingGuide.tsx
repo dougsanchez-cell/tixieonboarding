@@ -151,7 +151,7 @@ const PurchasingGuide = ({ completed, onComplete, demoMode = false }: Purchasing
                 <p
                   className="text-sm leading-relaxed mt-1"
                   style={{ color: "#9898B0" }}
-                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(section.body) }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(section.body, { ADD_ATTR: ['target'] }) }}
                 />
               </div>
             </div>

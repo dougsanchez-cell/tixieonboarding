@@ -331,7 +331,7 @@ const TrainingModules = ({ onComplete, onBack, demoMode = false, reviewMode = fa
                       <p
                         className="text-sm leading-relaxed mt-1 [&_a]:text-[#8B50CC] [&_a]:underline [&_a]:hover:text-[#a76de8]"
                         style={{ color: "#9898B0" }}
-                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(section.body) }}
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(section.body, { ADD_ATTR: ['target'] }) }}
                       />
                     </div>
                   </div>
