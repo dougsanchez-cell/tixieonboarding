@@ -136,7 +136,7 @@ const Index = () => {
       <div className={`max-w-5xl mx-auto ${demoMode || isReturningUser ? "pt-8" : ""}`}>
         <TixieHeader />
         <ProgressBar currentStep={step} onStepClick={(s) => setStep(s)} />
-        {contractor && step >= 2 && step <= 5 && !demoMode && (
+        {!demoMode && (
           <div className="flex justify-end mb-4 px-4 sm:px-0">
             <a
               href="mailto:gigsupport@jomero.co?subject=Tixie Orientation Help"
