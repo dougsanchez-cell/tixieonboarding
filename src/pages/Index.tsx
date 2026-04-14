@@ -144,7 +144,7 @@ const Index = () => {
             <button
               onClick={() => setShowContact(!showContact)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all hover:brightness-125"
-              style={{ background: "#2A2B3D", border: "1px solid #3A3B50", color: "#9898B0" }}
+              style={{ background: "#7B51D3", border: "1px solid #9B71E3", color: "white" }}
             >
               💬 Contact Us
             </button>
