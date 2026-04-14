@@ -151,11 +151,16 @@ const TOPICS: TopicCard[] = [
         <GlossaryPill status="ok" abbr="SRO" desc="Standing Room Only (OK to buy)" />
         <GlossaryPill status="ok" abbr="Clubs / Loges" desc="Premium indoor sections (OK to buy)" />
         <GlossaryPill status="ok" abbr="Uppers" desc="Upper-level seating, furthest from stage (OK to buy)" />
+        <GlossaryPill status="ok" abbr="Floor" desc="Front/bottom level, may be standing room (OK to buy)" />
+        <GlossaryPill status="ok" abbr="Pit / Pits" desc="Closest to stage, often standing room (OK to buy)" />
+        <GlossaryPill status="ok" abbr="Center" desc="Middle area, direct view of stage (OK to buy)" />
+        <GlossaryPill status="ok" abbr="Aisle" desc="Next to walkways, usually in pairs (OK to buy)" />
+        <GlossaryPill status="ok" abbr="GTB" desc="Good to Buy — confirmed OK to purchase" />
         <GlossaryPill status="warn" abbr="LV" desc="Limited View (avoid unless stated)" />
         <GlossaryPill status="warn" abbr="OV" desc="Obstructed View (avoid unless stated)" />
         <GlossaryPill status="warn" abbr="SS" desc="Side Stage (avoid unless stated)" />
         <GlossaryPill status="warn" abbr="Behind the Stage" desc="(avoid)" />
-        <GlossaryPill status="warn" abbr="RV / AFS" desc="Rear View / Away From Stage (avoid)" />
+        <GlossaryPill status="warn" abbr="RV / RW / AFS" desc="Rear View / Rear of Stage / Away From Stage (avoid)" />
         <GlossaryPill status="no" abbr="WC" desc="Wheelchair (NEVER purchase)" />
         <GlossaryPill status="no" abbr="ADA" desc="Accessible seating (NEVER purchase)" />
       </div>
@@ -267,10 +272,11 @@ const AIChatStep = ({ onComplete, onBack, demoMode = false, reviewMode = false, 
     4: "quantity even 2 4 6 8 single odd tickets never",
     5: "price after fees $2 tolerance below above checkout subtotal",
     6: "seat selection fan perspective blue grey stage closer section LV OV SS WC ADA tester guideline",
-    7: "glossary GA PIT lawn PAV ORCH MEZZ clubs loges IV LV OV SS WC ADA CS CTS SRO resale uppers upper balcony",
+    7: "glossary GA PIT lawn PAV ORCH MEZZ clubs loges IV LV OV SS WC ADA CS CTS SRO resale uppers upper balcony floor pit center aisle GTB RW",
     8: "troubleshooting stuck frozen 2 minutes select option map load bug report tester tixie support",
     9: "three core rules never single wheelchair ADA reach out guess LV OV SS",
     10: "bots scripts automated tools prohibited manual policy termination",
+    11: "section interpretation floor GA general admission range 101 102 103 slash dash pit center left right uppers backs mezzanine lawn aisle any playbook",
   };
 
   const filteredTopics = useMemo(() => {
