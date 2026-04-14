@@ -139,7 +139,7 @@ const Index = () => {
       <div className={`max-w-5xl mx-auto ${demoMode || isReturningUser ? "pt-8" : ""}`}>
         <TixieHeader />
         <ProgressBar currentStep={step} onStepClick={(s) => setStep(s)} />
-        {!demoMode && (
+{!demoMode && (
           <div className="flex justify-end mb-4 px-4 sm:px-0 relative">
             <button
               onClick={() => setShowContact(!showContact)}
