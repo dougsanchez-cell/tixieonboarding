@@ -155,7 +155,7 @@ const Index = () => {
               >
                 <p className="text-sm font-semibold text-white mb-1">Need help?</p>
                 <p className="text-xs mb-3" style={{ color: "#9898B0" }}>
-                  Reach out anytime — we're happy to help.
+                  Email us at
                 </p>
                 <div className="text-sm">
                   <a
