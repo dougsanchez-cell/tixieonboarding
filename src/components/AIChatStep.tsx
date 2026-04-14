@@ -304,9 +304,6 @@ const AIChatStep = ({ onComplete, onBack, demoMode = false, reviewMode = false, 
   const bypassGates = demoMode || reviewMode;
   const canAdvance = bypassGates || userQuestionCount >= minQuestions;
 
-  const bypassGates = demoMode || reviewMode;
-  const canAdvance = bypassGates || userQuestionCount >= minQuestions;
-
   const filteredTopics = useMemo(() => {
     if (!searchQuery.trim()) return TOPICS;
     const q = searchQuery.toLowerCase();
