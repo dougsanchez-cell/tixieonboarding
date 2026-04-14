@@ -131,7 +131,7 @@ const CompletionStep = ({ name, email, score, contractorId, userPath = null, mod
             <div className="flex gap-3 items-start">
               <span className="text-lg shrink-0">📞</span>
               <span style={{ color: "#7BC8F6" }}>
-                <strong className="text-white">Need more help?</strong> Request a guided 1-hour training session with the Jomero team before your first live session.
+                <strong className="text-white">Need more help?</strong> Request a guided training session with the Jomero team before your first live session.
               </span>
             </div>
             {!sessionRequested ? (
