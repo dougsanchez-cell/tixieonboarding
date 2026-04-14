@@ -151,11 +151,16 @@ const TOPICS: TopicCard[] = [
         <GlossaryPill status="ok" abbr="SRO" desc="Standing Room Only (OK to buy)" />
         <GlossaryPill status="ok" abbr="Clubs / Loges" desc="Premium indoor sections (OK to buy)" />
         <GlossaryPill status="ok" abbr="Uppers" desc="Upper-level seating, furthest from stage (OK to buy)" />
+        <GlossaryPill status="ok" abbr="Floor" desc="Front/bottom level, may be standing room (OK to buy)" />
+        <GlossaryPill status="ok" abbr="Pit / Pits" desc="Closest to stage, often standing room (OK to buy)" />
+        <GlossaryPill status="ok" abbr="Center" desc="Middle area, direct view of stage (OK to buy)" />
+        <GlossaryPill status="ok" abbr="Aisle" desc="Next to walkways, usually in pairs (OK to buy)" />
+        <GlossaryPill status="ok" abbr="GTB" desc="Good to Buy — confirmed OK to purchase" />
         <GlossaryPill status="warn" abbr="LV" desc="Limited View (avoid unless stated)" />
         <GlossaryPill status="warn" abbr="OV" desc="Obstructed View (avoid unless stated)" />
         <GlossaryPill status="warn" abbr="SS" desc="Side Stage (avoid unless stated)" />
         <GlossaryPill status="warn" abbr="Behind the Stage" desc="(avoid)" />
-        <GlossaryPill status="warn" abbr="RV / AFS" desc="Rear View / Away From Stage (avoid)" />
+        <GlossaryPill status="warn" abbr="RV / RW / AFS" desc="Rear View / Rear of Stage / Away From Stage (avoid)" />
         <GlossaryPill status="no" abbr="WC" desc="Wheelchair (NEVER purchase)" />
         <GlossaryPill status="no" abbr="ADA" desc="Accessible seating (NEVER purchase)" />
       </div>
@@ -206,6 +211,31 @@ const TOPICS: TopicCard[] = [
         <p>All ticket purchases must be made manually by you. Automated tools undermine the integrity of the purchasing process and violate your contractor agreement.</p>
         <p className="font-semibold text-white">Violation of this policy will result in immediate termination of your contractor access.</p>
         <p className="text-xs italic" style={{ color: "#9898B0" }}>By completing this orientation, you acknowledge that you understand and agree to this policy.</p>
+      </div>
+    ),
+  },
+  {
+    id: 11, icon: "🏟️", title: "Section Interpretation Guide", accent: "#8B50CC",
+    collapsed: "How to read Floor, GA, ranges, Pit, Center, Uppers, Any, and more",
+    content: (
+      <div className="space-y-3 text-sm" style={{ color: "#9898B0" }}>
+        <p className="text-xs italic">When a section name in the Request doesn't match what you see on the seat map, use these rules to interpret it.</p>
+        <ul className="space-y-2">
+          <li><span className="text-white font-semibold">Floor</span> — Front/bottom level of the venue, sometimes standing room. May also be called "Orchestra." If you don't see a section labeled "Floor," select the section that matches on the seat map</li>
+          <li><span className="text-white font-semibold">GA (General Admission)</span> — Open seating or standing room, no assigned seats. If you don't see "GA" on the map, select the matching section name</li>
+          <li><span className="text-white font-semibold">Ranges (e.g. 101-106)</span> — Means any section within that range is acceptable. If the map shows different section names, purchase in any section within the range</li>
+          <li><span className="text-white font-semibold">Sections with "/" or "-" (e.g. 7/9)</span> — Means section 7 <span className="text-white">OR</span> section 9. Either is acceptable</li>
+          <li><span className="text-white font-semibold">In View</span> — Preference for clear, standard sightlines. Avoid aisle seats, obstructed/limited views, and seats too far to the sides</li>
+          <li><span className="text-white font-semibold">Pit / Pits</span> — Area closest to the stage, often standing room. Can generally be treated as GA or standing room entry</li>
+          <li><span className="text-white font-semibold">Center</span> — Middle area of the venue with a direct view of the stage</li>
+          <li><span className="text-white font-semibold">Left / Right</span> — Select seats on the specified side of the venue within the price point</li>
+          <li><span className="text-white font-semibold">Uppers / Backs</span> — Top or back of the venue (sometimes called "nosebleeds"). If the venue doesn't label them as "Uppers," look for upper-level sections within the price point</li>
+          <li><span className="text-white font-semibold">Mezzanine</span> — Mid-level section above orchestra but below upper/backs. Can be split into left, center, right</li>
+          <li><span className="text-white font-semibold">Lawn</span> — Grassy area in amphitheaters, no fixed seating, furthest from stage. Sometimes labeled as GA</li>
+          <li><span className="text-white font-semibold">Aisle</span> — Seats next to walkways or exits, usually in pairs, often less expensive</li>
+          <li><span className="text-white font-semibold">Any</span> — Purchase in any section at the same price point, including lawn and GA. Still follow even-quantity rules</li>
+        </ul>
+        <p>📄 For the complete playbook with all scenarios, see the <a href="https://opyxdjxlkobucilpyqgi.supabase.co/storage/v1/object/public/Docs/Tixie%20Purchasing%20Sections%20Playbook.pdf" target="_blank" rel="noopener noreferrer" className="text-[#8B50CC] underline hover:text-[#a76de8]">Purchasing Sections Playbook</a></p>
       </div>
     ),
   },
@@ -267,10 +297,11 @@ const AIChatStep = ({ onComplete, onBack, demoMode = false, reviewMode = false, 
     4: "quantity even 2 4 6 8 single odd tickets never",
     5: "price after fees $2 tolerance below above checkout subtotal",
     6: "seat selection fan perspective blue grey stage closer section LV OV SS WC ADA tester guideline",
-    7: "glossary GA PIT lawn PAV ORCH MEZZ clubs loges IV LV OV SS WC ADA CS CTS SRO resale uppers upper balcony",
+    7: "glossary GA PIT lawn PAV ORCH MEZZ clubs loges IV LV OV SS WC ADA CS CTS SRO resale uppers upper balcony floor pit center aisle GTB RW",
     8: "troubleshooting stuck frozen 2 minutes select option map load bug report tester tixie support",
     9: "three core rules never single wheelchair ADA reach out guess LV OV SS",
     10: "bots scripts automated tools prohibited manual policy termination",
+    11: "section interpretation floor GA general admission range 101 102 103 slash dash pit center left right uppers backs mezzanine lawn aisle any playbook",
   };
 
   const filteredTopics = useMemo(() => {
