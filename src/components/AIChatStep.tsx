@@ -367,7 +367,7 @@ const AIChatStep = ({ onComplete, onBack, demoMode = false, reviewMode = false, 
                   </button>
                   <div
                     className="transition-all duration-300 ease-in-out overflow-hidden"
-                    style={{ maxHeight: isOpen ? "600px" : "0px", opacity: isOpen ? 1 : 0 }}
+                    style={{ maxHeight: isOpen ? "1200px" : "0px", opacity: isOpen ? 1 : 0 }}
                   >
                     <div className="px-4 pb-4 pt-1 rounded-b-[14px]" style={{ background: "#22233A" }}>
                       {topic.content}
