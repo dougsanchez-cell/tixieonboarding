@@ -160,7 +160,7 @@ const RegistrationStep = ({ onComplete, onReturningUser, demoMode = false, userP
           <div className="mb-6 px-4 py-3 rounded-xl text-sm flex items-start gap-3"
                style={{ background: "#1A2A3A", border: "1px solid #B3D4F0", color: "#7BC8F6" }}>
             <span className="text-base shrink-0">💡</span>
-            <span>Complete this orientation to get cleared for live purchasing. If you'd like additional support, a guided 1-hour session is available — just click Request Guided Session or email <a href="mailto:gigsupport@jomero.co" className="underline text-[#8B50CC]">gigsupport@jomero.co</a> after completing the orientation.</span>
+            <span>Complete this orientation to get cleared for live purchasing. If you'd like additional support, a guided session is available — just click the Request Guided Session banner or email <a href="mailto:gigsupport@jomero.co" className="underline text-[#8B50CC]">gigsupport@jomero.co</a> after completing the orientation.</span>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
