@@ -124,6 +124,8 @@ const Index = () => {
     });
   }, []);
 
+  useEffect(() => { setShowContact(false); }, [step]);
+
   return (
     <div className="min-h-screen bg-background">
       {demoMode && (
