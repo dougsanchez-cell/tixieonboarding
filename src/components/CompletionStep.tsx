@@ -12,12 +12,22 @@ interface CompletionStepProps {
   onBack?: () => void;
 }
 
+const isDemoMode = () => {
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(window.location.search);
+  return params.get("demo") === "true";
+};
+
 const CompletionStep = ({ name, email, score, contractorId, userPath = null, moduleCount = 3, onBack }: CompletionStepProps) => {
   const firstName = name.split(" ")[0];
   const [sessionRequested, setSessionRequested] = useState(false);
   const [requestingSession, setRequestingSession] = useState(false);
 
   const handleRequestSession = async () => {
+    if (isDemoMode()) {
+      setSessionRequested(true);
+      return;
+    }
     setRequestingSession(true);
     try {
       await supabase.functions.invoke("notify-ops", {
@@ -38,6 +48,7 @@ const CompletionStep = ({ name, email, score, contractorId, userPath = null, mod
   };
 
   useEffect(() => {
+    if (isDemoMode()) return;
     supabase.functions.invoke("notify-ops", {
       body: { contractorId, name, email, score },
     }).catch(() => {});
