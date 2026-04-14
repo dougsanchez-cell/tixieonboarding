@@ -235,7 +235,7 @@ const TOPICS: TopicCard[] = [
           <li><span className="text-white font-semibold">Aisle</span> — Seats next to walkways or exits, usually in pairs, often less expensive</li>
           <li><span className="text-white font-semibold">Any</span> — Purchase in any section at the same price point, including lawn and GA. Still follow even-quantity rules</li>
         </ul>
-        <p>📄 For the complete playbook with all scenarios, see the <a href="https://opyxdjxlkobucilpyqgi.supabase.co/storage/v1/object/public/Docs/Tixie%20Purchasing%20Sections%20Playbook.pdf" target="_blank" rel="noopener noreferrer" className="text-[#8B50CC] underline hover:text-[#a76de8]">Purchasing Sections Playbook</a></p>
+        <p>📄 For the complete guide with visual examples, see the <a href="https://opyxdjxlkobucilpyqgi.supabase.co/storage/v1/object/public/Docs/Tixie%20Tester%20Guideline%20-%20Updated%204_14_2026.pdf" target="_blank" rel="noopener noreferrer" className="text-[#8B50CC] underline hover:text-[#a76de8]">Tixie Tester Guideline</a></p>
       </div>
     ),
   },
