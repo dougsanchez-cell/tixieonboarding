@@ -214,6 +214,31 @@ const TOPICS: TopicCard[] = [
       </div>
     ),
   },
+  {
+    id: 11, icon: "🏟️", title: "Section Interpretation Guide", accent: "#8B50CC",
+    collapsed: "How to read Floor, GA, ranges, Pit, Center, Uppers, Any, and more",
+    content: (
+      <div className="space-y-3 text-sm" style={{ color: "#9898B0" }}>
+        <p className="text-xs italic">When a section name in the Request doesn't match what you see on the seat map, use these rules to interpret it.</p>
+        <ul className="space-y-2">
+          <li><span className="text-white font-semibold">Floor</span> — Front/bottom level of the venue, sometimes standing room. May also be called "Orchestra." If you don't see a section labeled "Floor," select the section that matches on the seat map</li>
+          <li><span className="text-white font-semibold">GA (General Admission)</span> — Open seating or standing room, no assigned seats. If you don't see "GA" on the map, select the matching section name</li>
+          <li><span className="text-white font-semibold">Ranges (e.g. 101-106)</span> — Means any section within that range is acceptable. If the map shows different section names, purchase in any section within the range</li>
+          <li><span className="text-white font-semibold">Sections with "/" or "-" (e.g. 7/9)</span> — Means section 7 <span className="text-white">OR</span> section 9. Either is acceptable</li>
+          <li><span className="text-white font-semibold">In View</span> — Preference for clear, standard sightlines. Avoid aisle seats, obstructed/limited views, and seats too far to the sides</li>
+          <li><span className="text-white font-semibold">Pit / Pits</span> — Area closest to the stage, often standing room. Can generally be treated as GA or standing room entry</li>
+          <li><span className="text-white font-semibold">Center</span> — Middle area of the venue with a direct view of the stage</li>
+          <li><span className="text-white font-semibold">Left / Right</span> — Select seats on the specified side of the venue within the price point</li>
+          <li><span className="text-white font-semibold">Uppers / Backs</span> — Top or back of the venue (sometimes called "nosebleeds"). If the venue doesn't label them as "Uppers," look for upper-level sections within the price point</li>
+          <li><span className="text-white font-semibold">Mezzanine</span> — Mid-level section above orchestra but below upper/backs. Can be split into left, center, right</li>
+          <li><span className="text-white font-semibold">Lawn</span> — Grassy area in amphitheaters, no fixed seating, furthest from stage. Sometimes labeled as GA</li>
+          <li><span className="text-white font-semibold">Aisle</span> — Seats next to walkways or exits, usually in pairs, often less expensive</li>
+          <li><span className="text-white font-semibold">Any</span> — Purchase in any section at the same price point, including lawn and GA. Still follow even-quantity rules</li>
+        </ul>
+        <p>📄 For the complete playbook with all scenarios, see the <a href="https://opyxdjxlkobucilpyqgi.supabase.co/storage/v1/object/public/Docs/Tixie%20Purchasing%20Sections%20Playbook.pdf" target="_blank" rel="noopener noreferrer" className="text-[#8B50CC] underline hover:text-[#a76de8]">Purchasing Sections Playbook</a></p>
+      </div>
+    ),
+  },
 ];
 
 interface AIChatStepProps { onComplete: () => void; onBack?: () => void; demoMode?: boolean; reviewMode?: boolean; userPath?: string | null; }
