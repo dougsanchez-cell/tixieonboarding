@@ -10,7 +10,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { contractorId, name, email, score } = await req.json();
+    const { contractorId, name, email, score, guidedSessionRequest } = await req.json();
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -24,7 +24,34 @@ serve(async (req) => {
 
     const opsEmail = configData?.value || "gigsupport@jomero.co";
 
-    console.log(`[NOTIFY-OPS] Contractor cleared: ${name} (${email}), Score: ${score}%, Notify: ${opsEmail}`);
+    const emailSubject = guidedSessionRequest
+      ? `🎓 Guided Session Request — ${name} (${email})`
+      : `✅ New Contractor Cleared — ${name} (${email})`;
+
+    const emailBody = guidedSessionRequest
+      ? `<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">
+          <h2 style="color:#7B51D3;">Guided Session Request</h2>
+          <p>${name} (<a href="mailto:${email}">${email}</a>) has completed the Tixie orientation and is requesting a guided 1-hour training session.</p>
+          <table style="width:100%;border-collapse:collapse;">
+            <tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">Name</td><td style="padding:8px;border-bottom:1px solid #eee;">${name}</td></tr>
+            <tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">Email</td><td style="padding:8px;border-bottom:1px solid #eee;">${email}</td></tr>
+            <tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">Quiz Score</td><td style="padding:8px;border-bottom:1px solid #eee;">${score}%</td></tr>
+            <tr><td style="padding:8px;font-weight:bold;">Contractor ID</td><td style="padding:8px;">${contractorId}</td></tr>
+          </table>
+          <p style="color:#666;margin-top:16px;">Please reach out to schedule their session.</p>
+        </div>`
+      : `<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">
+          <h2 style="color:#7B51D3;">New Contractor Cleared</h2>
+          <table style="width:100%;border-collapse:collapse;">
+            <tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">Name</td><td style="padding:8px;border-bottom:1px solid #eee;">${name}</td></tr>
+            <tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">Email</td><td style="padding:8px;border-bottom:1px solid #eee;">${email}</td></tr>
+            <tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">Quiz Score</td><td style="padding:8px;border-bottom:1px solid #eee;">${score}%</td></tr>
+            <tr><td style="padding:8px;font-weight:bold;">Contractor ID</td><td style="padding:8px;">${contractorId}</td></tr>
+          </table>
+          <p style="color:#666;margin-top:16px;">This contractor has completed the Tixie orientation and is cleared for live purchasing.</p>
+        </div>`;
+
+    console.log(`[NOTIFY-OPS] ${guidedSessionRequest ? 'Guided session request' : 'Contractor cleared'}: ${name} (${email}), Score: ${score}%, Notify: ${opsEmail}`);
 
     // Send email via Resend if API key is configured
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
@@ -42,19 +69,8 @@ serve(async (req) => {
         body: JSON.stringify({
           from: "Tixie Onboarding <onboarding@resend.dev>",
           to: [opsEmail],
-          subject: `🎓 New Contractor Cleared: ${name} (${score}%)`,
-          html: `
-            <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">
-              <h2 style="color:#7B51D3;">New Contractor Cleared</h2>
-              <table style="width:100%;border-collapse:collapse;">
-                <tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">Name</td><td style="padding:8px;border-bottom:1px solid #eee;">${name}</td></tr>
-                <tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">Email</td><td style="padding:8px;border-bottom:1px solid #eee;">${email}</td></tr>
-                <tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">Quiz Score</td><td style="padding:8px;border-bottom:1px solid #eee;">${score}%</td></tr>
-                <tr><td style="padding:8px;font-weight:bold;">Contractor ID</td><td style="padding:8px;">${contractorId}</td></tr>
-              </table>
-              <p style="color:#666;margin-top:16px;">This contractor has completed the Tixie orientation and is cleared for live purchasing.</p>
-            </div>
-          `,
+          subject: emailSubject,
+          html: emailBody,
         }),
       });
 
