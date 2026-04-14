@@ -257,6 +257,16 @@ const TOPIC_SEARCH_INDEX: Record<number, string> = {
 
 interface AIChatStepProps { onComplete: () => void; onBack?: () => void; demoMode?: boolean; reviewMode?: boolean; userPath?: string | null; }
 
+const linkifyText = (text: string) => {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+  return parts.map((part, i) =>
+    urlRegex.test(part)
+      ? <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-[#8B50CC] underline hover:text-[#a76de8] break-all">{part.length > 60 ? part.slice(0, 60) + "..." : part}</a>
+      : part
+  );
+};
+
 const AIChatStep = ({ onComplete, onBack, demoMode = false, reviewMode = false, userPath = null }: AIChatStepProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -456,7 +466,7 @@ const AIChatStep = ({ onComplete, onBack, demoMode = false, reviewMode = false, 
                     borderLeft: m.role === "assistant" ? "2px solid #8B50CC" : "none",
                   }}
                 >
-                  {m.content}
+                  {m.role === "assistant" ? linkifyText(m.content) : m.content}
                 </div>
                 {m.role === "user" && (
                   <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,.05)" }}>
