@@ -41,6 +41,7 @@ const Index = () => {
   const [finalScore, setFinalScore] = useState(saved?.finalScore || 0);
   const [reviewMode, setReviewMode] = useState(saved?.reviewMode || false);
   const [isReturningUser, setIsReturningUser] = useState(saved?.isReturningUser || false);
+  const [showContact, setShowContact] = useState(false);
   
   const [moduleCount, setModuleCount] = useState(3);
   const [demoMode, setDemoMode] = useState(() => {
