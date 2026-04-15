@@ -84,6 +84,13 @@ const PurchasingGuide = ({ completed, onComplete, demoMode = false }: Purchasing
 
   if (!isOpen) {
     return (
+      <>
+      <div className="flex items-start gap-2 px-4 py-3 mb-3 rounded-xl text-sm" style={{ background: "#1A2A3A", border: "1px solid #B3D4F0", color: "#7BC8F6" }}>
+        <span className="text-lg shrink-0">📖</span>
+        <span>
+          <strong className="text-white">Required reading:</strong> This guide covers the key purchasing rules you'll need during live sessions — seat selection, section names, price rules, and what to avoid. Read through it carefully before continuing.
+        </span>
+      </div>
       <div
         className="flex items-center gap-4 p-5 rounded-[14px] cursor-pointer transition-all hover:brightness-110"
         style={{ background: "#22233A", border: "1px solid #8B50CC" }}
