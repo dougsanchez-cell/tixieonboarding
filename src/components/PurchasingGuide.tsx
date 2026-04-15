@@ -116,6 +116,7 @@ const PurchasingGuide = ({ completed, onComplete, demoMode = false }: Purchasing
           Open Guide →
         </button>
       </div>
+      </>
     );
   }
 
