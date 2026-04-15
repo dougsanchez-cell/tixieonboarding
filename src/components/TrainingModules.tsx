@@ -190,7 +190,7 @@ const TrainingModules = ({ onComplete, onBack, demoMode = false, reviewMode = fa
   const quizGateMet = bypassGates || (hasQuiz ? quizPassed.has(current.module_number) : true);
   const canComplete = bypassGates ? !isCompleted : (videoGateMet && textGateMet && hasScrolledBottom && quizGateMet && !isCompleted);
   const isModule2 = current.module_number === 2;
-  const guideGateMet = bypassGates || !hideVideo || guideCompleted;
+  const guideGateMet = bypassGates || !isModule2 || guideCompleted;
   const showQuizAndComplete = bypassGates || ((isSupabase ? supabaseVideoGateMet : true) && guideGateMet);
 
   const getButtonLabel = () => {
@@ -279,7 +279,7 @@ const TrainingModules = ({ onComplete, onBack, demoMode = false, reviewMode = fa
             <div className="space-y-6 pt-2">
               {/* Video */}
               {/* Purchasing Guide for Module 2 */}
-              {isModule2 && hideVideo && (
+              {isModule2 && (
                 <PurchasingGuide
                   completed={guideCompleted}
                   onComplete={() => setGuideCompleted(true)}
