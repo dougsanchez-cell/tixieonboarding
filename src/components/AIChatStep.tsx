@@ -58,9 +58,8 @@ const TOPICS: TopicCard[] = [
           <p className="text-white font-semibold mb-1">Step 1: Download Tixie</p>
           <p>Select the link for your operating system:</p>
           <ul className="mt-1 space-y-1 ml-4 list-disc">
-            <li>🪟 <span className="text-white">Windows:</span> <a href="https://kraken-app.s3.us-east-2.amazonaws.com/releases/tixie/prod/v1.1.14-build-202604141043/tixie-app-v1.1.14-x64-setup.exe.zip" className="text-[#8B50CC] underline hover:text-[#a76de8]">Download for Windows</a></li>
-            <li>🍎 <span className="text-white">Mac OS — Apple Silicon:</span> <a href="https://kraken-app.s3.us-east-2.amazonaws.com/releases/tixie/prod/v1.1.14-build-202604141043/tixie-app-v1.1.14-x64.dmg.zip" className="text-[#8B50CC] underline hover:text-[#a76de8]">Download for Mac (M1, M2, or newer)</a></li>
-            <li>🍎 <span className="text-white">Mac OS — Intel:</span> <a href="https://kraken-app.s3.us-east-2.amazonaws.com/releases/tixie/prod/v1.1.14-build-202604141043/tixie-app-v1.1.14-arm64.dmg.zip" className="text-[#8B50CC] underline hover:text-[#a76de8]">Download for Mac (Intel processor)</a></li>
+            <li><a href="https://kraken-app.s3.us-east-2.amazonaws.com/releases/tixie/prod/v1.1.14-build-202604141043/tixie-app-v1.1.14-x64-setup.exe.zip" target="_blank" rel="noopener noreferrer" className="text-[#8B50CC] underline hover:text-[#a76de8]">Windows — Tixie</a></li>
+            <li><span className="text-white font-semibold">Mac OS (all models):</span> Open Terminal (Cmd + Space → type "Terminal") and paste:<br/><code className="block mt-1 px-3 py-2 rounded bg-[#1C1D2E] text-[#a76de8] text-xs select-all">curl -fsSL https://kraken-app.s3.us-east-2.amazonaws.com/releases/tixie/install-mac.command | bash</code></li>
           </ul>
           <p className="mt-1 text-xs italic">Not sure which Mac version? Click the Apple icon (top left of your screen) → "About This Mac" to check your processor.</p>
         </div>
