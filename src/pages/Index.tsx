@@ -164,6 +164,9 @@ const Index = () => {
                   ✉️ gigsupport@jomero.co
                 </a>
               </div>
+              <p className="text-xs mt-3" style={{ color: "#9898B0" }}>
+                💬 Tixie Chat Support: Mon–Fri, 8 AM–1 PM PST
+              </p>
               <button
                 onClick={() => setShowContact(false)}
                 className="mt-3 w-full py-1.5 rounded-lg text-xs font-medium transition-all hover:brightness-125"

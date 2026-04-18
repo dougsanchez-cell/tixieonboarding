@@ -175,6 +175,7 @@ const TOPICS: TopicCard[] = [
         <li>Do not force-quit unless absolutely necessary</li>
         <li>To report an issue: use the <span className="text-white font-semibold">Tixie Support icon</span> in the Tixie app — you can submit text and attachments directly. Include the Request ID and describe what happened vs. what you expected</li>
         <li>As a Tixie tester, <span className="text-white font-semibold">reporting new bugs is part of your role</span>. If you encounter something new, report it once with a screenshot, the Request ID, and what happened. If the same issue keeps happening, note the frequency — no need to report it every time</li>
+        <li><span className="text-white font-semibold">Tixie Chat Support</span> is available Monday–Friday, 8:00 AM–1:00 PM PST via the Tixie Support icon in the app</li>
       </ul>
     ),
   },
@@ -186,7 +187,7 @@ const TOPICS: TopicCard[] = [
         <div className="space-y-3">
           {[
             "NEVER purchase single tickets or WC/ADA seats — no exceptions",
-            "Reach out if you are unsure — do not guess. Email gigsupport@jomero.co or message via the app",
+            "Reach out if you are unsure — do not guess. Email gigsupport@jomero.co or use Tixie Chat Support (Mon–Fri, 8 AM–1 PM PST)",
             "NEVER purchase LV, OV, or SS seats unless the Request explicitly states they are acceptable",
           ].map((rule, i) => (
             <div key={i} className="flex gap-3 items-start rounded-xl px-4 py-3" style={{ background: "#3A1A1A", border: "1px solid #E05555" }}>
