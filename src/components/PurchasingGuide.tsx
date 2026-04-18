@@ -35,7 +35,7 @@ const GUIDE_SECTIONS = [
   },
   {
     heading: "Reporting Issues & Policies",
-    body: `As a Tixie tester, <strong>reporting new bugs is part of your role</strong>. Use the <strong>Tixie Support icon</strong> inside the Tixie app to submit issues — you can include text and attachments directly. Report new issues once — if the same bug recurs, note the frequency. If you are unsure about a purchase, <strong>reach out — do not guess</strong>. Email <a href="mailto:gigsupport@jomero.co">gigsupport@jomero.co</a> or use Tixie Support in the app. The use of <strong>bots, scripts, or automated tools is strictly prohibited</strong> — all purchases must be made manually.`,
+    body: `As a Tixie tester, <strong>reporting new bugs is part of your role</strong>. Use the <strong>Tixie Support icon</strong> inside the Tixie app to submit issues — you can include text and attachments directly. Report new issues once — if the same bug recurs, note the frequency. If you are unsure about a purchase, <strong>reach out — do not guess</strong>. Email <a href="mailto:gigsupport@jomero.co">gigsupport@jomero.co</a> or use Tixie Chat Support in the app (Mon–Fri, 8 AM–1 PM PST). The use of <strong>bots, scripts, or automated tools is strictly prohibited</strong> — all purchases must be made manually.`,
   },
 ];
 
