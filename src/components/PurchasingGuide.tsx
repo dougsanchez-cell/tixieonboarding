@@ -23,7 +23,7 @@ const GUIDE_SECTIONS = [
   },
   {
     heading: "Seat Selection",
-    body: `Think about it from a fan's perspective — within the requested section, pick the seats you'd want if you were attending the show. Closer to the stage is always better. On the seat map, <strong>blue seats</strong> are available for purchase — grey seats are unavailable. Only select from the blue seats in your assigned section. After a successful purchase your tickets are logged automatically. Always log out properly when done — never leave Tixie running. For visual examples of seat maps and section layouts, see the <a href="https://opyxdjxlkobucilpyqgi.supabase.co/storage/v1/object/public/Docs/Tixie%20Tester%20Guideline%20-%20Updated%204_15_2026.pdf" target="_blank">Tixie Tester Guideline</a>.`,
+    body: `Think about it from a fan's perspective — within the requested section, pick the seats you'd want if you were attending the show. Closer to the stage is always better. On the seat map, <strong>blue seats</strong> are available for purchase — grey seats are unavailable. Only select from the blue seats in your assigned section. After a successful purchase your tickets are logged automatically. Always log out properly when done — never leave Tixie running. For visual examples of seat maps and section layouts, see the <a href="https://opyxdjxlkobucilpyqgi.supabase.co/storage/v1/object/public/Docs/Tixie%20Tester%20Guideline%20-%20Updated%204_22_2026.pdf" target="_blank">Tixie Tester Guideline</a>.`,
   },
   {
     heading: "The Select Option Dropdown",
