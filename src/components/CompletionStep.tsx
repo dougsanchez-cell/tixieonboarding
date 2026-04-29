@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Mail, Download, Clock, HelpCircle, MessageCircle } from "lucide-react";
+import { Mail, Download, Clock, HelpCircle, MessageCircle, Lock } from "lucide-react";
+import DOMPurify from "dompurify";
 import { supabase } from "@/integrations/supabase/client";
 
 interface CompletionStepProps {
