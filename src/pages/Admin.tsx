@@ -454,6 +454,7 @@ const Admin = () => {
             <TabsTrigger value="analytics"><BarChart3 className="w-4 h-4 mr-1" />Analytics</TabsTrigger>
             <TabsTrigger value="ai"><Bot className="w-4 h-4 mr-1" />AI Prompt</TabsTrigger>
             <TabsTrigger value="settings"><Settings className="w-4 h-4 mr-1" />Settings</TabsTrigger>
+            <TabsTrigger value="compensation"><DollarSign className="w-4 h-4 mr-1" />Compensation</TabsTrigger>
           </TabsList>
 
           <TabsContent value="contractors">
