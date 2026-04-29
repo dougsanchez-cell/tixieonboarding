@@ -239,6 +239,59 @@ const CompletionStep = ({ name, email, score, contractorId, userPath = null, mod
         )}
       </div>
 
+      {/* Compensation Section */}
+      <div
+        className="rounded-2xl p-6 w-full max-w-lg z-10 mt-4 animate-fade-in"
+        style={{ background: "#2A2B3D", border: "1px solid #3A3B50", animationDelay: "0.7s" }}
+      >
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-2xl">💰</span>
+          <h2 className="font-bold text-lg text-white">Compensation & Pay</h2>
+        </div>
+
+        {!compUnlocked ? (
+          <div className="space-y-3">
+            <p className="text-sm" style={{ color: "#9898B0" }}>
+              Enter your access code to view compensation details. Your code was provided by the Jomero team.
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={compCode}
+                onChange={(e) => setCompCode(e.target.value)}
+                placeholder="Enter access code"
+                className="flex-1 px-3 py-2 rounded-lg text-sm bg-[#1C1D2E] border border-[#3A3B50] text-white placeholder-[#6B6B80] focus:outline-none focus:border-[#8B50CC]"
+                onKeyDown={(e) => e.key === "Enter" && handleCompCode()}
+              />
+              <button
+                onClick={handleCompCode}
+                disabled={compLoading || !compCode.trim()}
+                className="px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:brightness-125 disabled:opacity-60 flex items-center gap-1"
+                style={{ background: "#8B50CC", color: "#FFFFFF" }}
+              >
+                <Lock className="w-4 h-4" />
+                {compLoading ? "Checking..." : "Unlock"}
+              </button>
+            </div>
+            {compError && (
+              <p className="text-sm" style={{ color: "#F87171" }}>{compError}</p>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm" style={{ color: "#4CAF82" }}>
+              <span>✅</span>
+              <span>Compensation details unlocked</span>
+            </div>
+            <div
+              className="text-sm"
+              style={{ color: "#C8C8D0" }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(compContent, { ADD_ATTR: ['target'] }) }}
+            />
+          </div>
+        )}
+      </div>
+
       <style>{`
         @keyframes morphBlob {
           0%, 100% { border-radius: 50% 40% 60% 50% / 60% 50% 40% 50%; }
