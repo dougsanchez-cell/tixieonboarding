@@ -228,6 +228,8 @@ const Admin = () => {
         if (c.key === "pass_threshold") setPassThreshold(c.value);
         if (c.key === "ops_notification_email") setOpsEmail(c.value);
         if (c.key === "min_chat_questions") setMinQuestions(c.value);
+        if (c.key === "compensation_access_code") setCompensationCode(c.value);
+        if (c.key === "compensation_content") setCompensationContent(c.value);
         if (c.key === "contractor_notes") {
           try { setContractorNotes(JSON.parse(c.value)); } catch { setContractorNotes({}); }
         }
@@ -238,6 +240,12 @@ const Admin = () => {
       }
     }
     if (seRes.data) setSessionEvents(seRes.data as SessionEvent[]);
+
+    const { data: unlocksData } = await supabase
+      .from("compensation_unlocks")
+      .select("email, unlocked_at")
+      .order("unlocked_at", { ascending: false });
+    if (unlocksData) setCompUnlocks(unlocksData);
   };
 
   const getTimePerStep = (contractorId: string) => {
