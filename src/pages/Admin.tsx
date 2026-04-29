@@ -1068,6 +1068,71 @@ const Admin = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="compensation">
+            <Card>
+              <CardHeader>
+                <CardTitle>Compensation Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <Label>Access Code</Label>
+                  <p className="text-xs text-muted-foreground mb-1">
+                    Contractors enter this code on the Cleared screen to unlock compensation details.
+                    Share it individually — do not post publicly.
+                  </p>
+                  <div className="flex gap-2">
+                    <Input
+                      value={compensationCode}
+                      onChange={(e) => setCompensationCode(e.target.value)}
+                      placeholder="e.g. TIXIE2026"
+                    />
+                    <Button onClick={() => saveConfig("compensation_access_code", compensationCode)}>
+                      <Save className="w-4 h-4 mr-1" />Save
+                    </Button>
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Compensation Content</Label>
+                  <p className="text-xs text-muted-foreground mb-1">
+                    HTML content shown to contractors after they enter the code. Supports bold, links, lists.
+                  </p>
+                  <Textarea
+                    value={compensationContent}
+                    onChange={(e) => setCompensationContent(e.target.value)}
+                    rows={15}
+                    placeholder="Enter compensation details in HTML..."
+                    className="font-mono text-xs"
+                  />
+                  <Button className="mt-2" onClick={() => saveConfig("compensation_content", compensationContent)}>
+                    <Save className="w-4 h-4 mr-1" />Save Content
+                  </Button>
+                </div>
+
+                <div>
+                  <Label>Unlocked Contractors</Label>
+                  <p className="text-xs text-muted-foreground mb-1">
+                    Contractors who have entered the code and viewed compensation details.
+                  </p>
+                  <div className="mt-2 space-y-1">
+                    {compUnlocks.map((u, i) => (
+                      <div key={i} className="flex items-center gap-2 text-sm">
+                        <span className="text-success">✅</span>
+                        <span>{u.email}</span>
+                        <span className="text-muted-foreground text-xs">
+                          {new Date(u.unlocked_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    ))}
+                    {compUnlocks.length === 0 && (
+                      <span className="text-sm text-muted-foreground">No contractors have unlocked compensation yet.</span>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
     </div>
