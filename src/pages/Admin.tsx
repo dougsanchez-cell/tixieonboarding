@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { LogOut, Download, Save, Users, BookOpen, HelpCircle, Settings, Bot, ChevronRight, Search, BarChart3 } from "lucide-react";
+import { LogOut, Download, Save, Users, BookOpen, HelpCircle, Settings, Bot, ChevronRight, Search, BarChart3, DollarSign } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend, Cell } from "recharts";
 import TixieHeader from "@/components/TixieHeader";
 import type { Session } from "@supabase/supabase-js";
