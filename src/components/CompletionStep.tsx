@@ -23,6 +23,11 @@ const CompletionStep = ({ name, email, score, contractorId, userPath = null, mod
   const firstName = name.split(" ")[0];
   const [sessionRequested, setSessionRequested] = useState(false);
   const [requestingSession, setRequestingSession] = useState(false);
+  const [compCode, setCompCode] = useState("");
+  const [compUnlocked, setCompUnlocked] = useState(false);
+  const [compLoading, setCompLoading] = useState(false);
+  const [compError, setCompError] = useState("");
+  const [compContent, setCompContent] = useState("");
 
   const handleRequestSession = async () => {
     if (isDemoMode()) {
