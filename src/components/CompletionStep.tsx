@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Mail, Download, Clock, HelpCircle, MessageCircle } from "lucide-react";
+import { Mail, Download, Clock, HelpCircle, MessageCircle, Lock } from "lucide-react";
+import DOMPurify from "dompurify";
 import { supabase } from "@/integrations/supabase/client";
 
 interface CompletionStepProps {
@@ -22,6 +23,11 @@ const CompletionStep = ({ name, email, score, contractorId, userPath = null, mod
   const firstName = name.split(" ")[0];
   const [sessionRequested, setSessionRequested] = useState(false);
   const [requestingSession, setRequestingSession] = useState(false);
+  const [compCode, setCompCode] = useState("");
+  const [compUnlocked, setCompUnlocked] = useState(false);
+  const [compLoading, setCompLoading] = useState(false);
+  const [compError, setCompError] = useState("");
+  const [compContent, setCompContent] = useState("");
 
   const handleRequestSession = async () => {
     if (isDemoMode()) {
@@ -53,6 +59,62 @@ const CompletionStep = ({ name, email, score, contractorId, userPath = null, mod
       body: { contractorId, name, email, score },
     }).catch(() => {});
   }, [contractorId, name, email, score]);
+
+  useEffect(() => {
+    const checkUnlock = async () => {
+      if (isDemoMode()) return;
+      const { data } = await supabase
+        .from("compensation_unlocks")
+        .select("id")
+        .eq("email", email.toLowerCase())
+        .limit(1);
+      if (data && data.length > 0) {
+        setCompUnlocked(true);
+        const { data: configData } = await supabase
+          .from("app_config")
+          .select("value")
+          .eq("key", "compensation_content")
+          .single();
+        if (configData) setCompContent(configData.value);
+      }
+    };
+    checkUnlock();
+  }, [email]);
+
+  const handleCompCode = async () => {
+    setCompLoading(true);
+    setCompError("");
+    try {
+      const { data: codeData } = await supabase
+        .from("app_config")
+        .select("value")
+        .eq("key", "compensation_access_code")
+        .single();
+
+      if (!codeData || compCode.trim().toUpperCase() !== codeData.value.trim().toUpperCase()) {
+        setCompError("Invalid access code. Contact gigsupport@jomero.co for your code.");
+        setCompLoading(false);
+        return;
+      }
+
+      await supabase.from("compensation_unlocks").insert({
+        email: email.toLowerCase(),
+      });
+
+      const { data: contentData } = await supabase
+        .from("app_config")
+        .select("value")
+        .eq("key", "compensation_content")
+        .single();
+      if (contentData) setCompContent(contentData.value);
+
+      setCompUnlocked(true);
+    } catch {
+      setCompError("Something went wrong. Try again.");
+    } finally {
+      setCompLoading(false);
+    }
+  };
 
   return (
     <div
@@ -174,6 +236,59 @@ const CompletionStep = ({ name, email, score, contractorId, userPath = null, mod
           >
             ← Review Training Materials
           </button>
+        )}
+      </div>
+
+      {/* Compensation Section */}
+      <div
+        className="rounded-2xl p-6 w-full max-w-lg z-10 mt-4 animate-fade-in"
+        style={{ background: "#2A2B3D", border: "1px solid #3A3B50", animationDelay: "0.7s" }}
+      >
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-2xl">💰</span>
+          <h2 className="font-bold text-lg text-white">Compensation & Pay</h2>
+        </div>
+
+        {!compUnlocked ? (
+          <div className="space-y-3">
+            <p className="text-sm" style={{ color: "#9898B0" }}>
+              Enter your access code to view compensation details. Your code was provided by the Jomero team.
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={compCode}
+                onChange={(e) => setCompCode(e.target.value)}
+                placeholder="Enter access code"
+                className="flex-1 px-3 py-2 rounded-lg text-sm bg-[#1C1D2E] border border-[#3A3B50] text-white placeholder-[#6B6B80] focus:outline-none focus:border-[#8B50CC]"
+                onKeyDown={(e) => e.key === "Enter" && handleCompCode()}
+              />
+              <button
+                onClick={handleCompCode}
+                disabled={compLoading || !compCode.trim()}
+                className="px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:brightness-125 disabled:opacity-60 flex items-center gap-1"
+                style={{ background: "#8B50CC", color: "#FFFFFF" }}
+              >
+                <Lock className="w-4 h-4" />
+                {compLoading ? "Checking..." : "Unlock"}
+              </button>
+            </div>
+            {compError && (
+              <p className="text-sm" style={{ color: "#F87171" }}>{compError}</p>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm" style={{ color: "#4CAF82" }}>
+              <span>✅</span>
+              <span>Compensation details unlocked</span>
+            </div>
+            <div
+              className="text-sm"
+              style={{ color: "#C8C8D0" }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(compContent, { ADD_ATTR: ['target'] }) }}
+            />
+          </div>
         )}
       </div>
 
