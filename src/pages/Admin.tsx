@@ -101,6 +101,9 @@ const Admin = () => {
   const [editingContractor, setEditingContractor] = useState<Contractor | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [contractorNotes, setContractorNotes] = useState<Record<string, string>>({});
+  const [compensationCode, setCompensationCode] = useState("");
+  const [compensationContent, setCompensationContent] = useState("");
+  const [compUnlocks, setCompUnlocks] = useState<{ email: string; unlocked_at: string }[]>([]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => {
