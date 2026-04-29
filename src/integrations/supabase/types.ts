@@ -32,6 +32,24 @@ export type Database = {
         }
         Relationships: []
       }
+      compensation_unlocks: {
+        Row: {
+          email: string
+          id: string
+          unlocked_at: string
+        }
+        Insert: {
+          email: string
+          id?: string
+          unlocked_at?: string
+        }
+        Update: {
+          email?: string
+          id?: string
+          unlocked_at?: string
+        }
+        Relationships: []
+      }
       content_modules: {
         Row: {
           abbr: string
