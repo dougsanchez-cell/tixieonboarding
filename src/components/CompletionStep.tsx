@@ -60,6 +60,62 @@ const CompletionStep = ({ name, email, score, contractorId, userPath = null, mod
     }).catch(() => {});
   }, [contractorId, name, email, score]);
 
+  useEffect(() => {
+    const checkUnlock = async () => {
+      if (isDemoMode()) return;
+      const { data } = await supabase
+        .from("compensation_unlocks")
+        .select("id")
+        .eq("email", email.toLowerCase())
+        .limit(1);
+      if (data && data.length > 0) {
+        setCompUnlocked(true);
+        const { data: configData } = await supabase
+          .from("app_config")
+          .select("value")
+          .eq("key", "compensation_content")
+          .single();
+        if (configData) setCompContent(configData.value);
+      }
+    };
+    checkUnlock();
+  }, [email]);
+
+  const handleCompCode = async () => {
+    setCompLoading(true);
+    setCompError("");
+    try {
+      const { data: codeData } = await supabase
+        .from("app_config")
+        .select("value")
+        .eq("key", "compensation_access_code")
+        .single();
+
+      if (!codeData || compCode.trim().toUpperCase() !== codeData.value.trim().toUpperCase()) {
+        setCompError("Invalid access code. Contact gigsupport@jomero.co for your code.");
+        setCompLoading(false);
+        return;
+      }
+
+      await supabase.from("compensation_unlocks").insert({
+        email: email.toLowerCase(),
+      });
+
+      const { data: contentData } = await supabase
+        .from("app_config")
+        .select("value")
+        .eq("key", "compensation_content")
+        .single();
+      if (contentData) setCompContent(contentData.value);
+
+      setCompUnlocked(true);
+    } catch {
+      setCompError("Something went wrong. Try again.");
+    } finally {
+      setCompLoading(false);
+    }
+  };
+
   return (
     <div
       className="min-h-screen py-10 px-4 flex flex-col items-center justify-center relative overflow-hidden"
