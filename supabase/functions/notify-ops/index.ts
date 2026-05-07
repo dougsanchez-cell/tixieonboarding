@@ -73,9 +73,7 @@ Deno.serve(async (req) => {
     // Send Slack notification
     const SLACK_WEBHOOK_URL = Deno.env.get("SLACK_WEBHOOK_URL");
     if (SLACK_WEBHOOK_URL) {
-      const slackMessage = guidedSessionRequest
-        ? `🎓 *Guided Session Request*\n*${name}* (${email}) has completed orientation and is requesting a guided 1-hour training session.\nQuiz Score: ${score}%`
-        : `✅ *New Contractor Cleared*\n*${name}* (${email}) has been cleared for live purchasing.\nQuiz Score: ${score}%\nContractor ID: ${contractorId}`;
+      const slackMessage = `✅ *New Contractor Cleared*\n*${name}* (${email}) has been cleared for live purchasing.\nQuiz Score: ${score}%\nContractor ID: ${contractorId}`;
 
       try {
         const slackRes = await fetch(SLACK_WEBHOOK_URL, {
