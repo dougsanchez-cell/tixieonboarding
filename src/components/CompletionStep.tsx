@@ -21,37 +21,11 @@ const isDemoMode = () => {
 
 const CompletionStep = ({ name, email, score, contractorId, userPath = null, moduleCount = 3, onBack }: CompletionStepProps) => {
   const firstName = name.split(" ")[0];
-  const [sessionRequested, setSessionRequested] = useState(false);
-  const [requestingSession, setRequestingSession] = useState(false);
   const [compCode, setCompCode] = useState("");
   const [compUnlocked, setCompUnlocked] = useState(false);
   const [compLoading, setCompLoading] = useState(false);
   const [compError, setCompError] = useState("");
   const [compContent, setCompContent] = useState("");
-
-  const handleRequestSession = async () => {
-    if (isDemoMode()) {
-      setSessionRequested(true);
-      return;
-    }
-    setRequestingSession(true);
-    try {
-      await supabase.functions.invoke("notify-ops", {
-        body: {
-          contractorId,
-          name,
-          email,
-          score,
-          guidedSessionRequest: true,
-        },
-      });
-      setSessionRequested(true);
-    } catch {
-      window.open(`mailto:gigsupport@jomero.co?subject=Guided Session Request - ${name}&body=Hi, I just completed the Tixie orientation and would like to schedule a guided 1-hour training session. My email is ${email}. Thanks!`);
-    } finally {
-      setRequestingSession(false);
-    }
-  };
 
   useEffect(() => {
     if (isDemoMode()) return;
