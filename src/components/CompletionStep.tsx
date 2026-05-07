@@ -21,37 +21,11 @@ const isDemoMode = () => {
 
 const CompletionStep = ({ name, email, score, contractorId, userPath = null, moduleCount = 3, onBack }: CompletionStepProps) => {
   const firstName = name.split(" ")[0];
-  const [sessionRequested, setSessionRequested] = useState(false);
-  const [requestingSession, setRequestingSession] = useState(false);
   const [compCode, setCompCode] = useState("");
   const [compUnlocked, setCompUnlocked] = useState(false);
   const [compLoading, setCompLoading] = useState(false);
   const [compError, setCompError] = useState("");
   const [compContent, setCompContent] = useState("");
-
-  const handleRequestSession = async () => {
-    if (isDemoMode()) {
-      setSessionRequested(true);
-      return;
-    }
-    setRequestingSession(true);
-    try {
-      await supabase.functions.invoke("notify-ops", {
-        body: {
-          contractorId,
-          name,
-          email,
-          score,
-          guidedSessionRequest: true,
-        },
-      });
-      setSessionRequested(true);
-    } catch {
-      window.open(`mailto:gigsupport@jomero.co?subject=Guided Session Request - ${name}&body=Hi, I just completed the Tixie orientation and would like to schedule a guided 1-hour training session. My email is ${email}. Thanks!`);
-    } finally {
-      setRequestingSession(false);
-    }
-  };
 
   useEffect(() => {
     if (isDemoMode()) return;
@@ -189,28 +163,6 @@ const CompletionStep = ({ name, email, score, contractorId, userPath = null, mod
       <div className="rounded-2xl p-6 w-full max-w-lg z-10 animate-fade-in" style={{ background: "#2A2B3D", border: "1px solid #3A3B50", animationDelay: "0.6s" }}>
         <h2 className="font-bold text-lg mb-4 text-white">What happens next</h2>
         <div className="space-y-3 text-sm" style={{ color: "#9898B0" }}>
-          <div className="flex flex-col gap-3 p-3 rounded-xl" style={{ background: "#1A2A3A", border: "1px solid #B3D4F0" }}>
-            <div className="flex gap-3 items-start">
-              <span className="text-lg shrink-0">📞</span>
-              <span style={{ color: "#7BC8F6" }}>
-                <strong className="text-white">Need more help?</strong> Request a guided training session with the Jomero team before your first live session.
-              </span>
-            </div>
-            {!sessionRequested ? (
-              <button
-                onClick={handleRequestSession}
-                disabled={requestingSession}
-                className="w-full py-2.5 rounded-lg text-sm font-semibold transition-all hover:brightness-125 disabled:opacity-60"
-                style={{ background: "#8B50CC", color: "#FFFFFF" }}
-              >
-                {requestingSession ? "Sending..." : "Request Guided Session →"}
-              </button>
-            ) : (
-              <p className="text-sm font-medium" style={{ color: "#4CAF82" }}>
-                ✅ Request sent — the Jomero team will reach out to schedule your session
-              </p>
-            )}
-          </div>
           <div className="flex gap-3 items-start">
             <Download className="w-5 h-5 shrink-0 mt-0.5" style={{ color: "#8B50CC" }} />
             <span>Download and install Tixie if you haven't already (see Module 1)</span>
