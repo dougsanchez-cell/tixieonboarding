@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { contractorId, name, email, score, guidedSessionRequest } = await req.json();
+    const { contractorId, name, email, score } = await req.json();
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -32,18 +32,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    const subject = guidedSessionRequest
-      ? `🎓 Guided Session Request — ${name} (${email})`
-      : `✅ New Contractor Cleared: ${name} (${score}%)`;
+    const subject = `✅ New Contractor Cleared: ${name} (${score}%)`;
 
-    const htmlBody = guidedSessionRequest
-      ? `<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">
-          <h2 style="color:#7B51D3;">Guided Session Request</h2>
-          <p>${name} (<a href="mailto:${email}">${email}</a>) has completed the Tixie orientation and is requesting a guided 1-hour training session.</p>
-          <p><strong>Quiz Score:</strong> ${score}%</p>
-          <p style="color:#666;margin-top:16px;">Please reach out to schedule their session.</p>
-        </div>`
-      : `<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">
+    const htmlBody = `<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">
           <h2 style="color:#7B51D3;">New Contractor Cleared</h2>
           <table style="width:100%;border-collapse:collapse;">
             <tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">Name</td><td style="padding:8px;border-bottom:1px solid #eee;">${name}</td></tr>
