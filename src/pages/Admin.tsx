@@ -238,11 +238,6 @@ const Admin = () => {
     }
     if (seRes.data) setSessionEvents(seRes.data as SessionEvent[]);
 
-    const { data: unlocksData } = await supabase
-      .from("compensation_unlocks")
-      .select("email, unlocked_at")
-      .order("unlocked_at", { ascending: false });
-    if (unlocksData) setCompUnlocks(unlocksData);
   };
 
   const getTimePerStep = (contractorId: string) => {
