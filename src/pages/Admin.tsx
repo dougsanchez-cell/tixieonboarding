@@ -101,9 +101,7 @@ const Admin = () => {
   const [editingContractor, setEditingContractor] = useState<Contractor | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [contractorNotes, setContractorNotes] = useState<Record<string, string>>({});
-  const [compensationCode, setCompensationCode] = useState("");
   const [compensationContent, setCompensationContent] = useState("");
-  const [compUnlocks, setCompUnlocks] = useState<{ email: string; unlocked_at: string }[]>([]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => {
@@ -228,7 +226,6 @@ const Admin = () => {
         if (c.key === "pass_threshold") setPassThreshold(c.value);
         if (c.key === "ops_notification_email") setOpsEmail(c.value);
         if (c.key === "min_chat_questions") setMinQuestions(c.value);
-        if (c.key === "compensation_access_code") setCompensationCode(c.value);
         if (c.key === "compensation_content") setCompensationContent(c.value);
         if (c.key === "contractor_notes") {
           try { setContractorNotes(JSON.parse(c.value)); } catch { setContractorNotes({}); }
@@ -241,11 +238,6 @@ const Admin = () => {
     }
     if (seRes.data) setSessionEvents(seRes.data as SessionEvent[]);
 
-    const { data: unlocksData } = await supabase
-      .from("compensation_unlocks")
-      .select("email, unlocked_at")
-      .order("unlocked_at", { ascending: false });
-    if (unlocksData) setCompUnlocks(unlocksData);
   };
 
   const getTimePerStep = (contractorId: string) => {
@@ -1076,27 +1068,9 @@ const Admin = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <Label>Access Code</Label>
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Contractors enter this code on the Cleared screen to unlock compensation details.
-                    Share it individually — do not post publicly.
-                  </p>
-                  <div className="flex gap-2">
-                    <Input
-                      value={compensationCode}
-                      onChange={(e) => setCompensationCode(e.target.value)}
-                      placeholder="e.g. TIXIE2026"
-                    />
-                    <Button onClick={() => saveConfig("compensation_access_code", compensationCode)}>
-                      <Save className="w-4 h-4 mr-1" />Save
-                    </Button>
-                  </div>
-                </div>
-
-                <div>
                   <Label>Compensation Content</Label>
                   <p className="text-xs text-muted-foreground mb-1">
-                    HTML content shown to contractors after they enter the code. Supports bold, links, lists.
+                    HTML content shown to all cleared contractors. Supports bold, links, lists.
                   </p>
                   <Textarea
                     value={compensationContent}
@@ -1108,27 +1082,6 @@ const Admin = () => {
                   <Button className="mt-2" onClick={() => saveConfig("compensation_content", compensationContent)}>
                     <Save className="w-4 h-4 mr-1" />Save Content
                   </Button>
-                </div>
-
-                <div>
-                  <Label>Unlocked Contractors</Label>
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Contractors who have entered the code and viewed compensation details.
-                  </p>
-                  <div className="mt-2 space-y-1">
-                    {compUnlocks.map((u, i) => (
-                      <div key={i} className="flex items-center gap-2 text-sm">
-                        <span className="text-success">✅</span>
-                        <span>{u.email}</span>
-                        <span className="text-muted-foreground text-xs">
-                          {new Date(u.unlocked_at).toLocaleDateString()}
-                        </span>
-                      </div>
-                    ))}
-                    {compUnlocks.length === 0 && (
-                      <span className="text-sm text-muted-foreground">No contractors have unlocked compensation yet.</span>
-                    )}
-                  </div>
                 </div>
               </CardContent>
             </Card>
