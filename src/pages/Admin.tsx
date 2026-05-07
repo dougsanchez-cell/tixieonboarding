@@ -226,7 +226,6 @@ const Admin = () => {
         if (c.key === "pass_threshold") setPassThreshold(c.value);
         if (c.key === "ops_notification_email") setOpsEmail(c.value);
         if (c.key === "min_chat_questions") setMinQuestions(c.value);
-        if (c.key === "compensation_access_code") setCompensationCode(c.value);
         if (c.key === "compensation_content") setCompensationContent(c.value);
         if (c.key === "contractor_notes") {
           try { setContractorNotes(JSON.parse(c.value)); } catch { setContractorNotes({}); }
